@@ -1,0 +1,10 @@
+[
+  {
+    "id": "lincslevel2",
+    "name": "LINCS Level 2",
+    "description": "This is LINCS Level 2 data.<br>It was released on December 31st, 2015",
+    "numMetaTypes": 12,
+    "numGenes": 978,
+    "numSamples": 112634
+  }
+]
