@@ -96,7 +96,6 @@ export default new Vuex.Store({
       }
     },
     setDataset (context, payload) {
-      console.log(payload)
       context.commit('dataset', payload)
       if (payload.id) {
         context.dispatch('getMetadata')
@@ -106,35 +105,14 @@ export default new Vuex.Store({
         }
       }
     },
-    login (context, data) {
-      if (context.state.user !== null) {
-        throw Error('Cannot login while user is not null!')
-      }
-      Vue.http.post('/auth/login', {
-        username: data.username,
-        password: data.password
-      }).then(response => {
-        console.log(response)
-        if (response.data.jwt) {
-          localStorage.setItem('jwt', response.data.jwt)
-          context.dispatch('getUser', data.callback)
-        } else {
-          data.callback(false)
-        }
-      }, response => {
-        console.error('Login failed: ', response)
-        data.callback(null)
-      })
-    },
     logout (context) {
       localStorage.removeItem('jwt')
       context.commit('user', null)
     },
-    getUser (context, callback) {
+    getUser (context) {
       let user = null
       if (context.state.user === null) {
         let jwt = localStorage.getItem('jwt')
-        console.log(typeof jwt)
         if (jwt) {
           jwt = jwt.split('.')
           let headers = JSON.parse(atob(jwt[0]))
@@ -151,9 +129,7 @@ export default new Vuex.Store({
         user = null
         context.commit('user', user)
       }
-      if (callback) {
-        callback(user)
-      }
+      return user
     }
   }
 })

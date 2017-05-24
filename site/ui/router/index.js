@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Components from 'components'
-
 Vue.use(Router)
 
 export default new Router({
@@ -39,17 +38,27 @@ export default new Router({
     },
     {
       path: '/admin',
-      redirect: '/admin/manage-datasets',
+      redirect: '/admin/datasets',
       name: 'Admin',
       component: Components.Admin,
       children: [
         {
-          path: 'manage-datasets',
+          path: 'datasets',
           name: 'ManageDatasets',
-          component: Components.Datasets
+          component: Components.ManageDatasets
         },
         {
-          path: 'manage-users',
+          path: 'datasets/add',
+          name: 'AddDataset',
+          component: Components.AddDataset
+        },
+        {
+          path: 'datasets/:dataset',
+          name: 'EditDataset',
+          component: Components.EditDataset
+        },
+        {
+          path: 'users',
           name: 'ManageUsers',
           component: Components.Users
         }

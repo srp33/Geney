@@ -65,7 +65,7 @@ export default {
   created () {
     // get all datasets when page loads
     this.$store.dispatch('getDatasets')
-    this.$store.dispatch('getAuth')
+    this.$store.dispatch('getUser')
   }
 }
 
@@ -84,6 +84,7 @@ h1, h2, h3 {
 
   .logo {
     height: 250px;
+    // top: -25px;
     img {
       max-height: 250px;
     }
@@ -95,7 +96,7 @@ h1, h2, h3 {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      top: 0px;
+      top: 25px;
       width: 100%;
     }
   }

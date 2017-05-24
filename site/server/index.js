@@ -10,7 +10,7 @@ let bodyParser = require('body-parser')
 let datasets = require('../ui/api/datasets.json')
 let lincslevel2 = require('../ui/api/lincslevel2.json')
 
-const tokenConfig = {algorithm: 'HS512', expiresIn: '1h'}
+const tokenConfig = {algorithm: 'HS512', expiresIn: '30m'}
 
 let db = new sqlite3.Database(path.join(__dirname, 'geney.db'))
 db.run(queries.create, err => {
@@ -43,6 +43,14 @@ app.get('/api/datasets', (req, res, next) => {
 app.get('/api/meta/lincslevel2', (req, res, next) => {
   res.json(lincslevel2)
 })
+
+app.get('/api/admin/validate/id', (req, res, next) => {
+  res.json(req.query.val !== 'lincslevel2')
+})
+
+app.post('/api/admin/newdataset/', (req, res, next) => {
+  res.end()
+})
 // END TODO
 
 app.post('/auth/login', (req, res, next) => {
@@ -60,12 +68,12 @@ app.post('/auth/login', (req, res, next) => {
             firstname: user.firstname,
             lastname: user.lastname,
             email: user.email,
-            permissions: JSON.parse(user.permissions)
+            privileges: JSON.parse(user.privileges)
           }
           token.sign(userObj, config.dev.secret, tokenConfig, (err, jwt) => {
             if (err) console.error(err)
             console.log('Authenticated')
-            res.json({jwt: jwt})
+            res.json({'jwt': jwt})
           })
         } else {
           db.run(queries.updateFailedAttempts, {$fails: (user['failed_attempts'] + 1), $username: user.username})

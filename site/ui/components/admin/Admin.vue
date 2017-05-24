@@ -1,6 +1,6 @@
 <template>
 
-  <div class="admin">
+  <div class="admin top">
     <router-view></router-view>
   </div>
 </template>
@@ -16,8 +16,7 @@ export default {
     }
   },
   created () {
-    console.log('Checking authenticated')
-    this.$store.dispatch('getUser', (user) => {
+    this.$store.dispatch('getUser').then(user => {
       if (user === null || user.username === undefined) {
         router.push('/login')
       }
@@ -29,9 +28,9 @@ export default {
 <style lang="scss" scoped>
 
 .admin {
-  margin-left: 200px;
   text-align: left;
   padding-left: 25px;
+  padding-right: 25px;
 }
 
 </style>

@@ -6,6 +6,8 @@ module.exports = {
   Error404: require('./shared/Error404'),
   Login: require('./shared/Login'),
   Admin: require('./admin/Admin'),
-  Datasets: require('./admin/Datasets'),
+  ManageDatasets: require('./admin/datasets/ManageDatasets'),
+  AddDataset: require('./admin/datasets/AddDataset'),
+  EditDataset: require('./admin/datasets/EditDataset'),
   Users: require('./admin/Users')
 }

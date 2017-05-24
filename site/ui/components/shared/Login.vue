@@ -1,28 +1,35 @@
 <template>
 
-  <div class="login container">
-    <form>
-      <div class="col-xs-12">
-        <h1 class="heading">
+  <div class="login container top">
+    <form @submit.prevent="login">
+      <div class="row">
+        <h1 class="heading text-center col-12">
           Login
           <br>
           <h4>Please enter your username and password below to manage datasets.</h4>
           <h4>Note that you do not need to login to download any data.</h4>
         </h1>
 
-        <div class="form-group col-sm-6 col-sm-offset-3">
-          <label for="username">Username</label>
-          <input id="username" type="text" v-model="username" class="form-control" name="username">
+        <h4 v-if="invalidLogin" class="text-center col-12">{{loginMessage}}<br>
+          <small>Attempts: {{invalidCount}}</small>
+        </h4>
+
+        <div class="form-group col-sm-6 offset-sm-3" :class="{'has-danger': errors.has('username') && !invalidLogin}">
+          <label for="username" class="form-control-label">Username</label>
+          <input id="username" type="text" v-model="username" class="form-control" name="username" 
+                v-validate="'required'" :class="{'form-control-danger': errors.has('username') && !invalidLogin}">
+          <span v-show="errors.has('username') && !invalidLogin" class="form-control-feedback">{{ errors.first('username') }}</span>
         </div>
 
-        <div class="form-group col-sm-6 col-sm-offset-3">
-          <label for="password">Password</label>
-          <input id="password" type="password" v-model="password" class="form-control" name="password">
+        <div class="form-group col-sm-6 offset-sm-3" :class="{'has-danger': errors.has('password') && !invalidLogin}">
+          <label for="password" class="form-control-label">Password</label>
+          <input id="password" type="password" v-model="password" class="form-control" name="password" 
+                v-validate="'required'" :class="{'form-control-danger': errors.has('password') && !invalidLogin}">
+          <span v-show="errors.has('password') && !invalidLogin" class="form-control-feedback">{{ errors.first('password') }}</span>
         </div>
       </div>
       <div class="col-xs-12">
-        <button class="btn btn-primary btn-lg"
-                :disabled="username.length <= 4 || password.length <= 4" @click="login">
+        <button class="btn btn-primary btn-lg" :disabled="errors.any()">
           Login
         </button>   
       </div>
@@ -39,11 +46,14 @@ export default {
   data () {
     return {
       username: '',
-      password: ''
+      password: '',
+      invalidLogin: false,
+      loginMessage: '',
+      invalidCount: 0
     }
   },
   created () {
-    this.$store.dispatch('getUser', user => {
+    this.$store.dispatch('getUser').then(user => {
       if (user && user.username) {
         router.push('/admin')
       } else if (user && !user.username) {
@@ -54,20 +64,35 @@ export default {
   methods: {
     login (e) {
       let that = this
-      e.preventDefault() // stop form from submitting
-      this.$store.dispatch('login', {
-        username: this.username,
-        password: this.password,
-        callback (user) {
-          if (user && user.username) {
-            router.push('/admin')
+      this.$validator.validateAll().then(() => {
+        that.$http.post('/auth/login', {
+          username: that.username,
+          password: that.password
+        }).then(response => {
+          if (response.data.jwt) {
+            localStorage.setItem('jwt', response.data.jwt)
+            that.$store.dispatch('getUser').then(user => {
+              if (user && user.username) {
+                router.push('/admin')
+              } else {
+                that.failLogin()
+              }
+            })
           } else {
-            alert('Invalid username or password')
-            that.username = ''
-            that.password = ''
+            that.failLogin('Invalid username or password')
           }
-        }
-      })
+        }, response => {
+          console.error('Login failed: ', response)
+          that.failLogin()
+        })
+      }).catch(() => {})
+    },
+    failLogin (msg) {
+      this.invalidLogin = true
+      this.loginMessage = msg || 'Authentication error. Please try again.'
+      this.username = ''
+      this.password = ''
+      this.invalidCount++
     }
   }
 }
