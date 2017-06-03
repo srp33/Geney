@@ -1,7 +1,7 @@
 <template>
 
-  <div class="filter top" v-if="metaData">
-    <div class="col-sm-6 col-sm-offset-3">
+  <div class="filter top row justify-content-center" v-if="metaData">
+    <div class="col-sm-6">
       <h1>Filter Samples</h1>
       <selectize
         :options="metaTypes"
@@ -27,7 +27,7 @@
         :settings="settings.genes"></selectize>
 
     </div>
-    <div class="col-sm-8 col-sm-offset-2">
+    <div class="col-sm-8">
       <div v-if="numKeys">
         <h2>Let me get this right...</h2>
         <h3>You're looking for <strong>ROWS</strong> that have:</h3>

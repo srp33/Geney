@@ -9,10 +9,10 @@
       </b-link>
 
       <b-collapse is-nav id="nav_collapse">
-        
-        
+
+
         <b-nav is-nav-bar class="ml-auto" right-alignment>
-          
+
           <b-nav-item-dropdown v-if="authenticated" right-alignment right :text="name">
             <b-dropdown-item to="/admin">Admin</b-dropdown-item>
             <b-dropdown-item @click="logout">Logout</b-dropdown-item>
@@ -21,10 +21,10 @@
           <b-nav-item v-else to="/login">Login</b-nav-item>
 
         </b-nav>
-        
+
       </b-collapse>
-      
-      
+
+
     </b-navbar>
 
 
@@ -36,7 +36,7 @@
 
 
         <b-nav is-nav-bar class="mx-auto">
-          
+
 
           <b-nav-item to="/admin/datasets/">Datasets</b-nav-item>
 
@@ -50,81 +50,22 @@
 
 
       </b-collapse>
-      
-      
+
+
     </b-navbar>
 
-
-    <!--TOP NAVBAR
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
-            aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-        </button>
-          <router-link class="navbar-brand" to="/">Geney</router-link>
+    <div class="alerts-container">
+      <transition v-for="(alert, index) in alerts">
+        <div>
+          <b-alert
+            :variant="alert.variant"
+            dismissible
+            :show="alert.show">
+            {{ alert.message }}
+          </b-alert>
         </div>
-
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-
-          <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown" v-if="authenticated">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{name}} <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><router-link to="/admin">Admin</router-link></li>
-                <li role="separator" class="divider"></li>
-                <li><a @click="logout">Logout</a></li>
-              </ul>
-            </li>
-            <li class="authentication" v-else>
-              <router-link to="/login">Login</router-link>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="navbar-form navbar-center">
-        <b-breadcrumb :items="breadcrumbs" />
-      </div>
-
-    </nav>-->
-    <!--SIDE ADMIN NAVBAR-->
-    <!--<div v-if="admin" class="side-menu">
-
-      <nav class="navbar navbar-default" role="navigation">
-
-        <div class="side-menu-container">
-          <ul class="nav navbar-nav">-->
-
-            <!--<li v-for="link in adminLinks" :class="{ active: currentRoute === link.name }">
-              <router-link :to="link.path">{{link.name}}</router-link>
-            </li>-->
-<!--
-            <li class="panel panel-default" id="dropdown" v-for="(value, key) in adminLinks" v-if="authorized(value.privileges)">
-              <a data-toggle="collapse" :href="'#' + key">
-                <i class="fa fa-table fa-lg" aria-hidden="true"></i> {{value.name}} <span class="caret"></span>
-              </a>
-
-              <div :id="key" class="panel-collapse collapse">
-                <div class="panel-body">
-                  <ul class="nav navbar-nav">
-                    <li v-for="link in value.options" :class="{active: $route.path === link.path}">
-                      <router-link :to="link.path">{{link.description}}</router-link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </li>
-
-          </ul>
-        </div>
-      </nav>
-
-    </div>-->
+      </transition>
+    </div>
 
   </div>
 </template>
@@ -215,6 +156,9 @@ export default {
         }
       }
       return false
+    },
+    alerts () {
+      return this.$store.state.alerts
     }
   },
   methods: {
@@ -258,5 +202,20 @@ export default {
   z-index: 0 !important;
 }
 
+.alerts-container {
+  display: table;
+  position: fixed;
+  top: 60px;
+  right: 0px;
+  z-index: 2400;
+  clear: both;
+  div {
+    display: table-row;
+    .alert {
+      float: right;
+      height: 50px;
+    }
+  }
+}
 
 </style>

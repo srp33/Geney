@@ -30,15 +30,17 @@ export default {
       if (to.params.dataset !== from.params.dataset) {
         // remove any set filters
         this.$store.commit('filters', null)
-        var dataset = {}
-        // find dataset and set it in the store
-        for (var x of this.$store.state.datasets) {
-          if (x.id === to.params.dataset) {
-            dataset = x
-            break
+        if (this.$store.state.datasets) { // make sure it's not null
+          var dataset = {}
+          // find dataset and set it in the store
+          for (var x of this.$store.state.datasets) {
+            if (x.id === to.params.dataset) {
+              dataset = x
+              break
+            }
           }
+          this.$store.dispatch('setDataset', dataset)
         }
-        this.$store.dispatch('setDataset', dataset)
       }
 
       if (to.name === '404' || from.name === '404' || to.name === 'DatasetNotFound' || from.name === 'DatasetNotFound') {

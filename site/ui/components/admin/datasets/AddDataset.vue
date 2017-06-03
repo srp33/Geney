@@ -70,14 +70,6 @@ export default {
       id: '',
       file: null,
       metaCols: null,
-      idValidator: {
-        getMessage () {
-          return 'That ID is already in use!'
-        },
-        validate (field, args) {
-          return true
-        }
-      },
       progressData: {
         active: false,
         percent: 0

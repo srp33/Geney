@@ -51,6 +51,27 @@ app.get('/api/admin/validate/id', (req, res, next) => {
 app.post('/api/admin/newdataset/', (req, res, next) => {
   res.end()
 })
+
+app.post('/api/:id/samples', (req, res, next) => {
+  res.json(428)
+})
+
+app.post('/api/:id/download', (req, res, next) => {
+  let query = JSON.parse(req.body.query)
+  let filename = query.options.filename + '.' + query.options.fileformat
+  res.header({
+    "Content-Type": 'text/plain',
+    "Content-disposition": "attachment; filename="+filename
+  })
+  res.send('YAY!')
+  res.end()
+})
+
+app.post('/api/:id/update', (req, res, next) => {
+  console.log(req.body)
+  res.send(true)
+  res.end()
+})
 // END TODO
 
 app.post('/auth/login', (req, res, next) => {

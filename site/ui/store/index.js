@@ -11,7 +11,8 @@ export default new Vuex.Store({
     dataset: {},
     filters: null,
     datasetName: null,
-    user: null
+    user: null,
+    alerts: []
   },
   mutations: {
     metaData (state, value) {
@@ -28,6 +29,9 @@ export default new Vuex.Store({
     },
     user (state, value) {
       state.user = value
+    },
+    addAlert (state, alert) {
+      state.alerts.push(alert)
     }
   },
   actions: {

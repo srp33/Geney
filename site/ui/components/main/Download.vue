@@ -1,11 +1,16 @@
 <template>
 
-  <div class="download top" v-if="filters">
-    <h1>Download</h1>
-    <h3>You have selected 478 samples.</h3>
+  <div class="download top row justify-content-center" v-if="filters">
+    <div class="col-12">
+      <h1>Download</h1>
+      <div v-if="numSamples != null">
+        <h3 v-if="numSamples >= 0">You have selected {{ numSamples }} samples.</h3>
+        <h3 v-else>Unable to retreive number of samples.</h3>
+      </div>
+    </div>
 
     
-    <div class="col-sm-6 col-sm-offset-3">
+    <div class="col-sm-6">
       <h2>Options</h2>
 
       <div class="form-group">
@@ -17,7 +22,8 @@
           :settings="fileformats.settings" ></selectize>
       </div>
 
-      <button class="btn btn-primary btn-lg">Download</button>
+
+      <button class="btn btn-primary btn-lg" @click="download">Download</button>
     </div>
 
   </div>
@@ -25,7 +31,7 @@
 
 <script>
 import router from '../../router'
-var selectize = require('../shared/Selectize')
+import selectize from '../shared/Selectize'
 
 export default {
   name: 'download',
@@ -47,8 +53,10 @@ export default {
         }
       },
       options: {
-        fileformat: 'csv'
-      }
+        fileformat: 'csv',
+        filename: 'test'
+      },
+      numSamples: null
     }
   },
   computed: {
@@ -57,9 +65,38 @@ export default {
     }
   },
   created () {
-    if (!this.$store.state.filters) {
+    let filters = this.$store.state.filters
+    if (!filters || !filters.meta) {
       var newPath = this.$route.fullPath.replace(/\/download.*/, '')
       router.replace(newPath)
+    } else {
+      this.$http.post('/api/' + this.$route.params.dataset + '/samples', filters.meta).then(response => {
+        this.$set(this, 'numSamples', response.body)
+      }, response => {
+        this.$set(this, 'numSamples', -1)
+      })
+    }
+  },
+  methods: {
+    download () {
+      let payload = {}
+      Object.assign(payload, this.filters) // copy values from filters
+      payload.options = this.options
+
+      let form = document.createElement('form')
+      form.setAttribute('method', 'post')
+      form.setAttribute('action', '/api/' + this.$route.params.dataset + '/download')
+      form.setAttribute('target', '_blank')
+
+      var hiddenField = document.createElement('input')
+      hiddenField.setAttribute('type', 'hidden')
+      hiddenField.setAttribute('name', 'query')
+      hiddenField.setAttribute('value', JSON.stringify(payload))
+
+      form.appendChild(hiddenField)
+
+      document.body.appendChild(form)
+      form.submit()
     }
   }
 }
