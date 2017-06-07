@@ -16,14 +16,14 @@
 
         <div class="form-group col-sm-6 offset-sm-3" :class="{'has-danger': errors.has('username') && !invalidLogin}">
           <label for="username" class="form-control-label">Username</label>
-          <input id="username" type="text" v-model="username" class="form-control" name="username" 
+          <input id="username" type="text" v-model="username" class="form-control" name="username"
                 v-validate="'required'" :class="{'form-control-danger': errors.has('username') && !invalidLogin}">
           <span v-show="errors.has('username') && !invalidLogin" class="form-control-feedback">{{ errors.first('username') }}</span>
         </div>
 
         <div class="form-group col-sm-6 offset-sm-3" :class="{'has-danger': errors.has('password') && !invalidLogin}">
           <label for="password" class="form-control-label">Password</label>
-          <input id="password" type="password" v-model="password" class="form-control" name="password" 
+          <input id="password" type="password" v-model="password" class="form-control" name="password"
                 v-validate="'required'" :class="{'form-control-danger': errors.has('password') && !invalidLogin}">
           <span v-show="errors.has('password') && !invalidLogin" class="form-control-feedback">{{ errors.first('password') }}</span>
         </div>
@@ -31,7 +31,7 @@
       <div class="col-xs-12">
         <button class="btn btn-primary btn-lg" :disabled="errors.any()">
           Login
-        </button>   
+        </button>
       </div>
     </form>
   </div>
@@ -70,7 +70,6 @@ export default {
           password: that.password
         }).then(response => {
           if (response.data.jwt) {
-            localStorage.setItem('jwt', response.data.jwt)
             that.$store.dispatch('getUser').then(user => {
               if (user && user.username) {
                 router.push('/admin')

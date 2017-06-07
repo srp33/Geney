@@ -45,7 +45,6 @@
 
 export default {
   name: 'manage_datasets',
-  components: {},
   data () {
     return {
       mde: null,

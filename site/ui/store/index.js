@@ -12,7 +12,8 @@ export default new Vuex.Store({
     filters: null,
     datasetName: null,
     user: null,
-    alerts: []
+    alerts: [],
+    users: []
   },
   mutations: {
     metaData (state, value) {
@@ -32,6 +33,9 @@ export default new Vuex.Store({
     },
     addAlert (state, alert) {
       state.alerts.push(alert)
+    },
+    users (state, users) {
+      state.users = users
     }
   },
   actions: {
@@ -115,7 +119,7 @@ export default new Vuex.Store({
     },
     getUser (context) {
       let user = null
-      if (context.state.user === null) {
+      try {
         let jwt = localStorage.getItem('jwt')
         if (jwt) {
           jwt = jwt.split('.')
@@ -125,15 +129,41 @@ export default new Vuex.Store({
             context.commit('user', user)
           }
         }
-      } else {
-        user = context.state.user
-      }
-      if (user && user.exp < (Date.now() / 1000)) {
+        if (user && user.exp < (Date.now() / 1000)) {
+          localStorage.removeItem('jwt')
+          user = null
+          context.commit('user', user)
+        }
+      } catch (e) {
+        console.error('JWT malformed')
         localStorage.removeItem('jwt')
-        user = null
-        context.commit('user', user)
       }
       return user
+    },
+    getUsers (context) {
+      return Vue.http.get('/auth/api/users').then(response => {
+        return response.data
+      }, response => {
+        let messageText
+        switch (response.status) {
+          case 401:
+            router.replace('/')
+            messageText = 'You need to be logged in.'
+            break
+          case 403:
+            router.replace('/admin')
+            messageText = 'You do not have permission.'
+            break
+          default:
+            router.replace('/')
+            messageText = 'Unknown server error. Please try again.'
+        }
+        context.commit('addAlert', {
+          variant: 'danger',
+          message: messageText,
+          show: 3
+        })
+      })
     }
   }
 })

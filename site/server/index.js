@@ -33,7 +33,12 @@ let app = express()
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-app.use(jwt({secret: config.dev.secret, credentialsRequired: false}))
+let jwtAuth = jwt({ secret: config.dev.secret })
+
+// app.use(jwt({
+//   secret: config.dev.secret,
+//   credentialsRequired: false
+// }))
 
 // TODO: REMOVE THESE
 app.get('/api/datasets', (req, res, next) => {
@@ -68,7 +73,6 @@ app.post('/api/:id/download', (req, res, next) => {
 })
 
 app.post('/api/:id/update', (req, res, next) => {
-  console.log(req.body)
   res.send(true)
   res.end()
 })
@@ -76,6 +80,7 @@ app.post('/api/:id/update', (req, res, next) => {
 
 app.post('/auth/login', (req, res, next) => {
   if (req.user) console.error('TOKEN EXISTS')
+
   db.get(queries.getUser, {$username: req.body.username}, (err, user) => {
     if (err) console.error(err)
     // check if user exists
@@ -109,6 +114,29 @@ app.post('/auth/login', (req, res, next) => {
   //   if (err) console.log(err)
   //   console.log(hash)
   // })
+})
+
+app.all('/auth/api/*', jwtAuth, (req, res, next) => {
+  if (!req.user) {
+    res.sendStatus(401) // Unauthorized
+  } else {
+    if (req.user.privileges.indexOf('users') === -1) {
+      res.sendStatus(403) // Forbidden
+    } else {
+      next()
+    }
+  }
+})
+
+app.get('/auth/api/users', (req, res, next) => {
+  db.all(queries.getAllUsers, (err, rows) => {
+    if (err) {
+      res.sendStatus(500)
+    }
+    else {
+      res.json(rows)
+    }
+  })
 })
 
 module.exports = app.listen(port, (err) => {

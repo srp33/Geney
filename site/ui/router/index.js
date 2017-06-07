@@ -38,7 +38,6 @@ export default new Router({
     },
     {
       path: '/admin',
-      redirect: '/admin/datasets',
       name: 'Admin',
       component: Components.Admin,
       children: [

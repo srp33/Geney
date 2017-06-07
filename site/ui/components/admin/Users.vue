@@ -19,6 +19,9 @@ export default {
     }
   },
   created () {
+    this.$store.dispatch('getUsers').then(users => {
+      console.log(users)
+    })
   },
   computed: {
     datasets () {

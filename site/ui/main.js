@@ -5,9 +5,7 @@ import App from './App'
 import router from './router'
 import store from './store'
 import validator from './validator'
-
-import VueResource from 'vue-resource'
-Vue.use(VueResource)
+import './http'
 
 import BootstrapVue from 'bootstrap-vue'
 Vue.use(BootstrapVue)

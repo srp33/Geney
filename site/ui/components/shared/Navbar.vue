@@ -37,13 +37,7 @@
 
         <b-nav is-nav-bar class="mx-auto">
 
-
-          <b-nav-item to="/admin/datasets/">Datasets</b-nav-item>
-
-          <b-nav-item >&nbsp;</b-nav-item>
-
-          <b-nav-item to="/admin/users/">Users</b-nav-item>
-
+          <b-nav-item v-for="privilege in privileges" class="privilege" :to="'/admin/' + privilege" v-if="">{{privilege | capitalize}}</b-nav-item>
 
         </b-nav>
 
@@ -55,16 +49,14 @@
     </b-navbar>
 
     <div class="alerts-container">
-      <transition v-for="(alert, index) in alerts">
-        <div>
-          <b-alert
-            :variant="alert.variant"
-            dismissible
-            :show="alert.show">
-            {{ alert.message }}
-          </b-alert>
-        </div>
-      </transition>
+      <div v-for="(alert, index) in alerts" :key="index">
+        <b-alert
+          :variant="alert.variant"
+          dismissible
+          :show="alert.show">
+          {{ alert.message }}
+        </b-alert>
+      </div>
     </div>
 
   </div>
@@ -77,45 +69,8 @@ import router from '../../router'
 
 export default {
   name: 'navbar',
-  data: function () {
-    return {
-      adminLinks: {
-        datasets: {
-          name: 'Manage Datasets',
-          icon: '',
-          options: [
-            {
-              description: 'Edit Datasets',
-              name: 'ManageDatasets',
-              path: '/admin/datasets/manage'
-            },
-            {
-              description: 'Add Dataset',
-              name: 'AddDatasets',
-              path: '/admin/datasets/add'
-            }
-          ],
-          privileges: ['datasets']
-        },
-        users: {
-          name: 'Manage Users',
-          icon: '',
-          options: [
-            {
-              description: 'Edit/Remove Users',
-              name: 'ManageUsers',
-              path: '/admin/manage-users'
-            },
-            {
-              description: 'Add User',
-              name: 'AddUser',
-              path: '/admin/add-user'
-            }
-          ],
-          privileges: ['users']
-        }
-      }
-    }
+  data () {
+    return { }
   },
   computed: {
     breadcrumbs () {
@@ -159,6 +114,12 @@ export default {
     },
     alerts () {
       return this.$store.state.alerts
+    },
+    privileges () {
+      if (this.authenticated) {
+        return this.$store.state.user.privileges
+      }
+      return []
     }
   },
   methods: {
@@ -178,6 +139,13 @@ export default {
         return true
       }
       return false
+    }
+  },
+  filters: {
+    capitalize: function (value) {
+      if (!value) return ''
+      value = value.toString()
+      return value.charAt(0).toUpperCase() + value.slice(1)
     }
   }
 }
@@ -218,4 +186,8 @@ export default {
   }
 }
 
+.privilege {
+  margin-left: 10px;
+  margin-right: 10px;
+}
 </style>
