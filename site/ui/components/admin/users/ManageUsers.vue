@@ -42,9 +42,7 @@
   </div>
 </template>
 
-
 <script>
-
 export default {
   name: 'manage_users',
   data () {

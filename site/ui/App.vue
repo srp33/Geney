@@ -70,7 +70,6 @@ export default {
     this.$store.dispatch('getUser')
   }
 }
-
 </script>
 
 <style lang="scss">

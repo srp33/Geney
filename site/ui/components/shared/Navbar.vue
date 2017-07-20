@@ -44,7 +44,7 @@
 
         <b-nav is-nav-bar class="mx-auto">
 
-          <b-nav-item v-for="privilege in privileges" class="privilege" :to="'/admin/' + privilege">{{privilege | capitalize}}</b-nav-item>
+          <b-nav-item v-for="privilege in privileges" :key="privilege" class="privilege" :to="'/admin/' + privilege">{{privilege | capitalize}}</b-nav-item>
 
         </b-nav>
 

@@ -6,22 +6,19 @@ import router from './router'
 import store from './store'
 import validator from './validator'
 import './http'
-
 import BootstrapVue from 'bootstrap-vue'
-Vue.use(BootstrapVue)
-
 import VueMasonryPlugin from 'vue-masonry'
-Vue.use(VueMasonryPlugin)
-
 // load jQuery and Bootstrap (js and less)
 import jQuery from 'jquery'
-global.jQuery = jQuery
 import 'bootstrap/scss/bootstrap.scss'
 import 'selectize/dist/css/selectize.bootstrap3.css'
 import 'font-awesome-webpack'
 import 'simplemde/dist/simplemde.min.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+global.jQuery = jQuery
+Vue.use(VueMasonryPlugin)
+Vue.use(BootstrapVue)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

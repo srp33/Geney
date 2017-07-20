@@ -7,7 +7,7 @@
     <h3>We couldn't find it...Sorry!</h3>
 
     <router-link to="/" class="btn btn-primary btn-lg">
-      Go Home 
+      Go Home
       <i class="fa fa-home" aria-hidden="true"></i>
     </router-link>
 
@@ -15,7 +15,6 @@
 </template>
 
 <script>
-
 export default {
   name: 'Error404',
   data () {

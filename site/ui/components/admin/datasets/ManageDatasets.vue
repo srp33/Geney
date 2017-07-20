@@ -40,7 +40,6 @@
 
 
 <script>
-
 export default {
   name: 'manage_datasets',
   data () {

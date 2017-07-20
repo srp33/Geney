@@ -53,8 +53,12 @@
         @updated="updatePrivileges"></selectize>
     </div>
 
-    <div class="col-12 text-center" style="margin-bottom: 50px;">
+    <div class="col-12 text-center" style="margin-bottom: 15px;">
       <button class="btn btn-primary" @click="saveUser()">Save</button>
+    </div>
+
+    <div class="col-12 text-center" style="margin-bottom: 50px;">
+      <button class="btn btn-danger" @click="deleteUser()">Delete</button>
     </div>
   </div>
 </template>
@@ -150,6 +154,24 @@ export default {
           })
         }
       })
+    },
+    deleteUser () {
+      let confirmed = window.confirm(`Do you really want to delete ${this.username}?`)
+      if (confirmed) {
+        this.$http.delete('/api/admin/users/' + this.username)
+          .then(response => {
+            this.$store.commit('addAlert', {
+              variant: 'success',
+              message: 'User deleted.',
+              show: 3
+            })
+            setTimeout(() => {
+              router.push('/admin/users')
+            }, 250)
+          }).catch(response => {
+            console.log(response)
+          })
+      }
     }
   },
   filters: {
