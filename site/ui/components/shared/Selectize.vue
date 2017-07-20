@@ -19,15 +19,16 @@ export default {
   },
   mounted () {
     var component = this
+    let settings = this.settings || {}
     this.selectize = $(this.$el).find('select').selectize({
-      maxItems: this.settings.maxItems || null,
-      valueField: this.settings.valueField || 'name',
-      labelField: this.settings.labelField || 'name',
-      searchField: this.settings.searchField || 'name',
+      maxItems: settings.maxItems || null,
+      valueField: settings.valueField || 'name',
+      labelField: settings.labelField || 'name',
+      searchField: settings.searchField || 'name',
       options: this.options,
       create: false,
       items: this.value,
-      maxOptions: this.settings.maxOptions || 500,
+      maxOptions: settings.maxOptions || 500,
       onChange (values) {
         component.$emit('updated', values)
         var div = $(component.$el).find('.selectize-input')
@@ -35,7 +36,7 @@ export default {
       }
     })[0].selectize
     // force single input to show selected value on initialization
-    if (this.settings.maxItems === 1) {
+    if (settings.maxItems === 1) {
       this.selectize.addItem(this.value, true)
     }
   },

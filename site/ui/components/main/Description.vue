@@ -3,7 +3,9 @@
   <div class="description top" v-if="dataset">
     <img class="logo" src="../../assets/geney-no-lamp.png">
     <h1>{{ dataset.name }}</h1>
-    <h3 v-html="dataset.description"></h3>
+    <h4>
+      <vue-markdown :source="dataset.description"></vue-markdown>
+    </h4>
     <ul class="meta-types">
       <li><i class="fa fa-2x fa-align-justify" aria-hidden="true"></i><br>{{ dataset.numSamples }} Samples</li>
       <li><i class="fa fa-2x fa-flask" aria-hidden="true"></i><br>{{ dataset.numGenes }} Genes</li>
@@ -14,9 +16,11 @@
 </template>
 
 <script>
+import VueMarkdown from 'vue-markdown'
 
 export default {
   name: 'description',
+  components: { VueMarkdown },
   data () {
     return {
     }

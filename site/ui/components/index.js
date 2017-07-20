@@ -9,5 +9,7 @@ module.exports = {
   ManageDatasets: require('./admin/datasets/ManageDatasets'),
   AddDataset: require('./admin/datasets/AddDataset'),
   EditDataset: require('./admin/datasets/EditDataset'),
-  Users: require('./admin/Users')
+  ManageUsers: require('./admin/users/ManageUsers'),
+  AddUser: require('./admin/users/AddUser'),
+  EditUser: require('./admin/users/EditUser')
 }

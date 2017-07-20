@@ -82,6 +82,7 @@ h1, h2, h3 {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
+  min-width: 600px;
   // color: #2c3e50; // change page wide text color
 
   .logo {

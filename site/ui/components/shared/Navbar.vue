@@ -2,24 +2,31 @@
   <div>
     <b-navbar toggleable type="inverse" variant="success">
 
-      <b-nav-toggle target="nav_collapse"></b-nav-toggle>
+      <div class="nav-item center-nav">
+        <!-- <b-breadcrumb :items="breadcrumbs"/> -->
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item" :class="{'active': breadcrumb.active}" v-for="(breadcrumb, index) in breadcrumbs" :key="index">
+            <router-link :to="breadcrumb.link" v-if="!breadcrumb.active">{{breadcrumb.text}}</router-link>
+            <span v-if="breadcrumb.active">{{breadcrumb.text}}</span>
+          </li>
+        </ol>
+      </div>
 
-      <b-link class="navbar-brand" to="/">
+      <b-link class="navbar-brand above-breadcrumbs" to="/">
         <span>Geney</span>
       </b-link>
 
       <b-collapse is-nav id="nav_collapse">
 
-
         <b-nav is-nav-bar class="ml-auto" right-alignment>
+          <div class="above-breadcrumbs">
+            <b-nav-item-dropdown v-if="authenticated" right-alignment right :text="name">
+              <b-dropdown-item to="/admin">Admin</b-dropdown-item>
+              <b-dropdown-item @click="logout">Logout</b-dropdown-item>
+            </b-nav-item-dropdown>
 
-          <b-nav-item-dropdown v-if="authenticated" right-alignment right :text="name">
-            <b-dropdown-item to="/admin">Admin</b-dropdown-item>
-            <b-dropdown-item @click="logout">Logout</b-dropdown-item>
-          </b-nav-item-dropdown>
-
-          <b-nav-item v-else to="/login">Login</b-nav-item>
-
+            <b-nav-item v-else to="/login">Login</b-nav-item>
+          </div>
         </b-nav>
 
       </b-collapse>
@@ -37,7 +44,7 @@
 
         <b-nav is-nav-bar class="mx-auto">
 
-          <b-nav-item v-for="privilege in privileges" class="privilege" :to="'/admin/' + privilege" v-if="">{{privilege | capitalize}}</b-nav-item>
+          <b-nav-item v-for="privilege in privileges" class="privilege" :to="'/admin/' + privilege">{{privilege | capitalize}}</b-nav-item>
 
         </b-nav>
 
@@ -88,7 +95,9 @@ export default {
           }
         }
       }
-      crumbs[crumbs.length - 1].active = true
+      if (crumbs.length) {
+        crumbs[crumbs.length - 1].active = true
+      }
       return crumbs
     },
     currentRoute () {
@@ -155,7 +164,9 @@ export default {
 .navbar {
   z-index: 1020;
 }
-
+.above-breadcrumbs {
+  z-index:80;
+}
 .navbar-brand {
     img {
         height: 50px;
@@ -185,9 +196,36 @@ export default {
     }
   }
 }
-
 .privilege {
   margin-left: 10px;
   margin-right: 10px;
+}
+div.nav-item.center-nav {
+  position: absolute;
+  text-align: center;
+  left: 0px;
+  width: 100%;
+  margin: 0;
+  height: 40px;
+
+  ol.breadcrumb {
+    display: inline-block;
+    padding: 0.5em 0.5em;
+    margin-bottom: 0px;
+    background-color: transparent;
+    li.breadcrumb-item {
+      &::before {
+        color: yellow;
+      }
+      a {
+        color: white;
+        text-decoration: none;
+      }
+      &.active {
+        color: red;
+
+      }
+    }
+  }
 }
 </style>

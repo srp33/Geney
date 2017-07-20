@@ -40,7 +40,7 @@ export default {
   background-color: rgba(80, 80, 80, 0.8);
   text-align: center;
   color: #eee;
-  
+
   .middle-box {
     margin-left: 10%;
     margin-top: 50vh;

@@ -17,7 +17,7 @@
         @updated="updateMeta"
         placeholder="Filter Meta"
         :settings="settings.metaData"></selectize>
-      
+
       <h1>Select Genes</h1>
       <selectize
         :options="metaData.genes"
@@ -31,8 +31,8 @@
       <div v-if="numKeys">
         <h2>Let me get this right...</h2>
         <h3>You're looking for <strong>ROWS</strong> that have:</h3>
-        <h4 v-for="(values,type,num) in metaQuery"> 
-          <span v-for="(value, index) in values" v-if="index < 3">
+        <h4 v-for="(values,type,num) in metaQuery" :key="num">
+          <span v-for="(value, index) in values" v-if="index < 3" :key="index">
             "{{value}}"
             <strong v-if="index == values.length - 2 && values.length <= 3"> OR </strong>
           </span>
@@ -46,7 +46,7 @@
           <h3>And you want only the <strong>COLUMNS</strong> with the genes listed above.</h3>
         </div>
         <h3 v-else>And you want <strong>ALL</strong> of the <strong>COLUMNS</strong>.</h3>
-      
+
         <h2>Is that correct?</h2>
         <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Confirm</button>
       </div>

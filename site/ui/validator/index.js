@@ -9,7 +9,8 @@ Vue.use(VeeValidate, config)
 let Validator = VeeValidate.Validator
 
 let validateCache = {
-  id: {}
+  id: {},
+  username: {}
 }
 
 Validator.extend('idUsed', {
@@ -30,6 +31,32 @@ Validator.extend('idUsed', {
 
     return Vue.http.get('/api/admin/validate/id?val=' + value).then(response => {
       validateCache.id[value] = response.data
+      return { valid: response.data }
+    }).catch(response => {
+      return { valid: false }
+    })
+  }
+})
+
+Validator.extend('usernameUsed', {
+  getMessage () {
+    return 'That username is taken.'
+  },
+  validate (value, args) {
+    console.log(value)
+    if (Array.isArray(value)) {
+      value = value[0]
+    }
+    if (validateCache.username[value] !== undefined) {
+      return new Promise(resolve => {
+        resolve({
+          valid: validateCache.username[value]
+        })
+      })
+    }
+
+    return Vue.http.get('/api/admin/validate/username?val=' + value).then(response => {
+      validateCache.username[value] = response.data
       return { valid: response.data }
     }).catch(response => {
       return { valid: false }

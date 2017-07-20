@@ -55,7 +55,6 @@ export default {
     checkTruncated () {
       let elem = $(this.$el)
       let cardText = elem.find('.card-text')
-      console.log(cardText)
       let textHeight = 0
       cardText.children().each(function () {
         textHeight += $(this).height()

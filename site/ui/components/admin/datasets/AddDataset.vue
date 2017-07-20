@@ -5,17 +5,17 @@
     <div class="col-12">
       <h3>Add Dataset</h3>
     </div>
-    
+
     <div class="form-group col-sm-8" :class="{'has-danger': errors.has('Title')}">
       <label for="title" class="form-control-label">Title</label>
-      <input type="text" name="Title" id="title" v-model="title" class="form-control" 
+      <input type="text" name="Title" id="title" v-model="title" class="form-control"
             v-validate="'required'" @blur="setId" :class="{'form-control-danger': errors.has('Title')}">
       <span v-if="errors.has('Title')" class="form-control-feedback">{{ errors.first('Title') }}</span>
     </div>
 
     <div class="form-group col-sm-4" :class="{'has-danger': errors.has('Unique ID')}">
       <label for="id" class="form-control-label">Unique ID</label>
-      <input type="text" name="Unique ID" id="id" v-model="id" class="form-control" 
+      <input type="text" name="Unique ID" id="id" v-model="id" class="form-control"
             v-validate="'required|idUsed'" tabindex="-1" :class="{'form-control-danger': errors.has('Unique ID')}">
       <span v-if="errors.has('Unique ID')" class="form-control-feedback">{{ errors.first('Unique ID') }}</span>
     </div>
@@ -27,7 +27,7 @@
 
     <div class="form-group col-sm-12" :class="{'has-danger': errors.has('file')}">
       <label for="file" class="form-control-label">
-        File Upload 
+        File Upload
         <!--<b-tooltip content="Comma Separated Values files only.">
           <i class="fa fa-question-circle-o" aria-hidden="true"></i>
         </b-tooltip>-->
@@ -57,6 +57,7 @@
 <script>
 import SimpleMDE from 'simplemde'
 import ProgressBar from '../../shared/ProgressBar'
+import router from '../../../router'
 
 export default {
   name: 'add_datasets',
@@ -111,28 +112,37 @@ export default {
       let that = this
       let description = this.stripTags(this.mde.value())
       this.mde.value(description)
-      this.$validator.validateAll().then(() => {
-        let formData = new FormData()
-        formData.append('id', that.id)
-        formData.append('title', that.title)
-        formData.append('description', description)
-        formData.append('metaCols', that.metaCols)
-        formData.append('file', that.file)
-        that.progressData.active = true
-        that.$http.post('/api/admin/newdataset/', formData, {
-          progress (e) {
-            that.progressData.percent = (e.loaded / e.total) * 100
-          }
-        }).then(response => {
-          that.progressData.active = false
-          that.progressData.percent = 0
-          console.log(response)
-        }).catch(response => {
-          that.progressData.active = false
-          that.progressData.percent = 0
-          console.log(response)
-        })
-      }).catch(() => {})
+      this.$validator.validateAll().then((valid) => {
+        if (valid) {
+          let formData = new FormData()
+          formData.append('id', that.id)
+          formData.append('title', that.title)
+          formData.append('description', description)
+          formData.append('metaCols', that.metaCols)
+          formData.append('file', that.file)
+          that.progressData.active = true
+          that.$http.post('/api/admin/newdataset/', formData, {
+            progress (e) {
+              that.progressData.percent = (e.loaded / e.total) * 100
+            }
+          }).then(response => {
+            that.progressData.active = false
+            that.progressData.percent = 0
+            this.$store.commit('addAlert', {
+              variant: 'success',
+              message: 'Added dataset! You will recieve an email when processing is complete.',
+              show: 3
+            })
+            setTimeout(() => {
+              router.push('/admin/datasets')
+            }, 250)
+          }).catch(response => {
+            that.progressData.active = false
+            that.progressData.percent = 0
+            console.log(response)
+          })
+        }
+      })
     }
   }
 }

@@ -20,15 +20,20 @@ export default {
       if (user === null || user.username === undefined) {
         router.push('/login')
       } else {
+        // check if the user has ANY privileges
         if (user.privileges.length) {
-          let route = user.privileges[0]
-          router.replace('/admin/' + route)
+          // check if we only matched the /admin route
+          if (this.$route.matched.length === 1) {
+            let route = user.privileges[0]
+            router.replace('/admin/' + route)
+          }
         } else {
-          this.$store.state.commit('addAlert', {
+          this.$store.commit('addAlert', {
             variant: 'danger',
             message: 'You have no permissions!',
             show: 3
           })
+          router.replace('/')
         }
       }
     })

@@ -10,7 +10,6 @@ Vue.http.interceptors.push((request, next) => {
   next((response) => {
     if (typeof response.data === 'object' && response.data.jwt) {
       localStorage.setItem('jwt', response.data.jwt)
-      console.log(Vue.store)
     }
   })
 })

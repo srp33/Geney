@@ -59,7 +59,17 @@ export default new Router({
         {
           path: 'users',
           name: 'ManageUsers',
-          component: Components.Users
+          component: Components.ManageUsers
+        },
+        {
+          path: 'users/add',
+          name: 'AddUser',
+          component: Components.AddUser
+        },
+        {
+          path: 'users/:user',
+          name: 'EditUser',
+          component: Components.EditUser
         }
       ]
     },

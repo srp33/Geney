@@ -76,37 +76,39 @@ export default {
     saveDataset () {
       let description = this.stripTags(this.mde.value())
       this.mde.value(description)
-      this.$validator.validateAll().then(() => {
-        this.$http.post('/api/' + this.dataset.id + '/update', {
-          title: this.title,
-          description: description
-        }).then(
-        (response) => {
-          if (response.body === true) {
+      this.$validator.validateAll().then((valid) => {
+        if (valid) {
+          this.$http.patch('/api/' + this.dataset.id + '/update', {
+            title: this.title,
+            description: description
+          }).then(
+          (response) => {
+            if (response.body === true) {
+              this.$store.commit('addAlert', {
+                variant: 'success',
+                message: 'Dataset ' + this.dataset.id + ' updated successfully.',
+                show: 3
+              })
+              router.push('/admin/datasets')
+            } else {
+              this.$store.commit('addAlert', {
+                variant: 'warning',
+                message: 'Could not save dataset. Please refresh and try again.',
+                show: 3
+              })
+            }
+            this.$store.dispatch('getDatasets')
+          },
+          (errResponse) => {
             this.$store.commit('addAlert', {
-              variant: 'success',
-              message: 'Dataset ' + this.dataset.id + ' updated successfully.',
+              variant: 'danger',
+              message: 'Server error. Could not save dataset.',
               show: 3
             })
-            router.push('/admin/datasets')
-          } else {
-            this.$store.commit('addAlert', {
-              variant: 'warning',
-              message: 'Could not save dataset. Please refresh and try again.',
-              show: 3
-            })
-          }
-          this.$store.dispatch('getDatasets')
-        },
-        (errResponse) => {
-          this.$store.commit('addAlert', {
-            variant: 'danger',
-            message: 'Server error. Could not save dataset.',
-            show: 3
+            console.error(errResponse)
           })
-          console.error(errResponse)
-        })
-      }).catch(() => {})// do nothing if validation fails
+        }
+      })
     }
   },
   watch: {
