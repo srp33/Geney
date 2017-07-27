@@ -30,7 +30,7 @@
         {{ item.item.privileges | jsonArray }}
       </template>
       <template slot="actions" scope="item">
-        <router-link class="btn btn-sm btn-success" :to="'/admin/users/' + item.item.username"><i class="fa fa-edit fa-lg" aria-hidden="true"></i></router-link>
+        <router-link v-if="item.item.username !== loggedInUsername" class="btn btn-sm btn-success" :to="'/admin/users/' + item.item.username"><i class="fa fa-edit fa-lg" aria-hidden="true"></i></router-link>
       </template>
     </b-table>
 
@@ -79,6 +79,9 @@ export default {
     })
   },
   computed: {
+    loggedInUsername () {
+      return this.$store.state.user.username
+    }
   },
   methods: {
   },

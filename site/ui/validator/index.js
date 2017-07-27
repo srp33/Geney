@@ -29,7 +29,7 @@ Validator.extend('idUsed', {
       })
     }
 
-    return Vue.http.get('/api/admin/validate/id?val=' + value).then(response => {
+    return Vue.http.get('/api/datasets/validate?val=' + value).then(response => {
       validateCache.id[value] = response.data
       return { valid: response.data }
     }).catch(response => {
@@ -55,7 +55,7 @@ Validator.extend('usernameUsed', {
       })
     }
 
-    return Vue.http.get('/api/admin/validate/username?val=' + value).then(response => {
+    return Vue.http.get('/api/users/validate?val=' + value).then(response => {
       validateCache.username[value] = response.data
       return { valid: response.data }
     }).catch(response => {

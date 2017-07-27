@@ -9,8 +9,8 @@
       </div>
     </div>
 
-    
-    <div class="col-sm-6">
+
+    <div class="col-sm-4">
       <h2>Options</h2>
 
       <div class="form-group">
@@ -70,7 +70,7 @@ export default {
       var newPath = this.$route.fullPath.replace(/\/download.*/, '')
       router.replace(newPath)
     } else {
-      this.$http.post('/api/' + this.$route.params.dataset + '/samples', filters.meta).then(response => {
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, filters.meta).then(response => {
         this.$set(this, 'numSamples', response.body)
       }, response => {
         this.$set(this, 'numSamples', -1)
@@ -85,7 +85,7 @@ export default {
 
       let form = document.createElement('form')
       form.setAttribute('method', 'post')
-      form.setAttribute('action', '/api/' + this.$route.params.dataset + '/download')
+      form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download`)
       form.setAttribute('target', '_blank')
 
       var hiddenField = document.createElement('input')

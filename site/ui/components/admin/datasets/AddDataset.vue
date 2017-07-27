@@ -112,7 +112,7 @@ export default {
       let that = this
       let description = this.stripTags(this.mde.value())
       this.mde.value(description)
-      this.$validator.validateAll().then((valid) => {
+      this.$validator.validateAll().then(valid => {
         if (valid) {
           let formData = new FormData()
           formData.append('id', that.id)
@@ -121,7 +121,7 @@ export default {
           formData.append('metaCols', that.metaCols)
           formData.append('file', that.file)
           that.progressData.active = true
-          that.$http.post('/api/admin/newdataset/', formData, {
+          that.$http.put('/api/datasets', formData, {
             progress (e) {
               that.progressData.percent = (e.loaded / e.total) * 100
             }

@@ -1,7 +1,10 @@
 const bcrypt = require('bcryptjs')
 
 module.exports = class User {
-  constructor(userDefinition) {
+  constructor(userDefinition, ignore) {
+    if (!Array.isArray(ignore)) {
+      ignore = []
+    }
     let keys = [
       'username',
       'firstname',
@@ -12,7 +15,7 @@ module.exports = class User {
       'failed_attempts',
     ]
     for (let key of keys) {
-      if (userDefinition[key] === undefined) {
+      if (userDefinition[key] === undefined && ignore.indexOf(key) == -1) {
         throw new Error('User object missing key: ' + key)
       } else {
         this[key] = userDefinition[key]
@@ -21,8 +24,6 @@ module.exports = class User {
         this.password = userDefinition.password
       } else if (userDefinition.passhash) {
         this.passhash = userDefinition.passhash
-      } else {
-        throw new Error('User object missing pass')
       }
       if (typeof this.privileges === 'string') {
         this.privileges = JSON.parse(this.privileges)

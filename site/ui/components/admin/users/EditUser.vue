@@ -129,7 +129,7 @@ export default {
     saveUser () {
       this.$validator.validateAll().then((valid) => {
         if (valid) {
-          this.$http.patch('/api/admin/users/' + this.username, {
+          this.$http.patch(`/api/users/${this.username}`, {
             password: this.pass1.length ? this.pass1 : undefined,
             firstname: this.firstname,
             lastname: this.lastname,
@@ -158,7 +158,7 @@ export default {
     deleteUser () {
       let confirmed = window.confirm(`Do you really want to delete ${this.username}?`)
       if (confirmed) {
-        this.$http.delete('/api/admin/users/' + this.username)
+        this.$http.delete(`/api/users/${this.username}`)
           .then(response => {
             this.$store.commit('addAlert', {
               variant: 'success',

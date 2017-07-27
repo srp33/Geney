@@ -110,9 +110,7 @@ module.exports = class UserService {
 
   addUser(userDefinition, callback) {
     try {
-      userDefinition['email_reset_id'] = null
-      userDefinition['failed_attempts'] = null
-      let user = new User(userDefinition)
+      let user = new User(userDefinition, ['email_reset_id', 'failed_attempts'])
       let privileges = JSON.stringify(user.privileges)
       user.getPasshash(passhash => {
         if (!passhash) {
@@ -120,9 +118,15 @@ module.exports = class UserService {
           return
         }
         let statement = this.db.prepare(queries.addUser)
-        statement.run(user.username, user.firstname,
-          user.lastname, user.email,
-          passhash, privileges, 0, err => {
+        statement.run(
+          user.username,
+          user.firstname,
+          user.lastname,
+          user.email,
+          passhash,
+          privileges,
+          0,
+          err => {
             callback(!err ? true : false, 500)
           })
       })
@@ -134,11 +138,49 @@ module.exports = class UserService {
 
   updateUser(userDefinition, callback) {
     try {
-      let user = new User(userDefinition)
+      let user = new User(userDefinition, ['email_reset_id', 'failed_attempts'])
       let privileges = JSON.stringify(user.privileges)
+      user.getPasshash(passhash => {
+        let statement
+        if (passhash === false) {
+           statement = this.db.prepare(queries.updateUser,
+            user.firstname,
+            user.lastname,
+            user.email,
+            privileges,
+            user.username)
+        } else {
+           statement = this.db.prepare(queries.updateUserWithPassword,
+            user.firstname,
+            user.lastname,
+            user.email,
+            privileges,
+            passhash,
+            user.username)
+        }
+        statement.run(err => {
+          if (!err) {
+            callback(true)
+          } else {
+            callback(false, 500)
+          }
+        })
+      })
     } catch (e) {
       callback(false, 400)
     }
   }
+
+  deleteUser(username, callback) {
+    let statement = this.db.prepare(queries.deleteUser, username)
+    statement.run(err => {
+      if (!err) {
+        callback(true)
+      } else {
+        callback(false, 500)
+      }
+    })
+  }
+
 
 }

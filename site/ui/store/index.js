@@ -85,7 +85,7 @@ export default new Vuex.Store({
             context.commit('metaData', data)
           }
         }
-        Vue.http.get('/api/meta/' + context.state.dataset.id).then(response => {
+        Vue.http.get(`/api/datasets/${context.state.dataset.id}/meta`).then(response => {
           for (var key in response.data.meta) {
             response.data.meta[key] = response.data.meta[key].map(x => ({
               'name': x
@@ -141,7 +141,7 @@ export default new Vuex.Store({
       return user
     },
     getUsers (context) {
-      return Vue.http.get('/auth/api/users').then(response => {
+      return Vue.http.get('/api/users').then(response => {
         return response.data
       }, response => {
         let messageText

@@ -33,28 +33,24 @@ app.get('/api/datasets', (req, res, next) => {
   res.json(datasets)
 })
 
-app.get('/api/meta/lincslevel2', (req, res, next) => {
+app.get('/api/datasets/lincslevel2/meta', (req, res, next) => {
   res.json(lincslevel2)
 })
 
-app.get('/api/admin/validate/id', (req, res, next) => {
+app.get('/api/datasets/validate', (req, res, next) => {
   res.json(req.query.val !== 'lincslevel2')
 })
 
-app.get('/api/admin/validate/username', (req, res, next) => {
-  res.json(req.query.val !== 'pjtatlow')
-})
-
-app.post('/api/admin/newdataset/', (req, res, next) => {
+app.put('/api/datasets', (req, res, next) => {
   res.sendStatus(202)
   console.log(req)
 })
 
-app.post('/api/:id/samples', (req, res, next) => {
+app.post('/api/datasets/:id/samples', (req, res, next) => {
   res.json(428)
 })
 
-app.post('/api/:id/download', (req, res, next) => {
+app.post('/api/datasets/:id/download', (req, res, next) => {
   let query = JSON.parse(req.body.query)
   let filename = query.options.filename + '.' + query.options.fileformat
   res.header({
@@ -65,7 +61,7 @@ app.post('/api/:id/download', (req, res, next) => {
   res.end()
 })
 
-app.patch('/api/:id/update', (req, res, next) => {
+app.patch('/api/datasets/:id', (req, res, next) => {
   res.json(true)
 })
 // END TODO
@@ -84,7 +80,7 @@ app.post('/auth/login', (req, res, next) => {
   }
 })
 
-app.all('/auth/api/*', jwtAuth, (req, res, next) => {
+app.all('/api/users/*', jwtAuth, (req, res, next) => {
   if (!req.user) {
     res.sendStatus(401) // Unauthorized
   } else {
@@ -96,7 +92,7 @@ app.all('/auth/api/*', jwtAuth, (req, res, next) => {
   }
 })
 
-app.get('/auth/api/users', (req, res) => {
+app.get('/api/users', (req, res) => {
   UserService.getAllUsers((users, errorcode) => {
     if (users) {
       res.json(users)
@@ -106,7 +102,7 @@ app.get('/auth/api/users', (req, res) => {
   })
 })
 
-app.put('/api/admin/users', (req, res) => {
+app.put('/api/users', (req, res) => {
   UserService.addUser(req.body, (success, errorcode) => {
     if (success) {
       res.sendStatus(201)
@@ -116,9 +112,35 @@ app.put('/api/admin/users', (req, res) => {
   })
 })
 
-app.patch('/api/admin/users/:id', (req, res) => {
-  console.log(req.body)
-  res.json(true)
+app.get('/api/users/validate', (req, res, next) => {
+  UserService.getUser(req.query.val, user => {
+    if (user === null) {
+      res.json(true)
+    } else {
+      res.json(false)
+    }
+  })
+})
+
+app.patch('/api/users/:id', (req, res) => {
+  req.body.username = req.params.id
+  UserService.updateUser(req.body, (success, errorcode) => {
+    if (success) {
+      res.sendStatus(200)
+    } else {
+      res.sendStatus(errorcode)
+    }
+  })
+})
+
+app.delete('/api/users/:id', (req, res) => {
+  UserService.deleteUser(req.params.id, (success, errorcode) => {
+    if (success) {
+      res.sendStatus(200)
+    } else {
+      res.sendStatus(errorcode)
+    }
+  })
 })
 
 module.exports = app.listen(port, err => {

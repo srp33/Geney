@@ -78,7 +78,7 @@ export default {
       this.mde.value(description)
       this.$validator.validateAll().then((valid) => {
         if (valid) {
-          this.$http.patch('/api/' + this.dataset.id + '/update', {
+          this.$http.patch(`/api/datasets/${this.dataset.id}`, {
             title: this.title,
             description: description
           }).then(

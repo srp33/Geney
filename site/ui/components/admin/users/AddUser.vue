@@ -106,9 +106,9 @@ export default {
       this.$set(this, 'privileges', payload)
     },
     addUser () {
-      this.$validator.validateAll().then((valid) => {
+      this.$validator.validateAll().then(valid => {
         if (valid) {
-          this.$http.put('/api/admin/users/', {
+          this.$http.put('/api/users/', {
             username: this.username,
             password: this.pass1,
             firstname: this.firstname,

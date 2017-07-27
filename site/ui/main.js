@@ -10,11 +10,8 @@ import BootstrapVue from 'bootstrap-vue'
 import VueMasonryPlugin from 'vue-masonry'
 // load jQuery and Bootstrap (js and less)
 import jQuery from 'jquery'
-import 'bootstrap/scss/bootstrap.scss'
-import 'selectize/dist/css/selectize.bootstrap3.css'
+import './styles/main.scss'
 import 'font-awesome-webpack'
-import 'simplemde/dist/simplemde.min.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 global.jQuery = jQuery
 Vue.use(VueMasonryPlugin)

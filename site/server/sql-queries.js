@@ -5,4 +5,7 @@ module.exports = {
   resetFailedAttempts: 'UPDATE `users` SET failed_attempts = 0 WHERE username = (?);',
   getAllUsers: 'SELECT username, email, firstname, lastname, privileges FROM `users`;',
   addUser: 'INSERT INTO `users` (username, firstname, lastname, email, passhash, privileges, failed_attempts) VALUES((?),(?),(?),(?),(?),(?),(?));',
+  updateUser: 'UPDATE `users` SET firstname = (?), lastname = (?), email = (?), privileges = (?) WHERE username = (?);',
+  updateUserWithPassword: 'UPDATE `users` SET firstname = (?), lastname = (?), email = (?), privileges = (?), passhash = (?) WHERE username = (?);',
+  deleteUser: 'DELETE FROM `users` WHERE username = (?);',
 }

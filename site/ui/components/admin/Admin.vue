@@ -26,17 +26,51 @@ export default {
           if (this.$route.matched.length === 1) {
             let route = user.privileges[0]
             router.replace('/admin/' + route)
+          } else {
+            let path = this.$route.path.split('/')
+            let requiredPrivilege = null
+            if (path.length >= 3) {
+              requiredPrivilege = path[2]
+            }
+            if (requiredPrivilege && user.privileges.indexOf(requiredPrivilege) === -1) {
+              this.reject()
+            }
           }
         } else {
-          this.$store.commit('addAlert', {
-            variant: 'danger',
-            message: 'You have no permissions!',
-            show: 3
-          })
-          router.replace('/')
+          this.reject()
         }
       }
     })
+  },
+  watch: {
+    $route (to, from) {
+      let path = to.path.split('/')
+      let requiredPrivilege = null
+      if (path.length >= 3) {
+        requiredPrivilege = path[2]
+      }
+      if (requiredPrivilege) {
+        this.$store.dispatch('getUser').then(user => {
+          if (user === null || user.username === undefined) {
+            router.push('/login')
+          } else {
+            if (user.privileges.indexOf(requiredPrivilege) === -1) {
+              this.reject()
+            }
+          }
+        })
+      }
+    }
+  },
+  methods: {
+    reject () {
+      this.$store.commit('addAlert', {
+        variant: 'danger',
+        message: 'You have no permissions!',
+        show: 3
+      })
+      router.replace('/')
+    }
   }
 }
 </script>
