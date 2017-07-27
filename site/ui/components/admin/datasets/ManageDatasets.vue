@@ -64,19 +64,19 @@ export default {
       currentPage: 1,
       perPage: 5,
       filter: null
-    }
+    };
   },
   mounted () {
 
   },
   computed: {
     datasets () {
-      return this.$store.state.datasets
+      return this.$store.state.datasets;
     }
   },
   methods: {
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

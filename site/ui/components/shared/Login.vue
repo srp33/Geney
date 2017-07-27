@@ -39,7 +39,7 @@
 
 
 <script>
-import router from '../../router'
+import router from '../../router';
 
 export default {
   name: 'login',
@@ -50,20 +50,20 @@ export default {
       invalidLogin: false,
       loginMessage: '',
       invalidCount: 0
-    }
+    };
   },
   created () {
     this.$store.dispatch('getUser').then(user => {
       if (user && user.username) {
-        router.push('/admin')
+        router.push('/admin');
       } else if (user && !user.username) {
-        this.$store.dispatch('logout')
+        this.$store.dispatch('logout');
       }
-    })
+    });
   },
   methods: {
     login (e) {
-      let that = this
+      let that = this;
       this.$validator.validateAll().then((valid) => {
         if (valid) {
           that.$http.post('/auth/login', {
@@ -73,30 +73,30 @@ export default {
             if (response.data.jwt) {
               that.$store.dispatch('getUser').then(user => {
                 if (user && user.username) {
-                  router.push('/admin')
+                  router.push('/admin');
                 } else {
-                  that.failLogin()
+                  that.failLogin();
                 }
-              })
+              });
             } else {
-              that.failLogin('Invalid username or password')
+              that.failLogin('Invalid username or password');
             }
           }, response => {
-            console.error('Login failed: ', response)
-            that.failLogin()
-          })
+            console.error('Login failed: ', response);
+            that.failLogin();
+          });
         }
-      })
+      });
     },
     failLogin (msg) {
-      this.invalidLogin = true
-      this.loginMessage = msg || 'Authentication error. Please try again.'
-      this.username = ''
-      this.password = ''
-      this.invalidCount++
+      this.invalidLogin = true;
+      this.loginMessage = msg || 'Authentication error. Please try again.';
+      this.username = '';
+      this.password = '';
+      this.invalidCount++;
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

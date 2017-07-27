@@ -1,9 +1,9 @@
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
 
 module.exports = class User {
-  constructor(userDefinition, ignore) {
+  constructor (userDefinition, ignore) {
     if (!Array.isArray(ignore)) {
-      ignore = []
+      ignore = [];
     }
     let keys = [
       'username',
@@ -12,48 +12,48 @@ module.exports = class User {
       'email',
       'privileges',
       'email_reset_id',
-      'failed_attempts',
-    ]
+      'failed_attempts'
+    ];
     for (let key of keys) {
       if (userDefinition[key] === undefined && ignore.indexOf(key) == -1) {
-        throw new Error('User object missing key: ' + key)
+        throw new Error('User object missing key: ' + key);
       } else {
-        this[key] = userDefinition[key]
+        this[key] = userDefinition[key];
       }
       if (userDefinition.password) {
-        this.password = userDefinition.password
+        this.password = userDefinition.password;
       } else if (userDefinition.passhash) {
-        this.passhash = userDefinition.passhash
+        this.passhash = userDefinition.passhash;
       }
       if (typeof this.privileges === 'string') {
-        this.privileges = JSON.parse(this.privileges)
+        this.privileges = JSON.parse(this.privileges);
       }
     }
   }
 
-  getPayload() {
+  getPayload () {
     return {
       username: this.username,
       firstname: this.firstname,
       lastname: this.lastname,
       email: this.email,
-      privileges: this.privileges,
-    }
+      privileges: this.privileges
+    };
   }
 
-  getPasshash(callback) {
+  getPasshash (callback) {
     if (this.passhash) {
-      callback(this.passhash)
+      callback(this.passhash);
     } else if (this.password) {
       bcrypt.hash(this.password, 10, (err, hash) => {
         if (err) {
-          callback(false)
+          callback(false);
         } else {
-          callback(hash)
+          callback(hash);
         }
-      })
+      });
     } else {
-      callback(false)
+      callback(false);
     }
   }
-}
+};

@@ -28,10 +28,10 @@
 
 
 <script>
-import SimpleMDE from 'simplemde'
-import ProgressBar from '../../shared/ProgressBar'
-import { mapState } from 'vuex'
-import router from '../../../router'
+import SimpleMDE from 'simplemde';
+import ProgressBar from '../../shared/ProgressBar';
+import { mapState } from 'vuex';
+import router from '../../../router';
 
 export default {
   name: 'edit_datasets',
@@ -46,12 +46,12 @@ export default {
         active: false,
         percent: 0
       }
-    }
+    };
   },
   mounted () {
     // console.log()
     if (this.$store.state.dataset.name) {
-      this.$set(this, 'title', this.$store.state.dataset.name)
+      this.$set(this, 'title', this.$store.state.dataset.name);
     }
     this.mde = new SimpleMDE({
       element: document.getElementById('mde'),
@@ -63,7 +63,7 @@ export default {
         toggleSideBySide: null
       },
       initialValue: this.$store.state.dataset.description || ''
-    })
+    });
   },
   computed: mapState({
     // arrow functions can make the code very succinct!
@@ -71,11 +71,11 @@ export default {
   }),
   methods: {
     stripTags (str) {
-      return str.replace(/<[^>]*>/g, '')
+      return str.replace(/<[^>]*>/g, '');
     },
     saveDataset () {
-      let description = this.stripTags(this.mde.value())
-      this.mde.value(description)
+      let description = this.stripTags(this.mde.value());
+      this.mde.value(description);
       this.$validator.validateAll().then((valid) => {
         if (valid) {
           this.$http.patch(`/api/datasets/${this.dataset.id}`, {
@@ -88,38 +88,38 @@ export default {
                   variant: 'success',
                   message: 'Dataset ' + this.dataset.id + ' updated successfully.',
                   show: 3
-                })
-                router.push('/admin/datasets')
+                });
+                router.push('/admin/datasets');
               } else {
                 this.$store.commit('addAlert', {
                   variant: 'warning',
                   message: 'Could not save dataset. Please refresh and try again.',
                   show: 3
-                })
+                });
               }
-              this.$store.dispatch('getDatasets')
+              this.$store.dispatch('getDatasets');
             },
             (errResponse) => {
               this.$store.commit('addAlert', {
                 variant: 'danger',
                 message: 'Server error. Could not save dataset.',
                 show: 3
-              })
-              console.error(errResponse)
-            })
+              });
+              console.error(errResponse);
+            });
         }
-      })
+      });
     }
   },
   watch: {
     // we set the watcher here because the datsset isn't always ready when the page loads
     // this makes sure the mde gets the value it needs
     '$store.state.dataset' () {
-      this.$set(this, 'title', this.$store.state.dataset.name)
-      this.mde.value(this.$store.state.dataset.description)
+      this.$set(this, 'title', this.$store.state.dataset.name);
+      this.mde.value(this.$store.state.dataset.description);
     }
   }
-}
+};
 </script>
 
 <style lang="scss">

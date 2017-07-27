@@ -34,9 +34,9 @@
 </template>
 
 <script>
-import DatasetDetail from '../shared/DatasetDetail'
-import Sifter from 'sifter'
-import Vue from 'vue'
+import DatasetDetail from '../shared/DatasetDetail';
+import Sifter from 'sifter';
+import Vue from 'vue';
 
 export default {
   name: 'home',
@@ -45,50 +45,50 @@ export default {
     return {
       searchText: '',
       sortField: 'uploadDate'
-    }
+    };
   },
   updated () {
   },
   computed: {
     sifter () {
-      return new Sifter(this.$store.state.datasets)
+      return new Sifter(this.$store.state.datasets);
     },
     datasets () {
       // return this.$store.state.datasets
       if (this.sifter.items && this.sifter.items.length) {
         let result = this.sifter.search(this.searchText, {
           fields: ['name', 'description', 'id']
-        })
-        let datasets = []
+        });
+        let datasets = [];
         for (let item of result.items) {
-          datasets.push(this.sifter.items[item.id])
+          datasets.push(this.sifter.items[item.id]);
         }
-        datasets.sort(this.dynamicSort(this.sortField))
-        this.reloadMasonry()
-        return datasets
+        datasets.sort(this.dynamicSort(this.sortField));
+        this.reloadMasonry();
+        return datasets;
       }
-      return []
+      return [];
     }
   },
   methods: {
     reloadMasonry () {
       setTimeout(() => {
-        Vue.redrawVueMasonry()
-      }, 50)
+        Vue.redrawVueMasonry();
+      }, 50);
     },
     dynamicSort (property) {
-      var sortOrder = 1
+      var sortOrder = 1;
       if (property[0] === '-') {
-        sortOrder = -1
-        property = property.substr(1)
+        sortOrder = -1;
+        property = property.substr(1);
       }
       return function (a, b) {
-        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0
-        return result * sortOrder
-      }
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        return result * sortOrder;
+      };
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

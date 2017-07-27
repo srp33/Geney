@@ -16,21 +16,21 @@
 </template>
 
 <script>
-import VueMarkdown from 'vue-markdown'
+import VueMarkdown from 'vue-markdown';
 
 export default {
   name: 'description',
   components: { VueMarkdown },
   data () {
     return {
-    }
+    };
   },
   computed: {
     dataset () {
-      return this.$store.state.dataset
+      return this.$store.state.dataset;
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

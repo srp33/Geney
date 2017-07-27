@@ -19,7 +19,7 @@ export default {
   name: 'Error404',
   data () {
     return {
-    }
+    };
   },
   created () {
   },
@@ -27,7 +27,7 @@ export default {
   },
   methods: {
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

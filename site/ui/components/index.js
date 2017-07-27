@@ -12,4 +12,4 @@ module.exports = {
   ManageUsers: require('./admin/users/ManageUsers'),
   AddUser: require('./admin/users/AddUser'),
   EditUser: require('./admin/users/EditUser')
-}
+};

@@ -30,8 +30,8 @@
 </template>
 
 <script>
-import router from '../../router'
-import selectize from '../shared/Selectize'
+import router from '../../router';
+import selectize from '../shared/Selectize';
 
 export default {
   name: 'download',
@@ -57,49 +57,49 @@ export default {
         filename: 'test'
       },
       numSamples: null
-    }
+    };
   },
   computed: {
     filters () {
-      return this.$store.state.filters
+      return this.$store.state.filters;
     }
   },
   created () {
-    let filters = this.$store.state.filters
+    let filters = this.$store.state.filters;
     if (!filters || !filters.meta) {
-      var newPath = this.$route.fullPath.replace(/\/download.*/, '')
-      router.replace(newPath)
+      var newPath = this.$route.fullPath.replace(/\/download.*/, '');
+      router.replace(newPath);
     } else {
       this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, filters.meta).then(response => {
-        this.$set(this, 'numSamples', response.body)
+        this.$set(this, 'numSamples', response.body);
       }, response => {
-        this.$set(this, 'numSamples', -1)
-      })
+        this.$set(this, 'numSamples', -1);
+      });
     }
   },
   methods: {
     download () {
-      let payload = {}
-      Object.assign(payload, this.filters) // copy values from filters
-      payload.options = this.options
+      let payload = {};
+      Object.assign(payload, this.filters); // copy values from filters
+      payload.options = this.options;
 
-      let form = document.createElement('form')
-      form.setAttribute('method', 'post')
-      form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download`)
-      form.setAttribute('target', '_blank')
+      let form = document.createElement('form');
+      form.setAttribute('method', 'post');
+      form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download`);
+      form.setAttribute('target', '_blank');
 
-      var hiddenField = document.createElement('input')
-      hiddenField.setAttribute('type', 'hidden')
-      hiddenField.setAttribute('name', 'query')
-      hiddenField.setAttribute('value', JSON.stringify(payload))
+      var hiddenField = document.createElement('input');
+      hiddenField.setAttribute('type', 'hidden');
+      hiddenField.setAttribute('name', 'query');
+      hiddenField.setAttribute('value', JSON.stringify(payload));
 
-      form.appendChild(hiddenField)
+      form.appendChild(hiddenField);
 
-      document.body.appendChild(form)
-      form.submit()
+      document.body.appendChild(form);
+      form.submit();
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

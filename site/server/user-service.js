@@ -1,22 +1,21 @@
-const path = require('path')
-const sqlite3 = require('sqlite3')
-const queries = require('./sql-queries')
-const bcrypt = require('bcryptjs')
-const token = require('jsonwebtoken')
-const tokenConfig = {algorithm: 'HS512', expiresIn: '30m'}
-const config = require('../config')
-const User = require('./user')
+const path = require('path');
+const sqlite3 = require('sqlite3');
+const queries = require('./sql-queries');
+const bcrypt = require('bcryptjs');
+const token = require('jsonwebtoken');
+const tokenConfig = {algorithm: 'HS512', expiresIn: '30m'};
+const config = require('../config');
+const User = require('./user');
 
 module.exports = class UserService {
-
-  constructor() {
-    this.db = new sqlite3.Database(path.join(__dirname, 'geney.db'))
+  constructor () {
+    this.db = new sqlite3.Database(path.join(__dirname, 'geney.db'));
     this.db.run(queries.create, err => {
       if (err) {
-        console.error(err)
-        process.exit(1)
+        console.error(err);
+        process.exit(1);
       }
-    })
+    });
   }
 
   /**
@@ -26,23 +25,23 @@ module.exports = class UserService {
    * @param {function} callback
    * @return {User}
    */
-  getUser(username, callback) {
-    let statement = this.db.prepare(queries.getUser)
+  getUser (username, callback) {
+    let statement = this.db.prepare(queries.getUser);
     statement.get(username, (err, userDefinition) => {
       if (err) {
-        callback(null)
+        callback(null);
       }
       // check if user exists
       if (userDefinition) {
         try {
-          callback(new User(userDefinition))
-        } catch(e) {
-          callback(false)
+          callback(new User(userDefinition));
+        } catch (e) {
+          callback(false);
         }
       } else {
-        callback(null)
+        callback(null);
       }
-    })
+    });
   }
 
   /**
@@ -51,14 +50,14 @@ module.exports = class UserService {
    * @param {string} passhash
    * @param {function} callback
    */
-  validatePassword(password, passhash, callback) {
+  validatePassword (password, passhash, callback) {
     bcrypt.compare(password, passhash, (err, valid) => {
       if (err) {
-        callback(false)
+        callback(false);
       } else {
-        callback(!!valid)
+        callback(!!valid);
       }
-    })
+    });
   }
 
   /**
@@ -68,56 +67,54 @@ module.exports = class UserService {
    * @param  {string} password
    * @param  {function} callback
    */
-  authenticateUser(username, password, callback) {
+  authenticateUser (username, password, callback) {
     this.getUser(username, user => {
       if (!user) {
-        callback(false, 401)
-        return
+        callback(false, 401);
+        return;
       }
       user.getPasshash(hash => {
         if (!hash) {
-          callback(false, 401)
-          return
+          callback(false, 401);
+          return;
         }
         this.validatePassword(password, hash, valid => {
           if (valid) {
             token.sign(user.getPayload(), config.dev.secret, tokenConfig, (err, jwt) => {
               if (err) {
-                callback(false, 500)
+                callback(false, 500);
               } else {
-                callback(jwt)
+                callback(jwt);
               }
-            })
+            });
           } else {
-            callback(false, 401)
-            return
+            callback(false, 401);
           }
-        })
-      })
-    })
+        });
+      });
+    });
   }
 
-  getAllUsers(callback) {
-      this.db.all(queries.getAllUsers, (err, rows) => {
-        if (err) {
-          callback(500)
-        }
-        else {
-          callback(rows)
-        }
-      })
+  getAllUsers (callback) {
+    this.db.all(queries.getAllUsers, (err, rows) => {
+      if (err) {
+        callback(500);
+      } else {
+        callback(rows);
+      }
+    });
   }
 
-  addUser(userDefinition, callback) {
+  addUser (userDefinition, callback) {
     try {
-      let user = new User(userDefinition, ['email_reset_id', 'failed_attempts'])
-      let privileges = JSON.stringify(user.privileges)
+      let user = new User(userDefinition, ['email_reset_id', 'failed_attempts']);
+      let privileges = JSON.stringify(user.privileges);
       user.getPasshash(passhash => {
         if (!passhash) {
-          callback(false, 500)
-          return
+          callback(false, 500);
+          return;
         }
-        let statement = this.db.prepare(queries.addUser)
+        let statement = this.db.prepare(queries.addUser);
         statement.run(
           user.username,
           user.firstname,
@@ -127,60 +124,58 @@ module.exports = class UserService {
           privileges,
           0,
           err => {
-            callback(!err ? true : false, 500)
-          })
-      })
+            callback(!err, 500);
+          });
+      });
     } catch (e) {
-      console.log(e)
-      callback(false, 400)
+      console.log(e);
+      callback(false, 400);
     }
   }
 
-  updateUser(userDefinition, callback) {
+  updateUser (userDefinition, callback) {
     try {
-      let user = new User(userDefinition, ['email_reset_id', 'failed_attempts'])
-      let privileges = JSON.stringify(user.privileges)
+      let user = new User(userDefinition, ['email_reset_id', 'failed_attempts']);
+      let privileges = JSON.stringify(user.privileges);
       user.getPasshash(passhash => {
-        let statement
+        let statement;
         if (passhash === false) {
-           statement = this.db.prepare(queries.updateUser,
+          statement = this.db.prepare(queries.updateUser,
             user.firstname,
             user.lastname,
             user.email,
             privileges,
-            user.username)
+            user.username);
         } else {
-           statement = this.db.prepare(queries.updateUserWithPassword,
+          statement = this.db.prepare(queries.updateUserWithPassword,
             user.firstname,
             user.lastname,
             user.email,
             privileges,
             passhash,
-            user.username)
+            user.username);
         }
         statement.run(err => {
           if (!err) {
-            callback(true)
+            callback(true);
           } else {
-            callback(false, 500)
+            callback(false, 500);
           }
-        })
-      })
+        });
+      });
     } catch (e) {
-      callback(false, 400)
+      callback(false, 400);
     }
   }
 
-  deleteUser(username, callback) {
-    let statement = this.db.prepare(queries.deleteUser, username)
+  deleteUser (username, callback) {
+    let statement = this.db.prepare(queries.deleteUser, username);
     statement.run(err => {
       if (!err) {
-        callback(true)
+        callback(true);
       } else {
-        callback(false, 500)
+        callback(false, 500);
       }
-    })
+    });
   }
-
-
-}
+};

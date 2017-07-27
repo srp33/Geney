@@ -72,92 +72,92 @@
 
 
 <script>
-import router from '../../router'
+import router from '../../router';
 
 export default {
   name: 'navbar',
   data () {
-    return { }
+    return { };
   },
   computed: {
     breadcrumbs () {
-      var crumbs = []
+      var crumbs = [];
       if (!this.admin) {
-        crumbs.push({link: '/', text: 'Select Dataset', route: 'Home'})
+        crumbs.push({link: '/', text: 'Select Dataset', route: 'Home'});
         if (this.$store.state.dataset.id) {
-          var datasetPath = '/dataset/' + this.$store.state.dataset.id + '/'
-          crumbs.push({link: datasetPath, text: this.$store.state.dataset.name, route: 'Description'})
+          var datasetPath = '/dataset/' + this.$store.state.dataset.id + '/';
+          crumbs.push({link: datasetPath, text: this.$store.state.dataset.name, route: 'Description'});
           if (this.$route.path.indexOf('filter') >= 0) {
-            crumbs.push({link: datasetPath + 'filter', text: 'Filter', route: 'Filter'})
+            crumbs.push({link: datasetPath + 'filter', text: 'Filter', route: 'Filter'});
           }
           if (this.$route.path.indexOf('download') >= 0) {
-            crumbs.push({link: datasetPath + 'download', text: 'Download', route: 'Download'})
+            crumbs.push({link: datasetPath + 'download', text: 'Download', route: 'Download'});
           }
         }
       }
       if (crumbs.length) {
-        crumbs[crumbs.length - 1].active = true
+        crumbs[crumbs.length - 1].active = true;
       }
-      return crumbs
+      return crumbs;
     },
     currentRoute () {
-      return this.$route.name
+      return this.$route.name;
     },
     authenticated () {
-      return this.$store.state.user && this.$store.state.user.username
+      return this.$store.state.user && this.$store.state.user.username;
     },
     name () {
-      var user = this.$store.state.user
+      var user = this.$store.state.user;
       if (user) {
-        return user.firstname + ' ' + user.lastname
+        return user.firstname + ' ' + user.lastname;
       }
-      return null
+      return null;
     },
     admin () {
       for (var match of this.$route.matched) {
         if (match.name === 'Admin') {
-          return true
+          return true;
         }
       }
-      return false
+      return false;
     },
     alerts () {
-      return this.$store.state.alerts
+      return this.$store.state.alerts;
     },
     privileges () {
       if (this.authenticated) {
-        return this.$store.state.user.privileges
+        return this.$store.state.user.privileges;
       }
-      return []
+      return [];
     }
   },
   methods: {
     logout () {
-      this.$store.dispatch('logout')
+      this.$store.dispatch('logout');
       if (this.admin) {
-        router.push('/')
+        router.push('/');
       }
     },
     authorized (requiredPrivileges) {
       if (this.authenticated) {
         for (let privilege of requiredPrivileges) {
           if (this.$store.state.user.privileges.indexOf(privilege) === -1) {
-            return false
+            return false;
           }
         }
-        return true
+        return true;
       }
-      return false
+      return false;
     }
   },
   filters: {
     capitalize: function (value) {
-      if (!value) return ''
-      value = value.toString()
-      return value.charAt(0).toUpperCase() + value.slice(1)
+      if (!value) return '';
+      value = value.toString();
+      return value.charAt(0).toUpperCase() + value.slice(1);
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

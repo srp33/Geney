@@ -65,8 +65,8 @@
 
 
 <script>
-import router from '../../../router'
-const selectize = require('../../shared/Selectize')
+import router from '../../../router';
+const selectize = require('../../shared/Selectize');
 
 export default {
   name: 'edit_user',
@@ -86,34 +86,34 @@ export default {
       selected: [],
       availablePrivileges: ['datasets', 'users'],
       blurred: {}
-    }
+    };
   },
   created () {
-    let selectedUser = null
+    let selectedUser = null;
     this.$store.dispatch('getUsers').then(users => {
       if (Array.isArray(users)) {
         users.forEach(user => {
           if (user.username === this.$route.params.user) {
-            user.privileges = JSON.parse(user.privileges)
-            selectedUser = user
+            user.privileges = JSON.parse(user.privileges);
+            selectedUser = user;
           }
-        })
+        });
         if (selectedUser) {
           for (let prop of ['firstname', 'lastname', 'username', 'email', 'privileges']) {
-            this[prop] = selectedUser[prop]
+            this[prop] = selectedUser[prop];
           }
         }
       }
       if (!selectedUser) {
-        router.push('/404')
+        router.push('/404');
       }
-    })
+    });
   },
   computed: {
     mappedPrivileges () {
       return this.availablePrivileges.map(permission => {
-        return { name: permission }
-      })
+        return { name: permission };
+      });
     }
   },
   methods: {
@@ -121,10 +121,10 @@ export default {
     // password confirmtation won't show error
     // message until it has been blurred
     blur (input) {
-      this.$set(this.blurred, input, true)
+      this.$set(this.blurred, input, true);
     },
     updatePrivileges (payload) {
-      this.$set(this, 'privileges', payload)
+      this.$set(this, 'privileges', payload);
     },
     saveUser () {
       this.$validator.validateAll().then((valid) => {
@@ -140,23 +140,23 @@ export default {
               variant: 'success',
               message: 'User updated successfully.',
               show: 3
-            })
+            });
             setTimeout(() => {
-              router.push('/admin/users')
-            }, 250)
+              router.push('/admin/users');
+            }, 250);
           }).catch(response => {
             this.$store.commit('addAlert', {
               variant: 'danger',
               message: 'Error saving user.',
               show: 3
-            })
-            console.error(response)
-          })
+            });
+            console.error(response);
+          });
         }
-      })
+      });
     },
     deleteUser () {
-      let confirmed = window.confirm(`Do you really want to delete ${this.username}?`)
+      let confirmed = window.confirm(`Do you really want to delete ${this.username}?`);
       if (confirmed) {
         this.$http.delete(`/api/users/${this.username}`)
           .then(response => {
@@ -164,19 +164,19 @@ export default {
               variant: 'success',
               message: 'User deleted.',
               show: 3
-            })
+            });
             setTimeout(() => {
-              router.push('/admin/users')
-            }, 250)
+              router.push('/admin/users');
+            }, 250);
           }).catch(response => {
-            console.log(response)
-          })
+            console.log(response);
+          });
       }
     }
   },
   filters: {
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import Navbar from './components/shared/Navbar'
+import Navbar from './components/shared/Navbar';
 // import router from './router'
 
 export default {
@@ -21,7 +21,7 @@ export default {
     return {
       enterTransition: '',
       leaveTransition: ''
-    }
+    };
   },
   watch: {
     // this handles the animations
@@ -29,47 +29,47 @@ export default {
       // check if they're changing datasets
       if (to.params.dataset !== from.params.dataset) {
         // remove any set filters
-        this.$store.commit('filters', null)
+        this.$store.commit('filters', null);
         if (this.$store.state.datasets) { // make sure it's not null
-          var dataset = {}
+          var dataset = {};
           // find dataset and set it in the store
           for (var x of this.$store.state.datasets) {
             if (x.id === to.params.dataset) {
-              dataset = x
-              break
+              dataset = x;
+              break;
             }
           }
-          this.$store.dispatch('setDataset', dataset)
+          this.$store.dispatch('setDataset', dataset);
         }
       }
 
       if (to.name === '404' || from.name === '404' || to.name === 'DatasetNotFound' || from.name === 'DatasetNotFound') {
-        this.enterTransition = ''
-        this.leaveTransition = ''
-        return
+        this.enterTransition = '';
+        this.leaveTransition = '';
+        return;
       }
 
       // n => n is truthy when n.length > 0, so this filters out empty strings
-      const toDepth = to.path.split('/').filter(n => n).length
-      const fromDepth = from.path.split('/').filter(n => n).length
+      const toDepth = to.path.split('/').filter(n => n).length;
+      const fromDepth = from.path.split('/').filter(n => n).length;
       if (toDepth < fromDepth) {
-        this.enterTransition = 'animated slideInLeft'
-        this.leaveTransition = 'animated slideOutRight'
+        this.enterTransition = 'animated slideInLeft';
+        this.leaveTransition = 'animated slideOutRight';
       } else if (toDepth > fromDepth) {
-        this.enterTransition = 'animated slideInRight'
-        this.leaveTransition = 'animated slideOutLeft'
+        this.enterTransition = 'animated slideInRight';
+        this.leaveTransition = 'animated slideOutLeft';
       } else {
-        this.enterTransition = ''
-        this.leaveTransition = ''
+        this.enterTransition = '';
+        this.leaveTransition = '';
       }
     }
   },
   created () {
     // get all datasets when page loads
-    this.$store.dispatch('getDatasets')
-    this.$store.dispatch('getUser')
+    this.$store.dispatch('getDatasets');
+    this.$store.dispatch('getUser');
   }
-}
+};
 </script>
 
 <style lang="scss">

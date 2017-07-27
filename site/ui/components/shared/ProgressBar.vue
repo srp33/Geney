@@ -18,7 +18,7 @@ export default {
   data () {
     return {
 
-    }
+    };
   },
   created () {
 
@@ -26,7 +26,7 @@ export default {
   methods: {
 
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

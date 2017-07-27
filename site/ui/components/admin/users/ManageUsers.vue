@@ -71,31 +71,31 @@ export default {
       currentPage: 1,
       perPage: 5,
       filter: null
-    }
+    };
   },
   created () {
     this.$store.dispatch('getUsers').then(users => {
-      this.$set(this, 'users', users)
-    })
+      this.$set(this, 'users', users);
+    });
   },
   computed: {
     loggedInUsername () {
-      return this.$store.state.user.username
+      return this.$store.state.user.username;
     }
   },
   methods: {
   },
   filters: {
     jsonArray: function (value) {
-      if (!value) return ''
-      const arr = JSON.parse(value)
+      if (!value) return '';
+      const arr = JSON.parse(value);
       if (Array.isArray(arr)) {
-        return arr.join(', ')
+        return arr.join(', ');
       }
-      return ''
+      return '';
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

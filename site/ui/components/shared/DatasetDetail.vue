@@ -20,9 +20,9 @@
 
 
 <script>
-import VueMarkdown from 'vue-markdown'
-import Vue from 'vue'
-import $ from 'jquery'
+import VueMarkdown from 'vue-markdown';
+import Vue from 'vue';
+import $ from 'jquery';
 
 export default {
   name: 'dataset-detail',
@@ -32,45 +32,45 @@ export default {
     return {
       truncated: true,
       hidden: true
-    }
+    };
   },
   computed: {
     uploadDate () {
-      let date = new Date(this.data.uploadDate)
-      return date.toLocaleDateString()
+      let date = new Date(this.data.uploadDate);
+      return date.toLocaleDateString();
     }
   },
   mounted () {
-    this.checkTruncated()
+    this.checkTruncated();
   },
   methods: {
     toggleText () {
-      this.$set(this, 'hidden', !this.hidden)
+      this.$set(this, 'hidden', !this.hidden);
       // wait one tick to reset masonry
       this.$nextTick(() => {
-        Vue.redrawVueMasonry()
-        this.checkTruncated()
-      })
+        Vue.redrawVueMasonry();
+        this.checkTruncated();
+      });
     },
     checkTruncated () {
-      let elem = $(this.$el)
-      let cardText = elem.find('.card-text')
-      let textHeight = 0
+      let elem = $(this.$el);
+      let cardText = elem.find('.card-text');
+      let textHeight = 0;
       cardText.children().each(function () {
-        textHeight += $(this).height()
-      })
-      this.$set(this, 'truncated', this.hidden && (cardText.height() < textHeight))
+        textHeight += $(this).height();
+      });
+      this.$set(this, 'truncated', this.hidden && (cardText.height() < textHeight));
     }
   },
   watch: {
     data () {
-      this.$set(this, 'hidden', true)
+      this.$set(this, 'hidden', true);
       this.$nextTick(() => {
-        this.checkTruncated()
-      })
+        this.checkTruncated();
+      });
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

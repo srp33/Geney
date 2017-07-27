@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import $ from 'jquery'
-import 'selectize'
+import $ from 'jquery';
+import 'selectize';
 
 export default {
   name: 'selectize',
@@ -15,11 +15,11 @@ export default {
   data () {
     return {
       selectize: null
-    }
+    };
   },
   mounted () {
-    var component = this
-    let settings = this.settings || {}
+    var component = this;
+    let settings = this.settings || {};
     this.selectize = $(this.$el).find('select').selectize({
       maxItems: settings.maxItems || null,
       valueField: settings.valueField || 'name',
@@ -30,33 +30,33 @@ export default {
       items: this.value,
       maxOptions: settings.maxOptions || 500,
       onChange (values) {
-        component.$emit('updated', values)
-        var div = $(component.$el).find('.selectize-input')
-        div.scrollTop($(div)[0].scrollHeight)
+        component.$emit('updated', values);
+        var div = $(component.$el).find('.selectize-input');
+        div.scrollTop($(div)[0].scrollHeight);
       }
-    })[0].selectize
+    })[0].selectize;
     // force single input to show selected value on initialization
     if (settings.maxItems === 1) {
-      this.selectize.addItem(this.value, true)
+      this.selectize.addItem(this.value, true);
     }
   },
   watch: {
     'options' (to, from) {
-      this.selectize.clear()
-      this.selectize.clearOptions()
-      this.selectize.addOption(this.options)
+      this.selectize.clear();
+      this.selectize.clearOptions();
+      this.selectize.addOption(this.options);
       if (this.value) {
         for (var val of this.value) {
-          this.selectize.addItem(val, true)
+          this.selectize.addItem(val, true);
         }
       }
-      this.selectize.refreshItems()
-      this.selectize.refreshOptions()
-      this.selectize.blur()
-      this.selectize.close()
+      this.selectize.refreshItems();
+      this.selectize.refreshOptions();
+      this.selectize.blur();
+      this.selectize.close();
     }
   }
-}
+};
 </script>
 
 <style lang="scss">

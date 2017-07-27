@@ -58,8 +58,8 @@
 </template>
 
 <script>
-import router from '../../router'
-var selectize = require('../shared/Selectize')
+import router from '../../router';
+var selectize = require('../shared/Selectize');
 
 export default {
   name: 'filter',
@@ -78,54 +78,54 @@ export default {
         metaData: {},
         genes: {}
       }
-    }
+    };
   },
   computed: {
     metaQuery () {
       // basically just removes any undefined elements from the
       // selectedMeta object
-      var q = JSON.parse(JSON.stringify(this.selectedMeta))
+      var q = JSON.parse(JSON.stringify(this.selectedMeta));
       for (var key in q) {
         if (!q[key]) {
-          delete q[key]
+          delete q[key];
         }
       }
-      return q
+      return q;
     },
     numKeys () {
-      return Object.keys(this.metaQuery).length
+      return Object.keys(this.metaQuery).length;
     },
     metaTypes () {
       if (this.metaData.meta) {
-        return Object.keys(this.metaData.meta).map(x => ({'name': x}))
+        return Object.keys(this.metaData.meta).map(x => ({'name': x}));
       } else {
-        return false
+        return false;
       }
     },
     metaData () {
-      return this.$store.state.metaData
+      return this.$store.state.metaData;
     }
 
   },
   methods: {
     updateGenes (payload) {
-      this.$set(this, 'selectedGenes', payload)
+      this.$set(this, 'selectedGenes', payload);
     },
     updateMeta (payload) {
-      this.$set(this.selectedMeta, this.currentMetaType, payload)
+      this.$set(this.selectedMeta, this.currentMetaType, payload);
     },
     commit () {
-      this.$store.commit('filters', {meta: this.metaQuery, genes: this.selectedGenes})
-      router.push('/dataset/' + this.$route.params.dataset + '/filter/download')
+      this.$store.commit('filters', {meta: this.metaQuery, genes: this.selectedGenes});
+      router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
     }
   },
   created () {
     if (this.$store.state.filters) {
-      this.selectedGenes = this.$store.state.filters.genes
-      this.selectedMeta = this.$store.state.filters.meta
+      this.selectedGenes = this.$store.state.filters.genes;
+      this.selectedMeta = this.$store.state.filters.meta;
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

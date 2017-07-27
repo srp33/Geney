@@ -63,8 +63,8 @@
 
 
 <script>
-import router from '../../../router'
-const selectize = require('../../shared/Selectize')
+import router from '../../../router';
+const selectize = require('../../shared/Selectize');
 
 export default {
   name: 'add_user',
@@ -84,15 +84,15 @@ export default {
       selected: [],
       availablePrivileges: ['datasets', 'users'],
       blurred: {}
-    }
+    };
   },
   created () {
   },
   computed: {
     mappedPrivileges () {
       return this.availablePrivileges.map(permission => {
-        return { name: permission }
-      })
+        return { name: permission };
+      });
     }
   },
   methods: {
@@ -100,10 +100,10 @@ export default {
     // password confirmtation won't show error
     // message until it has been blurred
     blur (input) {
-      this.$set(this.blurred, input, true)
+      this.$set(this.blurred, input, true);
     },
     updatePrivileges (payload) {
-      this.$set(this, 'privileges', payload)
+      this.$set(this, 'privileges', payload);
     },
     addUser () {
       this.$validator.validateAll().then(valid => {
@@ -120,20 +120,20 @@ export default {
               variant: 'success',
               message: 'User added successfully.',
               show: 3
-            })
+            });
             setTimeout(() => {
-              router.push('/admin/users')
-            }, 250)
+              router.push('/admin/users');
+            }, 250);
           }).catch(response => {
-            console.error('failure', response)
-          })
+            console.error('failure', response);
+          });
         }
-      })
+      });
     }
   },
   filters: {
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

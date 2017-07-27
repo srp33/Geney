@@ -55,9 +55,9 @@
 
 
 <script>
-import SimpleMDE from 'simplemde'
-import ProgressBar from '../../shared/ProgressBar'
-import router from '../../../router'
+import SimpleMDE from 'simplemde';
+import ProgressBar from '../../shared/ProgressBar';
+import router from '../../../router';
 
 export default {
   name: 'add_datasets',
@@ -75,7 +75,7 @@ export default {
         active: false,
         percent: 0
       }
-    }
+    };
   },
   mounted () {
     this.mde = new SimpleMDE({
@@ -87,65 +87,65 @@ export default {
         toggleFullScreen: null,
         toggleSideBySide: null
       }
-    })
+    });
   },
   computed: {
   },
   methods: {
     setId () {
       if (this.title.length) {
-        this.id = this.title.toLowerCase().replace(/\s/g, '')
+        this.id = this.title.toLowerCase().replace(/\s/g, '');
       }
     },
     updateFile (event) {
-      let files = event.target.files
+      let files = event.target.files;
       if (files.length === 1) {
-        this.file = files[0]
+        this.file = files[0];
       } else {
-        this.file = null
+        this.file = null;
       }
     },
     stripTags (str) {
-      return str.replace(/<[^>]*>/g, '')
+      return str.replace(/<[^>]*>/g, '');
     },
     addDataset () {
-      let that = this
-      let description = this.stripTags(this.mde.value())
-      this.mde.value(description)
+      let that = this;
+      let description = this.stripTags(this.mde.value());
+      this.mde.value(description);
       this.$validator.validateAll().then(valid => {
         if (valid) {
-          let formData = new FormData()
-          formData.append('id', that.id)
-          formData.append('title', that.title)
-          formData.append('description', description)
-          formData.append('metaCols', that.metaCols)
-          formData.append('file', that.file)
-          that.progressData.active = true
+          let formData = new FormData();
+          formData.append('id', that.id);
+          formData.append('title', that.title);
+          formData.append('description', description);
+          formData.append('metaCols', that.metaCols);
+          formData.append('file', that.file);
+          that.progressData.active = true;
           that.$http.put('/api/datasets', formData, {
             progress (e) {
-              that.progressData.percent = (e.loaded / e.total) * 100
+              that.progressData.percent = (e.loaded / e.total) * 100;
             }
           }).then(response => {
-            that.progressData.active = false
-            that.progressData.percent = 0
+            that.progressData.active = false;
+            that.progressData.percent = 0;
             this.$store.commit('addAlert', {
               variant: 'success',
               message: 'Added dataset! You will recieve an email when processing is complete.',
               show: 3
-            })
+            });
             setTimeout(() => {
-              router.push('/admin/datasets')
-            }, 250)
+              router.push('/admin/datasets');
+            }, 250);
           }).catch(response => {
-            that.progressData.active = false
-            that.progressData.percent = 0
-            console.log(response)
-          })
+            that.progressData.active = false;
+            that.progressData.percent = 0;
+            console.log(response);
+          });
         }
-      })
+      });
     }
   }
-}
+};
 </script>
 
 <style lang="scss">
