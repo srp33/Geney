@@ -23,5 +23,5 @@ new Vue({
   store,
   validator,
   template: '<App/>',
-  components: { App }
+  components: { App },
 });

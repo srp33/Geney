@@ -11,5 +11,5 @@ module.exports = {
   EditDataset: require('./admin/datasets/EditDataset'),
   ManageUsers: require('./admin/users/ManageUsers'),
   AddUser: require('./admin/users/AddUser'),
-  EditUser: require('./admin/users/EditUser')
+  EditUser: require('./admin/users/EditUser'),
 };

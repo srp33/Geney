@@ -13,7 +13,7 @@ export default new Vuex.Store({
     datasetName: null,
     user: null,
     alerts: [],
-    users: []
+    users: [],
   },
   mutations: {
     metaData (state, value) {
@@ -36,7 +36,7 @@ export default new Vuex.Store({
     },
     users (state, users) {
       state.users = users;
-    }
+    },
   },
   actions: {
     getDatasets (context) {
@@ -88,11 +88,11 @@ export default new Vuex.Store({
         Vue.http.get(`/api/datasets/${context.state.dataset.id}/meta`).then(response => {
           for (var key in response.data.meta) {
             response.data.meta[key] = response.data.meta[key].map(x => ({
-              'name': x
+              'name': x,
             }));
           }
           response.data.genes = response.data.genes.map(x => ({
-            'name': x
+            'name': x,
           }));
           response.data.dataset = context.state.dataset.id;
           // window.localStorage.setItem(context.state.dataset + '_data', JSON.stringify(response.data))
@@ -161,9 +161,9 @@ export default new Vuex.Store({
         context.commit('addAlert', {
           variant: 'danger',
           message: messageText,
-          show: 3
+          show: 3,
         });
       });
-    }
-  }
+    },
+  },
 });

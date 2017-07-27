@@ -55,7 +55,7 @@ app.post('/api/datasets/:id/download', (req, res, next) => {
   let filename = query.options.filename + '.' + query.options.fileformat;
   res.header({
     'Content-Type': 'text/plain',
-    'Content-disposition': 'attachment; filename=' + filename
+    'Content-disposition': 'attachment; filename=' + filename,
   });
   res.send('YAY!');
   res.end();

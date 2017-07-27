@@ -2,7 +2,7 @@ import Vue from 'vue';
 import VeeValidate from 'vee-validate';
 
 const config = {
-  fieldsBagName: 'valFields'
+  fieldsBagName: 'valFields',
 };
 Vue.use(VeeValidate, config);
 
@@ -10,7 +10,7 @@ let Validator = VeeValidate.Validator;
 
 let validateCache = {
   id: {},
-  username: {}
+  username: {},
 };
 
 Validator.extend('idUsed', {
@@ -24,7 +24,7 @@ Validator.extend('idUsed', {
     if (validateCache.id[value] !== undefined) {
       return new Promise(resolve => {
         resolve({
-          valid: validateCache.id[value]
+          valid: validateCache.id[value],
         });
       });
     }
@@ -35,7 +35,7 @@ Validator.extend('idUsed', {
     }).catch(response => {
       return { valid: false };
     });
-  }
+  },
 });
 
 Validator.extend('usernameUsed', {
@@ -50,7 +50,7 @@ Validator.extend('usernameUsed', {
     if (validateCache.username[value] !== undefined) {
       return new Promise(resolve => {
         resolve({
-          valid: validateCache.username[value]
+          valid: validateCache.username[value],
         });
       });
     }
@@ -61,7 +61,7 @@ Validator.extend('usernameUsed', {
     }).catch(response => {
       return { valid: false };
     });
-  }
+  },
 });
 
 export default Validator;

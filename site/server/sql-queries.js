@@ -7,5 +7,5 @@ module.exports = {
   addUser: 'INSERT INTO `users` (username, firstname, lastname, email, passhash, privileges, failed_attempts) VALUES((?),(?),(?),(?),(?),(?),(?));',
   updateUser: 'UPDATE `users` SET firstname = (?), lastname = (?), email = (?), privileges = (?) WHERE username = (?);',
   updateUserWithPassword: 'UPDATE `users` SET firstname = (?), lastname = (?), email = (?), privileges = (?), passhash = (?) WHERE username = (?);',
-  deleteUser: 'DELETE FROM `users` WHERE username = (?);'
+  deleteUser: 'DELETE FROM `users` WHERE username = (?);',
 };

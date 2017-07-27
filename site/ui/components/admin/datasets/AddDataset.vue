@@ -62,7 +62,7 @@ import router from '../../../router';
 export default {
   name: 'add_datasets',
   components: {
-    ProgressBar
+    ProgressBar,
   },
   data () {
     return {
@@ -73,8 +73,8 @@ export default {
       metaCols: null,
       progressData: {
         active: false,
-        percent: 0
-      }
+        percent: 0,
+      },
     };
   },
   mounted () {
@@ -85,8 +85,8 @@ export default {
       hideIcons: ['fullscreen', 'side-by-side'],
       shortcuts: {
         toggleFullScreen: null,
-        toggleSideBySide: null
-      }
+        toggleSideBySide: null,
+      },
     });
   },
   computed: {
@@ -124,14 +124,14 @@ export default {
           that.$http.put('/api/datasets', formData, {
             progress (e) {
               that.progressData.percent = (e.loaded / e.total) * 100;
-            }
+            },
           }).then(response => {
             that.progressData.active = false;
             that.progressData.percent = 0;
             this.$store.commit('addAlert', {
               variant: 'success',
               message: 'Added dataset! You will recieve an email when processing is complete.',
-              show: 3
+              show: 3,
             });
             setTimeout(() => {
               router.push('/admin/datasets');
@@ -143,8 +143,8 @@ export default {
           });
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

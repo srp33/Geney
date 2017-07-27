@@ -60,18 +60,18 @@ export default {
           }
         });
       }
-    }
+    },
   },
   methods: {
     reject () {
       this.$store.commit('addAlert', {
         variant: 'danger',
         message: 'You have no permissions!',
-        show: 3
+        show: 3,
       });
       router.replace('/');
-    }
-  }
+    },
+  },
 };
 </script>
 

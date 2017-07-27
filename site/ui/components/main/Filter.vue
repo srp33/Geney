@@ -64,7 +64,7 @@ var selectize = require('../shared/Selectize');
 export default {
   name: 'filter',
   components: {
-    selectize
+    selectize,
   },
   data () {
     return {
@@ -73,11 +73,11 @@ export default {
       selectedMeta: {},
       settings: {
         metaTypes: {
-          maxItems: 1
+          maxItems: 1,
         },
         metaData: {},
-        genes: {}
-      }
+        genes: {},
+      },
     };
   },
   computed: {
@@ -104,7 +104,7 @@ export default {
     },
     metaData () {
       return this.$store.state.metaData;
-    }
+    },
 
   },
   methods: {
@@ -117,14 +117,14 @@ export default {
     commit () {
       this.$store.commit('filters', {meta: this.metaQuery, genes: this.selectedGenes});
       router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
-    }
+    },
   },
   created () {
     if (this.$store.state.filters) {
       this.selectedGenes = this.$store.state.filters.genes;
       this.selectedMeta = this.$store.state.filters.meta;
     }
-  }
+  },
 };
 </script>
 

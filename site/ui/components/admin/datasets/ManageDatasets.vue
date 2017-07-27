@@ -47,23 +47,23 @@ export default {
       labels: {
         name: {
           label: 'Name',
-          sortable: true
+          sortable: true,
         },
         id: {
           label: 'ID',
-          sortable: true
+          sortable: true,
         },
         uploadDate: {
           label: 'Upload Date',
-          sortable: true
+          sortable: true,
         },
         actions: {
-          label: 'Edit'
-        }
+          label: 'Edit',
+        },
       },
       currentPage: 1,
       perPage: 5,
-      filter: null
+      filter: null,
     };
   },
   mounted () {
@@ -72,10 +72,10 @@ export default {
   computed: {
     datasets () {
       return this.$store.state.datasets;
-    }
+    },
   },
   methods: {
-  }
+  },
 };
 </script>
 

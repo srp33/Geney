@@ -20,7 +20,7 @@ export default {
   data () {
     return {
       enterTransition: '',
-      leaveTransition: ''
+      leaveTransition: '',
     };
   },
   watch: {
@@ -62,13 +62,13 @@ export default {
         this.enterTransition = '';
         this.leaveTransition = '';
       }
-    }
+    },
   },
   created () {
     // get all datasets when page loads
     this.$store.dispatch('getDatasets');
     this.$store.dispatch('getUser');
-  }
+  },
 };
 </script>
 

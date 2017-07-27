@@ -36,7 +36,7 @@ import selectize from '../shared/Selectize';
 export default {
   name: 'download',
   components: {
-    selectize
+    selectize,
   },
   data () {
     return {
@@ -45,24 +45,24 @@ export default {
           {value: 'csv', name: 'Comma Separated Values ( .csv )'},
           {value: 'tsv', name: 'Tab Separated Values ( .tsv )'},
           {value: 'gct', name: 'Gene Cluster Text ( .gct )'},
-          {value: 'json', name: 'JavaScript Object Notation ( .json )'}
+          {value: 'json', name: 'JavaScript Object Notation ( .json )'},
         ],
         settings: {
           maxItems: 1,
-          valueField: 'value'
-        }
+          valueField: 'value',
+        },
       },
       options: {
         fileformat: 'csv',
-        filename: 'test'
+        filename: 'test',
       },
-      numSamples: null
+      numSamples: null,
     };
   },
   computed: {
     filters () {
       return this.$store.state.filters;
-    }
+    },
   },
   created () {
     let filters = this.$store.state.filters;
@@ -97,8 +97,8 @@ export default {
 
       document.body.appendChild(form);
       form.submit();
-    }
-  }
+    },
+  },
 };
 </script>
 

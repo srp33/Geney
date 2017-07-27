@@ -26,7 +26,7 @@ export default {
   computed: {
   },
   methods: {
-  }
+  },
 };
 </script>
 

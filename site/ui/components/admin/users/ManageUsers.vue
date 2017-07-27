@@ -51,26 +51,26 @@ export default {
       labels: {
         name: {
           label: 'Name',
-          sortable: true
+          sortable: true,
         },
         username: {
           label: 'Username',
-          sortable: true
+          sortable: true,
         },
         email: {
           label: 'Email',
-          sortable: true
+          sortable: true,
         },
         privileges: {
-          label: 'Privileges'
+          label: 'Privileges',
         },
         actions: {
-          label: 'Edit'
-        }
+          label: 'Edit',
+        },
       },
       currentPage: 1,
       perPage: 5,
-      filter: null
+      filter: null,
     };
   },
   created () {
@@ -81,7 +81,7 @@ export default {
   computed: {
     loggedInUsername () {
       return this.$store.state.user.username;
-    }
+    },
   },
   methods: {
   },
@@ -93,8 +93,8 @@ export default {
         return arr.join(', ');
       }
       return '';
-    }
-  }
+    },
+  },
 };
 </script>
 

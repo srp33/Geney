@@ -36,7 +36,7 @@ import router from '../../../router';
 export default {
   name: 'edit_datasets',
   components: {
-    ProgressBar
+    ProgressBar,
   },
   data () {
     return {
@@ -44,8 +44,8 @@ export default {
       title: '',
       progressData: {
         active: false,
-        percent: 0
-      }
+        percent: 0,
+      },
     };
   },
   mounted () {
@@ -60,14 +60,14 @@ export default {
       hideIcons: ['fullscreen', 'side-by-side'],
       shortcuts: {
         toggleFullScreen: null,
-        toggleSideBySide: null
+        toggleSideBySide: null,
       },
-      initialValue: this.$store.state.dataset.description || ''
+      initialValue: this.$store.state.dataset.description || '',
     });
   },
   computed: mapState({
     // arrow functions can make the code very succinct!
-    dataset: (state) => state.dataset
+    dataset: (state) => state.dataset,
   }),
   methods: {
     stripTags (str) {
@@ -80,21 +80,21 @@ export default {
         if (valid) {
           this.$http.patch(`/api/datasets/${this.dataset.id}`, {
             title: this.title,
-            description: description
+            description: description,
           }).then(
             (response) => {
               if (response.body === true) {
                 this.$store.commit('addAlert', {
                   variant: 'success',
                   message: 'Dataset ' + this.dataset.id + ' updated successfully.',
-                  show: 3
+                  show: 3,
                 });
                 router.push('/admin/datasets');
               } else {
                 this.$store.commit('addAlert', {
                   variant: 'warning',
                   message: 'Could not save dataset. Please refresh and try again.',
-                  show: 3
+                  show: 3,
                 });
               }
               this.$store.dispatch('getDatasets');
@@ -103,13 +103,13 @@ export default {
               this.$store.commit('addAlert', {
                 variant: 'danger',
                 message: 'Server error. Could not save dataset.',
-                show: 3
+                show: 3,
               });
               console.error(errResponse);
             });
         }
       });
-    }
+    },
   },
   watch: {
     // we set the watcher here because the datsset isn't always ready when the page loads
@@ -117,8 +117,8 @@ export default {
     '$store.state.dataset' () {
       this.$set(this, 'title', this.$store.state.dataset.name);
       this.mde.value(this.$store.state.dataset.description);
-    }
-  }
+    },
+  },
 };
 </script>
 

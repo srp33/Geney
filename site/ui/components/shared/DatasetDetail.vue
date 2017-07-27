@@ -31,14 +31,14 @@ export default {
   data () {
     return {
       truncated: true,
-      hidden: true
+      hidden: true,
     };
   },
   computed: {
     uploadDate () {
       let date = new Date(this.data.uploadDate);
       return date.toLocaleDateString();
-    }
+    },
   },
   mounted () {
     this.checkTruncated();
@@ -60,7 +60,7 @@ export default {
         textHeight += $(this).height();
       });
       this.$set(this, 'truncated', this.hidden && (cardText.height() < textHeight));
-    }
+    },
   },
   watch: {
     data () {
@@ -68,8 +68,8 @@ export default {
       this.$nextTick(() => {
         this.checkTruncated();
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

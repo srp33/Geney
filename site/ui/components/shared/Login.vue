@@ -49,7 +49,7 @@ export default {
       password: '',
       invalidLogin: false,
       loginMessage: '',
-      invalidCount: 0
+      invalidCount: 0,
     };
   },
   created () {
@@ -68,7 +68,7 @@ export default {
         if (valid) {
           that.$http.post('/auth/login', {
             username: that.username,
-            password: that.password
+            password: that.password,
           }).then(response => {
             if (response.data.jwt) {
               that.$store.dispatch('getUser').then(user => {
@@ -94,8 +94,8 @@ export default {
       this.username = '';
       this.password = '';
       this.invalidCount++;
-    }
-  }
+    },
+  },
 };
 </script>
 

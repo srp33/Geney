@@ -28,8 +28,8 @@ export default {
   computed: {
     dataset () {
       return this.$store.state.dataset;
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -12,10 +12,10 @@ module.exports = class User {
       'email',
       'privileges',
       'email_reset_id',
-      'failed_attempts'
+      'failed_attempts',
     ];
     for (let key of keys) {
-      if (userDefinition[key] === undefined && ignore.indexOf(key) == -1) {
+      if (userDefinition[key] === undefined && ignore.indexOf(key) === -1) {
         throw new Error('User object missing key: ' + key);
       } else {
         this[key] = userDefinition[key];
@@ -37,7 +37,7 @@ module.exports = class User {
       firstname: this.firstname,
       lastname: this.lastname,
       email: this.email,
-      privileges: this.privileges
+      privileges: this.privileges,
     };
   }
 

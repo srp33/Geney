@@ -9,32 +9,32 @@ export default new Router({
     {
       path: '/',
       name: 'Home',
-      component: Components.Home
+      component: Components.Home,
     },
     {
       path: '/login',
       name: 'Login',
-      component: Components.Login
+      component: Components.Login,
     },
     {
       path: '/404',
       name: 'DatasetNotFound',
-      component: Components.Error404
+      component: Components.Error404,
     },
     {
       path: '/dataset/:dataset/',
       name: 'Description',
-      component: Components.Description
+      component: Components.Description,
     },
     {
       path: '/dataset/:dataset/filter/',
       name: 'Filter',
-      component: Components.Filter
+      component: Components.Filter,
     },
     {
       path: '/dataset/:dataset/filter/download',
       name: 'Download',
-      component: Components.Download
+      component: Components.Download,
     },
     {
       path: '/admin',
@@ -44,40 +44,40 @@ export default new Router({
         {
           path: 'datasets',
           name: 'ManageDatasets',
-          component: Components.ManageDatasets
+          component: Components.ManageDatasets,
         },
         {
           path: 'datasets/add',
           name: 'AddDataset',
-          component: Components.AddDataset
+          component: Components.AddDataset,
         },
         {
           path: 'datasets/:dataset',
           name: 'EditDataset',
-          component: Components.EditDataset
+          component: Components.EditDataset,
         },
         {
           path: 'users',
           name: 'ManageUsers',
-          component: Components.ManageUsers
+          component: Components.ManageUsers,
         },
         {
           path: 'users/add',
           name: 'AddUser',
-          component: Components.AddUser
+          component: Components.AddUser,
         },
         {
           path: 'users/:user',
           name: 'EditUser',
-          component: Components.EditUser
-        }
-      ]
+          component: Components.EditUser,
+        },
+      ],
     },
     {
       path: '*',
       name: '404',
-      component: Components.Error404
-    }
+      component: Components.Error404,
+    },
 
-  ]
+  ],
 });

@@ -44,7 +44,7 @@ export default {
   data () {
     return {
       searchText: '',
-      sortField: 'uploadDate'
+      sortField: 'uploadDate',
     };
   },
   updated () {
@@ -57,7 +57,7 @@ export default {
       // return this.$store.state.datasets
       if (this.sifter.items && this.sifter.items.length) {
         let result = this.sifter.search(this.searchText, {
-          fields: ['name', 'description', 'id']
+          fields: ['name', 'description', 'id'],
         });
         let datasets = [];
         for (let item of result.items) {
@@ -68,7 +68,7 @@ export default {
         return datasets;
       }
       return [];
-    }
+    },
   },
   methods: {
     reloadMasonry () {
@@ -86,8 +86,8 @@ export default {
         var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
         return result * sortOrder;
       };
-    }
-  }
+    },
+  },
 };
 </script>
 

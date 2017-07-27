@@ -71,7 +71,7 @@ const selectize = require('../../shared/Selectize');
 export default {
   name: 'edit_user',
   components: {
-    selectize
+    selectize,
   },
   data () {
     return {
@@ -85,7 +85,7 @@ export default {
       privileges: null,
       selected: [],
       availablePrivileges: ['datasets', 'users'],
-      blurred: {}
+      blurred: {},
     };
   },
   created () {
@@ -114,7 +114,7 @@ export default {
       return this.availablePrivileges.map(permission => {
         return { name: permission };
       });
-    }
+    },
   },
   methods: {
     // marks the input as having been blurred
@@ -134,12 +134,12 @@ export default {
             firstname: this.firstname,
             lastname: this.lastname,
             email: this.email,
-            privileges: this.privileges
+            privileges: this.privileges,
           }).then(response => {
             this.$store.commit('addAlert', {
               variant: 'success',
               message: 'User updated successfully.',
-              show: 3
+              show: 3,
             });
             setTimeout(() => {
               router.push('/admin/users');
@@ -148,7 +148,7 @@ export default {
             this.$store.commit('addAlert', {
               variant: 'danger',
               message: 'Error saving user.',
-              show: 3
+              show: 3,
             });
             console.error(response);
           });
@@ -163,7 +163,7 @@ export default {
             this.$store.commit('addAlert', {
               variant: 'success',
               message: 'User deleted.',
-              show: 3
+              show: 3,
             });
             setTimeout(() => {
               router.push('/admin/users');
@@ -172,10 +172,10 @@ export default {
             console.log(response);
           });
       }
-    }
+    },
   },
   filters: {
-  }
+  },
 };
 </script>
 

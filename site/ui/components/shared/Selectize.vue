@@ -14,7 +14,7 @@ export default {
   props: ['options', 'value', 'placeholder', 'settings'],
   data () {
     return {
-      selectize: null
+      selectize: null,
     };
   },
   mounted () {
@@ -33,7 +33,7 @@ export default {
         component.$emit('updated', values);
         var div = $(component.$el).find('.selectize-input');
         div.scrollTop($(div)[0].scrollHeight);
-      }
+      },
     })[0].selectize;
     // force single input to show selected value on initialization
     if (settings.maxItems === 1) {
@@ -54,8 +54,8 @@ export default {
       this.selectize.refreshOptions();
       this.selectize.blur();
       this.selectize.close();
-    }
-  }
+    },
+  },
 };
 </script>
 
