@@ -4,7 +4,7 @@ const queries = require('./sql-queries');
 const bcrypt = require('bcryptjs');
 const token = require('jsonwebtoken');
 const tokenConfig = {algorithm: 'HS512', expiresIn: '30m'};
-const config = require('../config');
+const config = require('../../config');
 const User = require('./user');
 
 module.exports = class UserService {
@@ -52,6 +52,7 @@ module.exports = class UserService {
    */
   validatePassword (password, passhash, callback) {
     bcrypt.compare(password, passhash, (err, valid) => {
+      console.log('VALID', valid)
       if (err) {
         callback(false);
       } else {
@@ -70,6 +71,7 @@ module.exports = class UserService {
   authenticateUser (username, password, callback) {
     this.getUser(username, user => {
       if (!user) {
+        console.log('NO USER')
         callback(false, 401);
         return;
       }

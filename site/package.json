@@ -21,6 +21,7 @@
     "express-jwt-permissions": "^1.0.0",
     "jquery": "^1.12.4",
     "jsonwebtoken": "^7.3.0",
+    "morgan": "^1.8.2",
     "sqlite3": "^3.1.8"
   },
   "devDependencies": {
