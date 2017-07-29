@@ -138,22 +138,6 @@
 }
 .selectize-input {
   @extend .form-control;
-
-
-  // border: 1px solid #cccccc;
-  // display: inline-block;
-  // width: 100%;
-  // overflow: hidden;
-  // position: relative;
-  // z-index: 1;
-  // -webkit-box-sizing: border-box;
-  // -moz-box-sizing: border-box;
-  // box-sizing: border-box;
-  // -webkit-box-shadow: none;
-  // box-shadow: none;
-  // -webkit-border-radius: 4px;
-  // -moz-border-radius: 4px;
-  // border-radius: 4px;
 }
 .selectize-control.multi .selectize-input.has-items {
   padding: 7px $input-padding-x 4px $input-padding-x;
@@ -415,4 +399,17 @@
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
+}
+
+.input-group {
+  .selectize {
+    width: 100% !important;
+  }
+  .selectize-control {
+    width: 100% !important;
+    height: 38px !important;
+  }
+  .selectize-input {
+    width: 100% !important;
+  }
 }

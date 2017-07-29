@@ -13,11 +13,10 @@ let port = process.env.NODE_ENV === 'development'
   : config.prod.port;
 
 let app = express();
-app.use(morgan(':date[iso] | :method | :url | :remote-addr | :status | :response-time[5]'));
 
+app.use(morgan(':date[iso] | :method | :url | :remote-addr | :status | :response-time[5]'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
 app.use(routes);
 
 module.exports = app.listen(port, err => {

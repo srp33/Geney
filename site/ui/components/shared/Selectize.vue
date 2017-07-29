@@ -34,6 +34,7 @@ export default {
         var div = $(component.$el).find('.selectize-input');
         div.scrollTop($(div)[0].scrollHeight);
       },
+      render: settings.render || undefined,
     })[0].selectize;
     // force single input to show selected value on initialization
     if (settings.maxItems === 1) {
