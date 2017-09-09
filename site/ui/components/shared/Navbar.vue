@@ -81,11 +81,11 @@ export default {
   },
   computed: {
     breadcrumbs () {
-      var crumbs = [];
+      const crumbs = [];
       if (!this.admin) {
         crumbs.push({link: '/', text: 'Select Dataset', route: 'Home'});
         if (this.$store.state.dataset.id) {
-          var datasetPath = '/dataset/' + this.$store.state.dataset.id + '/';
+          let datasetPath = '/dataset/' + this.$store.state.dataset.id + '/';
           crumbs.push({link: datasetPath, text: this.$store.state.dataset.name, route: 'Description'});
           if (this.$route.path.indexOf('filter') >= 0) {
             crumbs.push({link: datasetPath + 'filter', text: 'Filter', route: 'Filter'});
@@ -107,14 +107,14 @@ export default {
       return this.$store.state.user && this.$store.state.user.username;
     },
     name () {
-      var user = this.$store.state.user;
+      const user = this.$store.state.user;
       if (user) {
         return user.firstname + ' ' + user.lastname;
       }
       return null;
     },
     admin () {
-      for (var match of this.$route.matched) {
+      for (let match of this.$route.matched) {
         if (match.name === 'Admin') {
           return true;
         }

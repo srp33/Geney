@@ -19,8 +19,8 @@ export default {
   components: {Navbar},
   data () {
     return {
-      enterTransition: '',
-      leaveTransition: '',
+      // enterTransition: '',
+      // leaveTransition: '',
     };
   },
   watch: {
@@ -30,37 +30,12 @@ export default {
       if (to.params.dataset !== from.params.dataset) {
         // remove any set filters
         this.$store.commit('filters', null);
-        if (this.$store.state.datasets) { // make sure it's not null
-          var dataset = {};
+        // make sure we have datasets
+        if (this.$store.state.datasets) {
           // find dataset and set it in the store
-          for (var x of this.$store.state.datasets) {
-            if (x.id === to.params.dataset) {
-              dataset = x;
-              break;
-            }
-          }
+          const dataset = this.$store.state.datasets[to.params.dataset] || {};
           this.$store.dispatch('setDataset', dataset);
         }
-      }
-
-      if (to.name === '404' || from.name === '404' || to.name === 'DatasetNotFound' || from.name === 'DatasetNotFound') {
-        this.enterTransition = '';
-        this.leaveTransition = '';
-        return;
-      }
-
-      // n => n is truthy when n.length > 0, so this filters out empty strings
-      const toDepth = to.path.split('/').filter(n => n).length;
-      const fromDepth = from.path.split('/').filter(n => n).length;
-      if (toDepth < fromDepth) {
-        this.enterTransition = 'animated slideInLeft';
-        this.leaveTransition = 'animated slideOutRight';
-      } else if (toDepth > fromDepth) {
-        this.enterTransition = 'animated slideInRight';
-        this.leaveTransition = 'animated slideOutLeft';
-      } else {
-        this.enterTransition = '';
-        this.leaveTransition = '';
       }
     },
   },
@@ -103,71 +78,70 @@ h1, h2, h3 {
     }
   }
 
-
-/* Transitions from Animate.css */
-.animated {
-  animation-duration: 0.8s;
-  animation-fill-mode: both;
-}
-
-$from: 300%;
-$to: -50%;
-
-@keyframes slideInRight {
-  from {
-    transform: translate3d($from, 0, 0);
-    visibility: visible;
+  /* Transitions from Animate.css */
+  .animated {
+    animation-duration: 0.8s;
+    animation-fill-mode: both;
   }
 
-  to {
-    transform: translate3d($to, 0, 0);
+  $from: 300%;
+  $to: -50%;
+
+  @keyframes slideInRight {
+    from {
+      transform: translate3d($from, 0, 0);
+      visibility: visible;
+    }
+
+    to {
+      transform: translate3d($to, 0, 0);
+    }
   }
-}
-.slideInRight {
-  animation-name: slideInRight;
-}
-@keyframes slideInLeft {
-  from {
-    transform: translate3d(-$from, 0, 0);
-    visibility: visible;
+  .slideInRight {
+    animation-name: slideInRight;
+  }
+  @keyframes slideInLeft {
+    from {
+      transform: translate3d(-$from, 0, 0);
+      visibility: visible;
+    }
+
+    to {
+      transform: translate3d($to, 0, 0);
+    }
   }
 
-  to {
-    transform: translate3d($to, 0, 0);
+  .slideInLeft {
+    animation-name: slideInLeft;
   }
-}
+  @keyframes slideOutLeft {
+    from {
+      transform: translate3d($to, 0, 0);
+    }
 
-.slideInLeft {
-  animation-name: slideInLeft;
-}
-@keyframes slideOutLeft {
-  from {
-    transform: translate3d($to, 0, 0);
-  }
-
-  to {
-    visibility: hidden;
-    transform: translate3d(-$from, 0, 0);
-  }
-}
-
-.slideOutLeft {
-  animation-name: slideOutLeft;
-}
-@keyframes slideOutRight {
-  from {
-    transform: translate3d($to, 0, 0);
+    to {
+      visibility: hidden;
+      transform: translate3d(-$from, 0, 0);
+    }
   }
 
-  to {
-    visibility: hidden;
-    transform: translate3d($from, 0, 0);
+  .slideOutLeft {
+    animation-name: slideOutLeft;
   }
-}
+  @keyframes slideOutRight {
+    from {
+      transform: translate3d($to, 0, 0);
+    }
 
-.slideOutRight {
-  animation-name: slideOutRight;
-}
+    to {
+      visibility: hidden;
+      transform: translate3d($from, 0, 0);
+    }
+  }
+
+  .slideOutRight {
+    animation-name: slideOutRight;
+  }
 
 }
 </style>

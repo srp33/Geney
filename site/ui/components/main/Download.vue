@@ -4,8 +4,8 @@
     <div class="col-12">
       <h1>Download</h1>
       <div v-if="numSamples != null">
-        <h3 v-if="numSamples >= 0">You have selected {{ numSamples }} samples.</h3>
-        <h3 v-else>Unable to retreive number of samples.</h3>
+        <h3 v-if="numSamples >= 0" id="num-samples-selected">You have selected {{ numSamples }} samples.</h3>
+        <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
       </div>
     </div>
 
@@ -23,7 +23,7 @@
       </div>
 
 
-      <button class="btn btn-primary btn-lg" @click="download">Download</button>
+      <button class="btn btn-primary btn-lg" @click="download" id="download-btn">Download</button>
     </div>
 
   </div>
@@ -65,11 +65,12 @@ export default {
     },
   },
   created () {
-    let filters = this.$store.state.filters;
+    const filters = this.$store.state.filters;
     if (!filters || !filters.meta) {
-      var newPath = this.$route.fullPath.replace(/\/download.*/, '');
+      const newPath = this.$route.fullPath.replace(/\/download.*/, '');
       router.replace(newPath);
     } else {
+      console.log(`/api/datasets/${this.$route.params.dataset}/samples`);
       this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, filters.meta).then(response => {
         this.$set(this, 'numSamples', response.body);
       }, response => {
@@ -79,16 +80,16 @@ export default {
   },
   methods: {
     download () {
-      let payload = {};
+      const payload = {};
       Object.assign(payload, this.filters); // copy values from filters
       payload.options = this.options;
 
-      let form = document.createElement('form');
+      const form = document.createElement('form');
       form.setAttribute('method', 'post');
       form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download`);
       form.setAttribute('target', '_blank');
 
-      var hiddenField = document.createElement('input');
+      const hiddenField = document.createElement('input');
       hiddenField.setAttribute('type', 'hidden');
       hiddenField.setAttribute('name', 'query');
       hiddenField.setAttribute('value', JSON.stringify(payload));

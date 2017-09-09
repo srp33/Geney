@@ -8,7 +8,8 @@
         :value="currentMetaType"
         placeholder="Select meta type to filter"
         @updated="x => currentMetaType = x"
-        :settings="settings.metaTypes"></selectize>
+        :settings="settings.metaTypes"
+        id="meta-types"></selectize>
 
       <div class="spacer"></div>
       <selectize v-if="currentMetaType"
@@ -16,7 +17,8 @@
         :value="selectedMeta[currentMetaType]"
         @updated="updateMeta"
         placeholder="Filter Meta"
-        :settings="settings.metaData"></selectize>
+        :settings="settings.metaData"
+        id="current-meta-type"></selectize>
 
       <h1>Select Genes</h1>
       <selectize
@@ -24,11 +26,12 @@
         :value="selectedGenes"
         @updated="updateGenes"
         placeholder="All Genes"
-        :settings="settings.genes"></selectize>
+        :settings="settings.genes"
+        id="genes"></selectize>
 
     </div>
     <div class="col-sm-8">
-      <div v-if="numKeys">
+      <div v-if="numKeys > 0">
         <h2>Let me get this right...</h2>
         <h3>You're looking for <strong>ROWS</strong> that have:</h3>
         <h4 v-for="(values,type,num) in metaQuery" :key="num">
@@ -59,7 +62,7 @@
 
 <script>
 import router from '../../router';
-var selectize = require('../shared/Selectize');
+const selectize = require('../shared/Selectize');
 
 export default {
   name: 'filter',
@@ -82,10 +85,10 @@ export default {
   },
   computed: {
     metaQuery () {
-      // basically just removes any undefined elements from the
-      // selectedMeta object
-      var q = JSON.parse(JSON.stringify(this.selectedMeta));
-      for (var key in q) {
+      // basically just removes any null elements from the selectedMeta object
+      // they become null when you remove all filters from a meta type
+      const q = JSON.parse(JSON.stringify(this.selectedMeta));
+      for (let key in q) {
         if (!q[key]) {
           delete q[key];
         }
@@ -96,7 +99,7 @@ export default {
       return Object.keys(this.metaQuery).length;
     },
     metaTypes () {
-      if (this.metaData.meta) {
+      if (this.metaData && this.metaData.meta) {
         return Object.keys(this.metaData.meta).map(x => ({'name': x}));
       } else {
         return false;
@@ -105,7 +108,6 @@ export default {
     metaData () {
       return this.$store.state.metaData;
     },
-
   },
   methods: {
     updateGenes (payload) {

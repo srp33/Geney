@@ -18,7 +18,7 @@ export default {
     };
   },
   mounted () {
-    var component = this;
+    const component = this;
     let settings = this.settings || {};
     this.selectize = $(this.$el).find('select').selectize({
       maxItems: settings.maxItems || null,
@@ -31,7 +31,7 @@ export default {
       maxOptions: settings.maxOptions || 500,
       onChange (values) {
         component.$emit('updated', values);
-        var div = $(component.$el).find('.selectize-input');
+        const div = $(component.$el).find('.selectize-input');
         div.scrollTop($(div)[0].scrollHeight);
       },
       render: settings.render || undefined,
@@ -47,7 +47,7 @@ export default {
       this.selectize.clearOptions();
       this.selectize.addOption(this.options);
       if (this.value) {
-        for (var val of this.value) {
+        for (let val of this.value) {
           this.selectize.addItem(val, true);
         }
       }
