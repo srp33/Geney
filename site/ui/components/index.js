@@ -3,6 +3,7 @@ module.exports = {
   Description: require('./main/Description'),
   Filter: require('./main/Filter'),
   Download: require('./main/Download'),
+  Plot: require('./main/Plot'),
   Error404: require('./shared/Error404'),
   Login: require('./shared/Login'),
   Admin: require('./admin/Admin'),

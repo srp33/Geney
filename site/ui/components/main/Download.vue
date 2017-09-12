@@ -78,6 +78,8 @@ export default {
       });
     }
   },
+  mounted () {
+  },
   methods: {
     download () {
       const payload = {};

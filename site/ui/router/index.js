@@ -37,6 +37,11 @@ export default new Router({
       component: Components.Download,
     },
     {
+      path: '/dataset/:dataset/filter/plot',
+      name: 'Plot',
+      component: Components.Plot,
+    },
+    {
       path: '/admin',
       name: 'Admin',
       component: Components.Admin,

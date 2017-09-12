@@ -36,6 +36,11 @@ module.exports = {
   },
   module: {
     rules: [
+      { // https://github.com/plotly/plotly.js/
+        test: /^plotly\.js\/lib\/[^\/]+$/,
+        loader: 'ify-loader',
+        enforce: 'post'
+      },
       {
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',
