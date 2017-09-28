@@ -14,10 +14,10 @@ module.exports = {
     app: './ui/main.js'
   },
   output: {
-    path: config.build.assetsRoot,
+    path: config.prod.assetsRoot,
     filename: '[name].js',
     publicPath: process.env.NODE_ENV === 'production'
-      ? config.build.assetsPublicPath
+      ? config.prod.assetsPublicPath
       : config.dev.assetsPublicPath
   },
   resolve: {

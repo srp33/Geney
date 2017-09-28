@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const config = require('../config');
 const routes = require('./routes');
+const path = require('path');
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = JSON.parse(config.dev.env.NODE_ENV);
@@ -18,6 +19,12 @@ app.use(morgan(':date[iso] | :method | :url | :remote-addr | :status | :response
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(routes);
+
+app.use('/', express.static('dist/'));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve('dist') + '/index.html');
+});
 
 module.exports = app.listen(port, err => {
   if (err) {

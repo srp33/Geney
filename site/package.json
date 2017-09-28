@@ -7,7 +7,7 @@
   "scripts": {
     "dev:ui": "node build/dev-server.js",
     "dev:server": "$(npm bin nodemon)/nodemon --watch server/ server/server.js",
-    "build": "build/build.js",
+    "build": "node build/build.js",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "test:ui:watch": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --auto-watch",
     "test": "npm run unit",

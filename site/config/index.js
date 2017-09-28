@@ -2,7 +2,7 @@
 var path = require('path')
 
 module.exports = {
-  build: {
+  prod: {
     env: require('./prod.env'),
     port: 8888,
     index: path.resolve(__dirname, '../dist/index.html'),
