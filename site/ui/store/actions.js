@@ -50,15 +50,20 @@ export default {
       }
       Vue.http.get(`/api/datasets/${context.state.dataset.id}/meta`).then(response => {
         for (let key in response.data.meta) {
-          response.data.meta[key] = response.data.meta[key].map(x => ({
+          const metaType = response.data.meta[key];
+          if (Array.isArray(metaType.options)) {
+            metaType.options = metaType.options.map(x => ({
+              'name': x,
+            }));
+          }
+        }
+        if (Array.isArray(response.data.genes.options)) {
+          response.data.genes.options = response.data.genes.options.map(x => ({
             'name': x,
           }));
         }
-        response.data.genes = response.data.genes.map(x => ({
-          'name': x,
-        }));
         response.data.dataset = context.state.dataset.id;
-        window.localStorage.setItem(context.state.dataset.id + '_data', JSON.stringify(response.data));
+        // window.localStorage.setItem(context.state.dataset.id + '_data', JSON.stringify(response.data));
         context.commit('metaData', response.data);
       }, response => {
         console.log('FAILED', response);

@@ -9,7 +9,6 @@ export default {
     state.datasets = value;
   },
   dataset (state, value) {
-    console.log('dataset', value);
     state.dataset = value;
   },
   user (state, value) {

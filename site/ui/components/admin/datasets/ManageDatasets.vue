@@ -71,7 +71,13 @@ export default {
   },
   computed: {
     datasets () {
-      return this.$store.state.datasets;
+      const datasets = [];
+      for (let id in this.$store.state.datasets) {
+        const dataset = Object.assign({}, this.$store.state.datasets[id]);
+        dataset.id = id;
+        datasets.push(dataset);
+      }
+      return datasets;
     },
   },
   methods: {

@@ -2,7 +2,8 @@ const router = require('express').Router();
 
 const datasets = require('../../ui/api/datasets.json');
 const lincslevel2 = require('../../ui/api/lincslevel2.json');
-
+const lincslevel2Genes = require('../../ui/api/lincslevel2_genes.json');
+const lincslevel2CompoundId = require('../../ui/api/lincslevel2_compoundid.json');
 
 router.get('/api/datasets', (req, res, next) => {
   res.json(datasets);
@@ -38,6 +39,14 @@ router.post('/api/datasets/:id/download', (req, res, next) => {
 
 router.patch('/api/datasets/:id', (req, res, next) => {
   res.json(true);
+});
+
+router.get('/api/datasets/lincslevel2/meta/genes/search/:str', (req, res) => {
+  res.json(lincslevel2Genes.filter(gene => gene.indexOf(req.params.str) >= 0));
+});
+
+router.get('/api/datasets/lincslevel2/meta/SM_Center_Compound_ID/search/:str', (req, res) => {
+  res.json(lincslevel2CompoundId.filter(ops => ops.indexOf(req.params.str) >= 0));
 });
 
 module.exports = router;
