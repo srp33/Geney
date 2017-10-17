@@ -12,11 +12,6 @@ export default new Router({
       component: Components.Home,
     },
     {
-      path: '/login',
-      name: 'Login',
-      component: Components.Login,
-    },
-    {
       path: '/404',
       name: 'DatasetNotFound',
       component: Components.Error404,
@@ -36,43 +31,48 @@ export default new Router({
       name: 'Download',
       component: Components.Download,
     },
-    {
-      path: '/admin',
-      name: 'Admin',
-      component: Components.Admin,
-      children: [
-        {
-          path: 'datasets',
-          name: 'ManageDatasets',
-          component: Components.ManageDatasets,
-        },
-        {
-          path: 'datasets/add',
-          name: 'AddDataset',
-          component: Components.AddDataset,
-        },
-        {
-          path: 'datasets/:dataset',
-          name: 'EditDataset',
-          component: Components.EditDataset,
-        },
-        {
-          path: 'users',
-          name: 'ManageUsers',
-          component: Components.ManageUsers,
-        },
-        {
-          path: 'users/add',
-          name: 'AddUser',
-          component: Components.AddUser,
-        },
-        {
-          path: 'users/:user',
-          name: 'EditUser',
-          component: Components.EditUser,
-        },
-      ],
-    },
+    // {
+    //   path: '/login',
+    //   name: 'Login',
+    //   component: Components.Login,
+    // },
+    // {
+    //   path: '/admin',
+    //   name: 'Admin',
+    //   component: Components.Admin,
+    //   children: [
+    //     {
+    //       path: 'datasets',
+    //       name: 'ManageDatasets',
+    //       component: Components.ManageDatasets,
+    //     },
+    //     {
+    //       path: 'datasets/add',
+    //       name: 'AddDataset',
+    //       component: Components.AddDataset,
+    //     },
+    //     {
+    //       path: 'datasets/:dataset',
+    //       name: 'EditDataset',
+    //       component: Components.EditDataset,
+    //     },
+    //     {
+    //       path: 'users',
+    //       name: 'ManageUsers',
+    //       component: Components.ManageUsers,
+    //     },
+    //     {
+    //       path: 'users/add',
+    //       name: 'AddUser',
+    //       component: Components.AddUser,
+    //     },
+    //     {
+    //       path: 'users/:user',
+    //       name: 'EditUser',
+    //       component: Components.EditUser,
+    //     },
+    //   ],
+    // },
     {
       path: '*',
       name: '404',

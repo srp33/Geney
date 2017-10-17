@@ -81,7 +81,7 @@
       <div v-if="numKeys > 0">
         <h2>Let me get this right...</h2>
         <h3>You're looking for <strong>ROWS</strong> that have:</h3>
-        <h4 v-for="(values,metaType,num) in metaQuery" :key="metaType">
+        <h4 v-for="(values,metaType,num) in metaQuery.meta" :key="metaType">
 
           <span v-if="optionsType(metaType) === 'array'">
             <span v-for="(value, index) in values" v-if="index < 3" :key="index">
@@ -251,7 +251,7 @@ export default {
           }
         }
       }
-      this.$set(this, 'metaQuery', query);
+      this.$set(this, 'metaQuery', {meta: query});
       // return q;
     },
     commit () {

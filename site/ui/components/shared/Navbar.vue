@@ -16,8 +16,8 @@
         <span>Geney</span>
       </b-navbar-brand>
 
-
-        <b-nav is-nav-bar class="ml-auto" right-alignment>
+        <!-- Commenting out the login section for now...  -->
+        <!-- <b-nav is-nav-bar class="ml-auto" right-alignment>
           <div class="above-breadcrumbs">
             <b-nav-item-dropdown v-if="authenticated" right-alignment right :text="name">
               <b-dropdown-item to="/admin">Admin</b-dropdown-item>
@@ -26,7 +26,7 @@
 
             <b-nav-item v-else to="/login">Login</b-nav-item>
           </div>
-        </b-nav>
+        </b-nav> -->
 
 
 
@@ -210,14 +210,15 @@ div.nav-item.center-nav {
     background-color: transparent;
     li.breadcrumb-item {
       &::before {
-        color: yellow;
+        color: white;
       }
       a {
         color: white;
         text-decoration: none;
       }
       &.active {
-        color: red;
+        color: white;
+        font-weight: bold;
 
       }
     }

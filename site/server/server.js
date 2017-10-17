@@ -1,17 +1,20 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const config = require('../config');
-const routes = require('./routes');
 const path = require('path');
 
 if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = JSON.parse(config.dev.env.NODE_ENV);
+  process.env.NODE_ENV = 'development';
 }
 
-let port = process.env.NODE_ENV === 'development'
-  ? config.dev.backendPort
-  : config.prod.port;
+let config;
+if (process.env.NODE_ENV === 'development') {
+  config = require('../config').dev;
+} else {
+  config = require('./server-config.json');
+}
+
+const routes = require('./routes')(config);
 
 let app = express();
 
@@ -26,10 +29,10 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve('dist') + '/index.html');
 });
 
-module.exports = app.listen(port, err => {
+module.exports = app.listen(config.port, err => {
   if (err) {
     console.log(err);
     return;
   }
-  console.log('Listening on port ' + port);
+  console.log('Listening on port ' + config.port);
 });
