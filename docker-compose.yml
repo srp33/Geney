@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  ui-server:
+    image: pjtatlow/geney-ui:0.0.1
+    ports:
+      - "10000:10000"
+    environment:
+      - NODE_ENV=prod
+  backend-server:
+    image: pjtatlow/geney-server:0.0.1
+    ports:
+      - "9998:9998"
+    volumes:
+      - "./data:/root/data"

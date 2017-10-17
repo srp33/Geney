@@ -1,8 +1,8 @@
 <template>
   <div>
-    <b-navbar toggleable type="inverse" variant="success">
+    <b-navbar toggleable="md" type="inverse" variant="success">
 
-      <div class="nav-item center-nav">
+    <div class="nav-item center-nav">
         <!-- <b-breadcrumb :items="breadcrumbs"/> -->
         <ol class="breadcrumb">
           <li class="breadcrumb-item" :class="{'active': breadcrumb.active}" v-for="(breadcrumb, index) in breadcrumbs" :key="index">
@@ -12,11 +12,10 @@
         </ol>
       </div>
 
-      <b-link class="navbar-brand above-breadcrumbs" to="/">
+      <b-navbar-brand class="above-breadcrumbs" to="/">
         <span>Geney</span>
-      </b-link>
+      </b-navbar-brand>
 
-      <b-collapse is-nav id="nav_collapse">
 
         <b-nav is-nav-bar class="ml-auto" right-alignment>
           <div class="above-breadcrumbs">
@@ -29,7 +28,6 @@
           </div>
         </b-nav>
 
-      </b-collapse>
 
 
     </b-navbar>
@@ -37,21 +35,11 @@
 
     <b-navbar v-if="admin" toggleable class="no-z-index" style="background-color: #dedede;">
 
-      <b-nav-toggle target="nav_collapse2"></b-nav-toggle>
-
-      <b-collapse is-nav id="nav_collapse2">
-
-
         <b-nav is-nav-bar class="mx-auto">
 
           <b-nav-item v-for="privilege in privileges" :key="privilege" class="privilege" :to="'/admin/' + privilege">{{privilege | capitalize}}</b-nav-item>
 
         </b-nav>
-
-
-
-      </b-collapse>
-
 
     </b-navbar>
 
@@ -81,11 +69,11 @@ export default {
   },
   computed: {
     breadcrumbs () {
-      var crumbs = [];
+      const crumbs = [];
       if (!this.admin) {
         crumbs.push({link: '/', text: 'Select Dataset', route: 'Home'});
         if (this.$store.state.dataset.id) {
-          var datasetPath = '/dataset/' + this.$store.state.dataset.id + '/';
+          let datasetPath = '/dataset/' + this.$store.state.dataset.id + '/';
           crumbs.push({link: datasetPath, text: this.$store.state.dataset.name, route: 'Description'});
           if (this.$route.path.indexOf('filter') >= 0) {
             crumbs.push({link: datasetPath + 'filter', text: 'Filter', route: 'Filter'});
@@ -107,14 +95,14 @@ export default {
       return this.$store.state.user && this.$store.state.user.username;
     },
     name () {
-      var user = this.$store.state.user;
+      const user = this.$store.state.user;
       if (user) {
         return user.firstname + ' ' + user.lastname;
       }
       return null;
     },
     admin () {
-      for (var match of this.$route.matched) {
+      for (let match of this.$route.matched) {
         if (match.name === 'Admin') {
           return true;
         }
@@ -167,11 +155,17 @@ export default {
 .above-breadcrumbs {
   z-index:80;
 }
+.nav, .navbar {
+  // display: flex;
+  flex-direction: row;
+}
 .navbar-brand {
-    img {
-        height: 50px;
-        margin-top: -15px;
-    }
+  text-align: left;
+  display: inline;
+  img {
+      height: 50px;
+      margin-top: -15px;
+  }
 }
 .navbar-right {
   z-index: 1020;
@@ -199,6 +193,7 @@ export default {
 .privilege {
   margin-left: 10px;
   margin-right: 10px;
+  display: inline;
 }
 div.nav-item.center-nav {
   position: absolute;

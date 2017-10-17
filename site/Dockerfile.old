@@ -1,0 +1,13 @@
+# Use this dockerfile again when we need the node server
+FROM node:8.6.0-alpine
+
+COPY server /root/server
+COPY dist /root/server/dist
+COPY package.json /root/server
+COPY package-lock.json /root/server
+
+WORKDIR /root/server
+
+RUN npm install --only=production
+
+ENTRYPOINT [ "node", "server.js" ]

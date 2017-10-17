@@ -2,6 +2,10 @@
 node_modules/
 dist/
 **/*.log
-test/unit/coverage
+site/test/unit/coverage
 **/.vscode/
 **npm-debug.log**
+__pycache__
+**/file.csv
+**.pyc
+flask/

@@ -98,10 +98,10 @@ export default {
   },
   computed: {
     sifter () {
-      return new Sifter(this.$store.state.datasets);
+      const datasets = this.$store.state.datasets || {};
+      return new Sifter(Object.values(datasets));
     },
     datasets () {
-      // return this.$store.state.datasets
       if (this.sifter.items && this.sifter.items.length) {
         let result = this.sifter.search(this.searchText, {
           fields: ['name', 'description', 'id'],
@@ -112,7 +112,7 @@ export default {
         }
         datasets.sort(
           this.dynamicSort(
-            this.sort.descending ? this.sort.selected : '-' + this.sort.selected
+            this.sort.descending ? '-' + this.sort.selected : this.sort.selected
           )
         );
         this.reloadMasonry();
@@ -128,13 +128,13 @@ export default {
       }, 50);
     },
     dynamicSort (property) {
-      var sortOrder = 1;
+      let sortOrder = 1;
       if (property[0] === '-') {
         sortOrder = -1;
         property = property.substr(1);
       }
       return (a, b) => {
-        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
         return result * sortOrder;
       };
     },

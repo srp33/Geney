@@ -1,8 +1,9 @@
-var path = require('path')
-var utils = require('./utils')
-var config = require('../config')
-var vueLoaderConfig = require('./vue-loader.conf')
-var webpack = require('webpack')
+const path = require('path')
+const utils = require('./utils')
+const config = require('../config')
+const vueLoaderConfig = require('./vue-loader.conf')
+const webpack = require('webpack')
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -13,10 +14,10 @@ module.exports = {
     app: './ui/main.js'
   },
   output: {
-    path: config.build.assetsRoot,
+    path: config.prod.assetsRoot,
     filename: '[name].js',
     publicPath: process.env.NODE_ENV === 'production'
-      ? config.build.assetsPublicPath
+      ? config.prod.assetsPublicPath
       : config.dev.assetsPublicPath
   },
   resolve: {
@@ -28,12 +29,18 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.common.js',
       'ui': resolve('ui'),
+      'test': resolve('test'),
       'assets': resolve('ui/assets'),
       'components': resolve('ui/components')
     }
   },
   module: {
     rules: [
+      { // https://github.com/plotly/plotly.js/
+        test: /^plotly\.js\/lib\/[^\/]+$/,
+        loader: 'ify-loader',
+        enforce: 'post'
+      },
       {
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',
@@ -68,14 +75,15 @@ module.exports = {
           limit: 10000,
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
-      } 
+      }
     ]
   },
   plugins: [
-        new webpack.ProvidePlugin({   
-        jQuery: 'jquery',
-        $: 'jquery',
-        jquery: 'jquery'
-    })
+    new webpack.ProvidePlugin({
+      jQuery: 'jquery',
+      $: 'jquery',
+      jquery: 'jquery'
+    }),
+    new ProgressBarPlugin(),
   ]
 }

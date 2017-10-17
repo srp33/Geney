@@ -15,12 +15,13 @@ export default {
   data () {
     return {
       selectize: null,
+      dirty: false,
     };
   },
   mounted () {
-    var component = this;
+    this.update = this.update.bind(this);
     let settings = this.settings || {};
-    this.selectize = $(this.$el).find('select').selectize({
+    const selectizeOps = {
       maxItems: settings.maxItems || null,
       valueField: settings.valueField || 'name',
       labelField: settings.labelField || 'name',
@@ -29,17 +30,40 @@ export default {
       create: false,
       items: this.value,
       maxOptions: settings.maxOptions || 500,
-      onChange (values) {
-        component.$emit('updated', values);
-        var div = $(component.$el).find('.selectize-input');
-        div.scrollTop($(div)[0].scrollHeight);
-      },
+      onChange: this.update,
       render: settings.render || undefined,
-    })[0].selectize;
+      load: settings.load || undefined,
+    };
+
+    this.selectize = $(this.$el).find('select').selectize(selectizeOps)[0].selectize;
+
+    // mark the selectize as dirty
+    $(this.$el).find('.selectize-input').one('focusout', (e) => {
+      $(e.currentTarget).addClass('dirty');
+    });
+
     // force single input to show selected value on initialization
     if (settings.maxItems === 1) {
       this.selectize.addItem(this.value, true);
     }
+
+    this.update(this.value);
+  },
+  methods: {
+    update (values) {
+      this.$emit('updated', values);
+      const div = $(this.$el).find('.selectize-input');
+      div.scrollTop($(div)[0].scrollHeight);
+      if (this.settings.required) {
+        if (this.settings.maxItems === 1) {
+          if (!values) {
+            div.parent().addClass('has-error');
+          } else {
+            div.parent().removeClass('has-error');
+          }
+        }
+      }
+    },
   },
   watch: {
     'options' (to, from) {
@@ -47,7 +71,7 @@ export default {
       this.selectize.clearOptions();
       this.selectize.addOption(this.options);
       if (this.value) {
-        for (var val of this.value) {
+        for (let val of this.value) {
           this.selectize.addItem(val, true);
         }
       }

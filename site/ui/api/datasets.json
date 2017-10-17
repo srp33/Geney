@@ -1,6 +1,5 @@
-[
-  {
-    "id": "lincslevel2",
+{
+  "lincslevel2": {
     "name": "LINCS Level 2",
     "description": "This is **LINCS Level 2** data.\n\n\nIt was ~~released~~ on December 31st, 2015",
     "numMetaTypes": 12,
@@ -8,8 +7,7 @@
     "numSamples": 112634,
     "uploadDate": 1464695717279
   },
-  {
-    "id": "lincslevel2",
+  "lincslevel3": {
     "name": "LINCS Level 3",
     "description": "This is **LINCS Level 2** data. It was ~~released~~ on December 31st, 2015. `This is a test of code`his is **LINCS Level 2** data. It was ~~released~~ on December 31st, 2015. `This is a test of code`his is **LINCS Level 2** data. It was ~~released~~ on December 31st, 2015. `This is a test of code`his is **LINCS Level 2** data. It was ~~released~~ on December 31st, 2015. `This is a test of code`his is **LINCS Level 2** data. It was ~~released~~ on December 31st, 2015. `This is a test of code`his is **LINCS Level 2** data. It was ~~released~~ on December 31st, 2015. `This is a test of code`his is **LINCS Level 2** data. It was ~~released~~ on December 31st, 2015. `This is a test of code`his is **LINCS Level 2** data. It was ~~released~~ on December 31st, 2015. `This is a test of code`",
     "numMetaTypes": 12,
@@ -17,8 +15,7 @@
     "numSamples": 112634,
     "uploadDate": 494695717279
   },
-  {
-    "id": "lincslevel2",
+  "lincslevel4": {
     "name": "LINCS Level 4",
     "description": "This is **LINCS Level 2** data.\nIt was ~~released~~ on December 31st, 2015",
     "numMetaTypes": 12,
@@ -26,8 +23,7 @@
     "numSamples": 112634,
     "uploadDate": 1494195717279
   },
-  {
-    "id": "lincslevel2",
+  "lincslevel5": {
     "name": "LINCS Level 5",
     "description": "This is **LINCS Level 2** data.\nIt was ~~released~~ on December 31st, 2015",
     "numMetaTypes": 12,
@@ -35,13 +31,12 @@
     "numSamples": 112634,
     "uploadDate": 1494695717279
   },
-  {
-    "id": "lincslevel2",
+  "lincslevel234": {
     "name": "LINCS Level 234",
     "description": "This is **LINCS Level 2** data.\nIt was ~~released~~ on December 31st, 2015",
     "numMetaTypes": 12,
     "numGenes": 978,
     "numSamples": 112634,
     "uploadDate": 1494695717279
-  }  
-]
+  }
+}

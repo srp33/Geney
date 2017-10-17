@@ -1,8 +1,8 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
-var path = require('path')
+var path = require('path');
 
 module.exports = {
-  build: {
+  prod: {
     env: require('./prod.env'),
     port: 8888,
     index: path.resolve(__dirname, '../dist/index.html'),
@@ -21,26 +21,26 @@ module.exports = {
     // `npm run build --report`
     // Set to `true` or `false` to always turn it on or off
     bundleAnalyzerReport: process.env.npm_config_report,
-    secret: 'very-secret'
+    secret: 'very-secret',
   },
   dev: {
     env: require('./dev.env'),
     frontendPort: 8080,
-    backendPort: 8081,
+    port: 8081,
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
       api: {
-        filter: '/api',
+        filter: '/api/datasets',
         target: 'http://localhost:8081',
-        changeOrigin: true
+        changeOrigin: true,
       },
       auth: {
         filter: '/auth',
         target: 'http://localhost:8081',
-        changeOrigin: true
-      }
+        changeOrigin: true,
+      },
     },
     apiPath: 'http://geney.pjtatlow.me:8000',
     // CSS Sourcemaps off by default because relative paths are "buggy"
@@ -49,6 +49,6 @@ module.exports = {
     // In our experience, they generally work as expected,
     // just be aware of this issue when enabling this option.
     cssSourceMap: false,
-    secret: 'very-secret'
-  }
-}
+    secret: 'very-secret',
+  },
+};
