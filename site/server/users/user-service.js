@@ -4,11 +4,11 @@ const queries = require('./sql-queries');
 const bcrypt = require('bcryptjs');
 const token = require('jsonwebtoken');
 const tokenConfig = {algorithm: 'HS512', expiresIn: '30m'};
-const config = require('../../config');
 const User = require('./user');
 
 module.exports = class UserService {
-  constructor () {
+  constructor (secret) {
+    this.secret = secret;
     this.db = new sqlite3.Database(path.join(__dirname, 'geney.db'));
     this.db.run(queries.create, err => {
       if (err) {
@@ -52,7 +52,7 @@ module.exports = class UserService {
    */
   validatePassword (password, passhash, callback) {
     bcrypt.compare(password, passhash, (err, valid) => {
-      console.log('VALID', valid)
+      console.log('VALID', valid);
       if (err) {
         callback(false);
       } else {
@@ -71,7 +71,6 @@ module.exports = class UserService {
   authenticateUser (username, password, callback) {
     this.getUser(username, user => {
       if (!user) {
-        console.log('NO USER')
         callback(false, 401);
         return;
       }
@@ -82,7 +81,7 @@ module.exports = class UserService {
         }
         this.validatePassword(password, hash, valid => {
           if (valid) {
-            token.sign(user.getPayload(), config.dev.secret, tokenConfig, (err, jwt) => {
+            token.sign(user.getPayload(), this.secret, tokenConfig, (err, jwt) => {
               if (err) {
                 callback(false, 500);
               } else {

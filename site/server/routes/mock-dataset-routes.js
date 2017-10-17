@@ -1,9 +1,9 @@
 const router = require('express').Router();
 
-const datasets = require('../../ui/api/datasets.json');
-const lincslevel2 = require('../../ui/api/lincslevel2.json');
-const lincslevel2Genes = require('../../ui/api/lincslevel2_genes.json');
-const lincslevel2CompoundId = require('../../ui/api/lincslevel2_compoundid.json');
+const datasets = require('./api/datasets.json');
+const lincslevel2 = require('./api/lincslevel2.json');
+const lincslevel2Genes = require('./api/lincslevel2_genes.json');
+const lincslevel2CompoundId = require('./api/lincslevel2_compoundid.json');
 
 router.get('/api/datasets', (req, res, next) => {
   res.json(datasets);

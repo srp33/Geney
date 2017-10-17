@@ -1,4 +1,6 @@
-module.exports = [
-  require('./user-routes'),
-  require('./mock-dataset-routes'),
-]
+module.exports = function (config) {
+  return [
+    require('./user-routes')(config),
+    require('./mock-dataset-routes'),
+  ];
+};
