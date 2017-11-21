@@ -85,6 +85,15 @@ class SQLiteDao:
 
 		return feature_ids
 
+	def get_sample_ids(self, sample_names: List[str]) -> List[int]:
+		query = GET_SAMPLE_IDS.format(items='"{}"'.format('","'.join(sample_names)))
+		sampleIDs = []
+		cursor = self.__con.cursor()
+		for sampleID in cursor.execute(query):
+			sampleIDs.append(int(sampleID[0]))
+		cursor.close()
+		return sampleIDs
+
 	def get_sample_metadata(self, sample_id: int, meta_names: List[str]) -> Dict[str, Any]:
 		# for details on ** see https://www.python.org/dev/peps/pep-0448/
 		meta_names_str = '"{}"'.format('","'.join(meta_names))
@@ -97,7 +106,8 @@ class SQLiteDao:
 
 	def get_sample_name(self, sample_id: int) -> str:
 		cursor = self.__con.cursor()
-		name = cursor.execute(GET_SAMPLE_NAME, (sample_id,)).fetchone()[0]
+		result = cursor.execute(GET_SAMPLE_NAME, (sample_id,)).fetchone()
+		name = result[0] if result is not None else ''
 		cursor.close()
 		return name
 
@@ -126,9 +136,20 @@ class SQLiteDao:
 		cursor.close()	
 		return names			
 
+	def search_sample_id(self, search_val: str) -> List[str]:
+		names = list()
+		cursor = self.__con.cursor()
+		for feature in cursor.execute(SEARCH_SAMPLES, ('%{}%'.format(search_val),)):
+			names.append(feature[0])
+		cursor.close()	
+		return names
+
 	def search_meta_type(self, meta_type: str, search_val: str) -> List[str]:
 		values = list()
-		meta_id, meta_type = self.get_variable(meta_type)
+		result = self.get_variable(meta_type)
+		if result is None:
+			return None
+		meta_id, meta_type = result
 		if meta_type != TEXT:
 			return None
 		cursor = self.__con.cursor()
@@ -179,7 +200,7 @@ class Hdf5Dao:
 		# print(self.__data[0][0].astype(str))
 		# print(str(self.__data[0][0]))
 
-	def get_row(self, row_index, col_indices, num_features) -> List[str]:
+	def get_row(self, row_index, col_indices) -> List[str]:
 		for start, end in col_indices:
 			yield self.__data[row_index, start:end].astype(str)
 

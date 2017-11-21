@@ -16,6 +16,7 @@ INTEGER = 'Integer'
 # Config constants
 MAX_OPTIONS = 1000
 MAX_ITEMS_IN_OUTPUT_FILE = 500000
+SEARCH_LIMIT = 35
 
 # Others
 SAMPLE_ID = "sampleID"
@@ -31,10 +32,12 @@ GET_FEATURE_IDS = 'SELECT featureID, featureName FROM featureTable WHERE feature
 GET_ALL_FEATURE_NAMES = 'SELECT featureName FROM featureTable ORDER BY featureID ASC;'
 
 GET_SAMPLE_NAME = 'SELECT sampleName from sampleTable WHERE sampleID = ?;'
+GET_SAMPLE_IDS = 'SELECT sampleID from sampleTable WHERE sampleName in ({items:s}) ORDER BY sampleID ASC;'
 
-SEARCH_FEATURES = 'SELECT DISTINCT featureName FROM featureTable WHERE featureName LIKE ? ORDER BY featureID ASC LIMIT 35;'
-SEARCH_VARIABLES = 'SELECT variableName FROM variableTable WHERE variableName LIKE ? ORDER BY variableID ASC LIMIT 35;'
-SEARCH_TEXT_META_TYPE = 'SELECT DISTINCT value FROM textTable WHERE variableID = ? AND value LIKE ? ORDER BY value ASC LIMIT 35;'
+SEARCH_FEATURES = 'SELECT DISTINCT featureName FROM featureTable WHERE featureName LIKE ? ORDER BY featureID ASC LIMIT {limit};'.format(limit=SEARCH_LIMIT)
+SEARCH_SAMPLES = 'SELECT DISTINCT sampleName FROM sampleTable WHERE sampleName LIKE ? ORDER BY sampleID ASC LIMIT {limit};'.format(limit=SEARCH_LIMIT)
+SEARCH_VARIABLES = 'SELECT DISTINCT variableName FROM variableTable WHERE variableName LIKE ? ORDER BY variableID ASC LIMIT {limit};'.format(limit=SEARCH_LIMIT)
+SEARCH_TEXT_META_TYPE = 'SELECT DISTINCT value FROM textTable WHERE variableID = ? AND value LIKE ? ORDER BY value ASC LIMIT {limit};'.format(limit=SEARCH_LIMIT)
 
 GET_SAMPLE_TEXT_METADATA = '''
 SELECT vt.variableName, tt.value 

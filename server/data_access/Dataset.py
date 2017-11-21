@@ -63,12 +63,14 @@ class GeneyDataset:
 		sample_ids = self.query_samples(query)
 		meta_names = query.meta_filter_names
 
-		# TODO figure out the max number of items for files we can build
+		if SAMPLE_ID in meta_names:
+			meta_names.remove(SAMPLE_ID)
 
+		# TODO figure out the max number of items for files we can build
 		feature_slices, num_features_requested = self.get_query_feature_slices(query)
 
 		# TODO generate feature names rather than loading them all into memory at once
-		yield ['sample_id'] + meta_names
+		yield [SAMPLE_ID] + meta_names
 		yield self.get_query_feature_names(query)
 		yield None
 
@@ -85,7 +87,7 @@ class GeneyDataset:
 				else:
 					yield ''
 
-			for data_slice in hdf5_dao.get_row(sample_id, feature_slices, num_features_requested):
+			for data_slice in hdf5_dao.get_row(sample_id, feature_slices):
 				yield data_slice
 			yield None
 
@@ -128,7 +130,10 @@ class GeneyDataset:
 		sample_ids = None
 		with SQLiteDao(self.__dir) as dao:
 			for meta_filter in query.meta_filters:
-				matched = dao.get_samples_matching_filter(meta_filter)
+				if meta_filter.name == SAMPLE_ID:
+					matched = dao.get_sample_ids(meta_filter.values)
+				else:
+					matched = dao.get_samples_matching_filter(meta_filter)
 				# if any one filter has no matches, there is no point in continuing to search
 				if len(matched) == 0:
 					return frozenset()
@@ -148,6 +153,8 @@ class GeneyDataset:
 				return dao.search_meta_types(search_val)
 			elif meta_type == 'features':
 				return dao.search_features(search_val)
+			elif meta_type == SAMPLE_ID:
+				return dao.search_sample_id(search_val)
 			else:
 				print("SEARCHING META TYPE", meta_type)
 				return dao.search_meta_type(meta_type, search_val)
