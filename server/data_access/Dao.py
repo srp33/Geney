@@ -39,6 +39,9 @@ class SQLiteDao:
 			return None
 
 	def __filter_text(self, meta_id: int, values: List[str]) -> Set[int]:
+		if len(values) == 0 or type(values[0]) is not str:
+			return set()
+
 		try:
 			# build query
 			query = GET_SAMPLEID_TEXT_TABLE.format(var_id=meta_id, items='"{}"'.format('","'.join(values)))
@@ -54,16 +57,60 @@ class SQLiteDao:
 
 		except ValueError as ve:
 			# the .format received the wrong parameter types
-			raise RequestError('Could not build discrete query with meta_id "{}"'.format(meta_id))
+			raise RequestError('Could not build text query with meta_id "{}"'.format(meta_id))
 		except AssertionError as ae:
 			# the regex failed to match
-			raise RequestError('Invalid discrete query: {}'.format(query))
+			raise RequestError('Invalid text query: {}'.format(query))
 
 	def __filter_integer(self, meta_id: int, values: List[str]) -> Set[int]:
-		raise NotImplementedError()
+		if len(values) == 0 or type(values[0]) is not dict:
+			return set()
+
+		try:
+			print(meta_id, values)
+			whereStatements = ['value {operator} {value}'.format(operator=x['operator'], value=x['value']) for x in values ]
+			query = GET_SAMPLEID_INTEGER_TABLE.format(var_id=meta_id, where=' AND '.join(whereStatements))
+			assert(self.__valid_meta_filter_query(query, continuous=True))
+			# now we know it's a valid query, so execute it and get ids
+			ids = set()
+			cursor = self.__con.cursor()
+			for sample_id in cursor.execute(query):
+				ids.add(sample_id[0])
+			# cleanup and return
+			cursor.close()			
+			return ids
+
+		except ValueError as ve:
+			# the .format received the wrong parameter types
+			raise RequestError('Could not build integer query with meta_id "{}"'.format(meta_id))
+		except AssertionError as ae:
+			# the regex failed to match
+			raise RequestError('Invalid text query: {}'.format(query))			
 
 	def __filter_real(self, meta_id: int, values: List[str]) -> Set[int]:
-		raise NotImplementedError()
+		if len(values) == 0 or type(values[0]) is not dict:
+			return set()
+
+		try:
+			print(meta_id, values)
+			whereStatements = ['value {operator} {value}'.format(operator=x['operator'], value=x['value']) for x in values]
+			query = GET_SAMPLEID_REAL_TABLE.format(var_id=meta_id, where=' AND '.join(whereStatements))
+			assert(self.__valid_meta_filter_query(query, continuous=True))
+			# now we know it's a valid query, so execute it and get ids
+			ids = set()
+			cursor = self.__con.cursor()
+			for sample_id in cursor.execute(query):
+				ids.add(sample_id[0])
+			# cleanup and return
+			cursor.close()			
+			return ids
+
+		except ValueError as ve:
+			# the .format received the wrong parameter types
+			raise RequestError('Could not build integer query with meta_id "{}"'.format(meta_id))
+		except AssertionError as ae:
+			# the regex failed to match
+			raise RequestError('Invalid text query: {}'.format(query))			
 
 	def __valid_meta_filter_query(self, query: str, discrete=False, continuous=False) -> bool:
 		return (discrete and DISCRETE_QUERY_REGEX.match(query) is not None) or (continuous and CONTINUOUS_QUERY_REGEX.match(query)) 
@@ -116,7 +163,14 @@ class SQLiteDao:
 		cursor = self.__con.cursor()
 		query = GET_SAMPLE_METADATA_FROM_TABLE_X.format(x=table, sample_id=sample_id, items=meta_names)
 		for meta in cursor.execute(query):
-			metadata[meta[0]] = meta[1]
+			meta_name = meta[0]
+			val = meta[1] if table == 'textTable' else str(meta[1])
+			if meta[0] in metadata:
+				if not table == 'textTable':
+					raise Exception('multiple values for non discrete meta type')
+				metadata[meta_name] += '|' + val
+			else:
+				metadata[meta_name] = val
 		cursor.close()
 		return metadata
 
@@ -166,7 +220,7 @@ class SQLiteDao:
 		cursor.close()	
 		return names			
 
-	def get_variable_options(self, variable_name):
+	def get_variable_options(self, variable_name) -> Dict[str, Any]:
 		variable = self.get_variable(variable_name)		
 		if variable is None:
 			return None
@@ -191,6 +245,7 @@ class SQLiteDao:
 			else: # if it's not D
 				return None
 			return { "min": min_val, "max": max_val, "options": "continuous" }
+
 
 class Hdf5Dao:
 

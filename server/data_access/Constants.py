@@ -73,9 +73,9 @@ SELECT vt.variableName, x.value
 
 GET_SAMPLEID_TEXT_TABLE = 'SELECT sampleID FROM textTable WHERE variableID = {var_id:d} AND value IN ({items:s});'
 
-GET_SAMPLEID_INTEGER_TABLE = 'SELECT sampleID FROM integerTable WHERE variableID = %d %s;'
+GET_SAMPLEID_INTEGER_TABLE = 'SELECT sampleID FROM integerTable WHERE variableID = {var_id:d} AND {where:s};'
 
-GET_SAMPLEID_REAL_TABLE = 'SELECT sampleID FROM realTable WHERE variableID = %d %s;'
+GET_SAMPLEID_REAL_TABLE = 'SELECT sampleID FROM realTable WHERE variableID = {var_id:d} AND {where:s};'
 
 DISCRETE_QUERY_REGEX = re.compile('^\s*SELECT\s+sampleID\s+FROM\s+[a-z]+Table\s+WHERE\s+variableID\s+=\s+\d+\s+AND\s+value\s+IN\s+\(("[^";]*",?\s*)*\)\s*;\s*$', re.MULTILINE)
 CONTINUOUS_QUERY_REGEX = re.compile('^\s*SELECT\s+sampleID\s+FROM\s+[a-z]+Table\s+WHERE\s+variableID\s+=\s+\d+(\s+AND\s+value\s+(>|>=|<|<=|==|!=)\s+\d+(\.\d*)?)*\s*;\s*$', re.MULTILINE)
