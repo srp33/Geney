@@ -35,7 +35,7 @@ export default {
   },
   computed: {
     uploadDate () {
-      let date = new Date(this.data.uploadDate);
+      let date = new Date(this.data.uploadDate * 1000);
       return date.toLocaleDateString();
     },
   },
@@ -73,6 +73,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 .change-size {
   cursor: pointer;
   color: #0275D8;
