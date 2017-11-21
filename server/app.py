@@ -77,6 +77,7 @@ def download(dataset_id):
 
         if file_format not in RESPONDERS:
             return bad_request()
+
         responder = RESPONDERS[file_format]
 
         return responder(DATASETS[dataset_id], query)

@@ -58,7 +58,7 @@ class GeneyDataset:
 		with SQLiteDao(self.__dir) as dao:
 			return dao.get_variable_options(variable_name)
 
-	def get_filtered_data(self, filters):
+	def get_filtered_data(self, filters, illegal_chars=[]):
 		query = Query(filters, self.__description)
 		sample_ids = self.query_samples(query)
 		meta_names = query.meta_filter_names

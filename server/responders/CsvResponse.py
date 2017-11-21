@@ -9,7 +9,7 @@ class CsvResponse(GeneyResponse):
     
     def generate(self, dataset, query):
         new_row = True
-        for items in dataset.get_filtered_data(query):
+        for items in dataset.get_filtered_data(query, [',']):
             if items is None:
                 yield '\n'
                 new_row = True

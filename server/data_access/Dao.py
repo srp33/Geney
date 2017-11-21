@@ -197,8 +197,6 @@ class Hdf5Dao:
 	def __init__(self, directory):
 		self.__hdf5 = h5py.File(directory + DATA_FILE, 'r')
 		self.__data = self.__hdf5[HDF5_DATA_PATH]
-		# print(self.__data[0][0].astype(str))
-		# print(str(self.__data[0][0]))
 
 	def get_row(self, row_index, col_indices) -> List[str]:
 		for start, end in col_indices:
