@@ -322,7 +322,8 @@ export default {
       this.$forceUpdate();
     },
     removeLogicSet (index) {
-      this.currentSelectedMeta.splice(index, 1);
+      const list = this.currentSelectedMeta.slice().splice(index, 1);
+      this.updateSelectedMeta(list);
       this.$forceUpdate();
       Vue.nextTick(() => {
         this.$validator.validateAll();
