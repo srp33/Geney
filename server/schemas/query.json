@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "id": "http://geney.byu.edu/schemas/query.json",
+  "type": "object",
+  "required": ["features", "meta"],
+  "properties": {
+    "features": {
+      "id": "/properties/features",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "meta": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "anyOf": [
+          {"$ref": "#/definitions/continuousOperationList"},
+          {"$ref": "#/definitions/filterOptionList"},
+          {"type": "null"}
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "continuousOperationList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "maxProperties": 2,
+        "required": ["operator","value"],
+        "properties": {
+          "operator": {
+            "enum": [">",">=","<","<=","==","!="]
+          },
+          "value": {
+          	"type": "number"
+          }
+        }
+      }
+    },
+    "filterOptionList": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

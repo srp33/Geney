@@ -9,3 +9,5 @@ __pycache__
 **/file.csv
 **.pyc
 flask/
+data/
+**.paw

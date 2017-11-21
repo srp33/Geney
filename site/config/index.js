@@ -33,14 +33,14 @@ module.exports = {
     proxyTable: {
       api: {
         filter: '/api/datasets',
-        target: 'http://localhost:8081',
+        target: 'http://localhost:9998',
         changeOrigin: true,
       },
-      auth: {
-        filter: '/auth',
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-      },
+      // auth: {
+      //   filter: '/auth',
+      //   target: 'http://localhost:8081',
+      //   changeOrigin: true,
+      // },
     },
     apiPath: 'http://geney.pjtatlow.me:8000',
     // CSS Sourcemaps off by default because relative paths are "buggy"

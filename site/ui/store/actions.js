@@ -6,7 +6,10 @@ export default {
     Vue.http.get('/api/datasets').then(response => {
       const datasets = response.data;
       for (let datasetId in datasets) {
-        datasets[datasetId].id = datasetId;
+        if (!datasets[datasetId].featureDescription) {
+          datasets[datasetId].featureDescription = 'features';
+          datasets[datasetId].id = datasetId;
+        }
       }
       context.commit('datasets', response.data);
       if (router.currentRoute.params.dataset) {
@@ -18,7 +21,7 @@ export default {
       context.commit('datasets', []);
     });
   },
-  getMetadata (context) {
+  getDatasetMetadata (context) {
     if (context.state.dataset) {
       // check if current metaData is the one we need right now
       if (context.state.metaData && context.state.metaData.dataset === context.state.dataset.id) {
@@ -29,6 +32,7 @@ export default {
         return;
       }
       context.commit('metaData', false);
+      context.commit('initializeMetaCache');
       // check if localStorage is available on the browser
       if (window.localStorage) {
         let data;
@@ -57,8 +61,8 @@ export default {
             }));
           }
         }
-        if (Array.isArray(response.data.genes.options)) {
-          response.data.genes.options = response.data.genes.options.map(x => ({
+        if (Array.isArray(response.data.features.options)) {
+          response.data.features.options = response.data.features.options.map(x => ({
             'name': x,
           }));
         }
@@ -74,7 +78,7 @@ export default {
   setDataset (context, payload) {
     context.commit('dataset', payload);
     if (payload.id) {
-      context.dispatch('getMetadata');
+      context.dispatch('getDatasetMetadata');
     } else {
       if (router.currentRoute.params.dataset) {
         router.replace('/404');

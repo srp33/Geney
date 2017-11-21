@@ -42,7 +42,7 @@ export default {
   created () {
     // get all datasets when page loads
     this.$store.dispatch('getDatasets');
-    this.$store.dispatch('getUser');
+    // this.$store.dispatch('getUser');
   },
 };
 </script>

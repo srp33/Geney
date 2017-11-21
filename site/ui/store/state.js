@@ -7,4 +7,5 @@ export default {
   user: null,
   alerts: [],
   users: [],
+  cachedMeta: {},
 };

@@ -44,7 +44,6 @@ export default {
         options: [
           {value: 'csv', name: 'Comma Separated Values ( .csv )'},
           {value: 'tsv', name: 'Tab Separated Values ( .tsv )'},
-          {value: 'gct', name: 'Gene Cluster Text ( .gct )'},
           {value: 'json', name: 'JavaScript Object Notation ( .json )'},
         ],
         settings: {
@@ -54,7 +53,6 @@ export default {
       },
       options: {
         fileformat: 'csv',
-        filename: 'test',
       },
       numSamples: null,
     };
@@ -71,7 +69,7 @@ export default {
       router.replace(newPath);
     } else {
       console.log(`/api/datasets/${this.$route.params.dataset}/samples`);
-      this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, filters.meta).then(response => {
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, filters).then(response => {
         this.$set(this, 'numSamples', response.body);
       }, response => {
         this.$set(this, 'numSamples', -1);

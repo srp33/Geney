@@ -1,9 +1,15 @@
-FROM python:2.7-alpine3.6
+FROM python:3.6-jessie
 
-COPY *.py /root/
+COPY app.py /app/
+COPY data_access/*.py /app/data_access/
+COPY schemas/*.json /app/schemas/
+COPY responders/*.py /app/responders/
 
-RUN pip install Flask==0.12.2
+RUN apt-get update && \
+    apt-get install -y gcc
 
-WORKDIR /root/
+RUN pip install Flask==0.12.2 fastnumbers h5py gunicorn jsonschema greenlet eventlet
 
-ENTRYPOINT [ "python", "app.py" ]
+WORKDIR /app/
+
+CMD [ "gunicorn", "app:app" ]

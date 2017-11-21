@@ -1,9 +1,8 @@
 <template>
   <div class="card">
     <div class="card-block row justify-content-center">
-      <h4 class="card-title col-12"><router-link :to="'/dataset/' + data.id">{{data.name}}</router-link></h4>
+      <h2 class="card-title col-12"><router-link :to="'/dataset/' + data.id">{{data.name}}</router-link></h2>
       <vue-markdown class="card-text" :class="{'truncated': hidden}" :source="data.description"></vue-markdown>
-
       <small class="change-size col-12" @click="toggleText()">
         <span v-if="hidden && truncated">Show More</span>
         <span v-if="!truncated && !hidden">Show Less</span>
@@ -93,6 +92,9 @@ export default {
   margin-top: 15px;
 }
 .card-text {
+  width: 100%;
+  text-align: left;
   padding: 0px 5px 0px 5px;
 }
+
 </style>

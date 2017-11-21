@@ -8,7 +8,7 @@
         :value="currentMetaType"
         placeholder="Select meta type to filter"
         @updated="selectMetaType"
-        :settings="settings.oneItem"
+        :settings="metaTypeSettings"
         id="meta-types"></selectize>
 
       <div class="spacer"></div>
@@ -53,8 +53,7 @@
               <button
                 class=" btn btn-sm btn-danger"
                 style="margin-top:5.5px"
-                @click="removeLogicSet(index)"
-                :disabled="currentSelectedMeta.length === 1">
+                @click="removeLogicSet(index)">
                 <i class="fa fa-minus" aria-hidden="true"></i>
               </button>
             </div>
@@ -67,21 +66,21 @@
         </div>
       </div>
 
-      <h1 style="margin-top:25px;">Select Genes</h1>
+      <h1 style="margin-top:50px;">Select {{ dataset.featureDescriptionPlural | capitalize }}</h1>
       <selectize
-        :options="metaData.genes.options"
-        :value="selectedGenes"
-        @updated="updateGenes"
-        placeholder="All Genes"
-        :settings="getSelectizeSettings('genes', metaData.genes)"
-        id="genes"></selectize>
+        :options="metaData.features.options"
+        :value="selectedFeatures"
+        @updated="updateFeatures"
+        :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural)"
+        :settings="getSelectizeSettings('features', metaData.features)"
+        id="features"></selectize>
 
     </div>
     <div id="description" class="col-12 spacer">
       <div v-if="numKeys > 0">
         <h2>Let me get this right...</h2>
-        <h3>You're looking for <strong>ROWS</strong> that have:</h3>
-        <h4 v-for="(values,metaType,num) in metaQuery.meta" :key="metaType">
+        <h3>You're looking for <strong>SAMPLES</strong> that have:</h3>
+        <h4 v-for="(values,metaType,num) in metaQuery" :key="metaType">
 
           <span v-if="optionsType(metaType) === 'array'">
             <span v-for="(value, index) in values" v-if="index < 3" :key="index">
@@ -105,10 +104,14 @@
 
           <h4 v-if="num < numKeys - 1"><strong>AND</strong></h4>
         </h4>
-        <div v-if="selectedGenes && selectedGenes.length">
-          <h3>And you want only the <strong>COLUMNS</strong> with the genes listed above.</h3>
+        <div v-if="selectedFeatures && selectedFeatures.length">
+          <h3>And you want only the
+            <strong>{{ selectedFeatures.length }}</strong>
+            <span v-if="selectedFeatures.length > 1">{{ dataset.featureDescriptionPlural }}</span>
+            <span v-else>{{ dataset.featureDescription }}</span>
+            listed above.</h3>
         </div>
-        <h3 v-else>And you want <strong>ALL</strong> of the <strong>COLUMNS</strong>.</h3>
+        <h3 v-else>And you want <strong>ALL</strong> of the {{ dataset.featureDescriptionPlural }}.</h3>
 
         <h2>Is that correct?</h2>
         <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Confirm</button>
@@ -132,9 +135,10 @@ export default {
   },
   data () {
     return {
-      selectedGenes: [],
+      selectedFeatures: [],
       currentMetaType: '',
       selectedMeta: {},
+      currentMeta: {},
       settings: {
         oneItem: {
           maxItems: 1,
@@ -164,21 +168,18 @@ export default {
     metaTypes () {
       if (this.metaData && this.metaData.meta) {
         return Object.keys(this.metaData.meta).map(x => ({'name': x}));
+      } else if (this.$store.state.filters && this.$store.state.filters.meta) {
+        return Object.keys(this.$store.state.filters.meta).map(val => ({ name: val }));
       } else {
-        return false;
+        return [];
       }
     },
     metaData () {
       return this.$store.state.metaData;
     },
-    currentMeta () {
-      if (this.currentMetaType) {
-        return this.$store.state.metaData.meta[this.currentMetaType];
-      }
-      return {};
-    },
     currentSelectedMeta () {
       if (this.currentMetaType) {
+        console.log('updating currentSelectedMeta');
         return this.selectedMeta[this.currentMetaType];
       }
       return {};
@@ -206,21 +207,75 @@ export default {
       }
       return list;
     },
+    dataset () {
+      return this.$store.state.dataset;
+    },
+    metaTypeSettings () {
+      const baseSettings = { maxItems: 1 };
+      if (this.metaData && this.metaData.meta === null) {
+        const loadfn = function (query, callback) {
+          this.$http.get(
+            `/api/datasets/${this.$route.params.dataset}/meta/search/${query}`
+          ).then(response => {
+            const items = response.data.map(item => {
+              return {name: item};
+            });
+            callback(items);
+          }, failedResponse => {
+            console.log(failedResponse);
+            callback();
+          });
+        };
+        baseSettings.load = loadfn.bind(this);
+        return baseSettings;
+      } else {
+        return baseSettings;
+      }
+    },
+    cachedMeta () {
+      return this.$store.state.cachedMeta[this.dataset.id];
+    },
   },
   methods: {
     selectMetaType (metaType) {
       this.$set(this, 'currentMetaType', metaType);
       if (metaType) {
-        if (this.metaData.meta[metaType].options === 'continuous') {
-          if (!this.selectedMeta[metaType]) {
-            this.selectedMeta[metaType] = [];
-            this.addLogicSet();
+        if (this.metaData && this.metaData.meta === null) {
+          if (!this.cachedMeta[metaType]) { // not in cache so request it from the server
+            this.getVariableMetadata(metaType).then(metaData => {
+              this.$store.commit('cachedMeta', {
+                dataset: this.dataset.id,
+                metaType: metaType,
+                value: metaData,
+              });
+              this.updateCurrentMeta();
+              this.initializeContinuousType(metaType);
+            });
           }
+        } else {
+          this.initializeContinuousType(metaType);
         }
       }
+      this.updateCurrentMeta();
     },
-    updateGenes (genes) {
-      this.$set(this, 'selectedGenes', genes);
+    updateCurrentMeta () {
+      if (this.currentMetaType) {
+        if (this.cachedMeta[this.currentMetaType]) {
+          this.$set(this, 'currentMeta', this.cachedMeta[this.currentMetaType]);
+          return;
+        }
+        if (this.metaData.meta && this.metaData.meta[this.currentMetaType]) {
+          this.$set(this, 'currentMeta', this.metaData.meta[this.currentMetaType]);
+          return;
+        }
+      }
+      this.$set(this, 'currentMeta', {});
+    },
+    updateFeatures (features) {
+      if (!features) {
+        features = [];
+      }
+      this.$set(this, 'selectedFeatures', features);
     },
     updateSelectedMeta (value, index, key = false) {
       if (key === false) {
@@ -251,11 +306,10 @@ export default {
           }
         }
       }
-      this.$set(this, 'metaQuery', {meta: query});
-      // return q;
+      this.$set(this, 'metaQuery', query);
     },
     commit () {
-      this.$store.commit('filters', {meta: this.metaQuery, genes: this.selectedGenes});
+      this.$store.commit('filters', {meta: this.metaQuery, features: this.selectedFeatures});
       router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
     },
     addLogicSet () {
@@ -275,8 +329,11 @@ export default {
       });
     },
     optionsType (metaType) {
-      if (this.metaData && this.metaData.meta) {
-        const meta = this.metaData.meta[metaType];
+      if (this.metaData && this.metaData.meta !== undefined) {
+        const meta = this.getMeta(metaType);
+        if (!meta) {
+          return;
+        }
         if (Array.isArray(meta.options) || meta.options === null) {
           return 'array';
         } else if (meta.options === 'continuous') {
@@ -290,7 +347,10 @@ export default {
       if (!logicSet.operator) {
         return false;
       }
-      const meta = this.metaData.meta[metaType];
+      const meta = this.getMeta(metaType);
+      if (!meta) {
+        return false;
+      }
       if (typeof logicSet.value !== 'number' ||
           logicSet.value > meta.max ||
           logicSet.value < logicSet.min) {
@@ -302,15 +362,13 @@ export default {
       const settings = {};
       if (metaData.options === null) {
         const loadfn = function (query, callback) {
-          if (query.length === 0) {
-            return callback();
-          }
           this.$http.get(
             `/api/datasets/${this.$route.params.dataset}/meta/${metaType}/search/${query}`
           ).then(response => {
-            callback(response.data.map(item => {
+            const items = response.data.map(item => {
               return {name: item};
-            }));
+            });
+            callback(items);
           }, failedResponse => {
             console.log(failedResponse);
             callback();
@@ -320,11 +378,38 @@ export default {
       }
       return settings;
     },
+    getVariableMetadata (metaType) {
+      return Vue.http.get(`/api/datasets/${this.dataset.id}/meta/${metaType}`).then(response => {
+        console.log(response);
+        const data = response.body;
+        if (Array.isArray(data.options)) {
+          data.options = data.options.map(val => ({ name: val }));
+        }
+        return data;
+      }).catch(err => {
+        console.error(err);
+      });
+    },
+    getMeta (metaType) {
+      return this.metaData.meta ? this.metaData.meta[metaType] : this.cachedMeta[metaType];
+    },
+    initializeContinuousType (metaType) {
+      const meta = this.getMeta(metaType);
+      if (meta && meta.options === 'continuous') {
+        if (!this.selectedMeta[metaType] || this.selectedMeta[metaType].length === 0) {
+          this.selectedMeta[metaType] = [];
+          this.addLogicSet();
+        }
+      }
+    },
   },
   created () {
     if (this.$store.state.filters) {
-      this.selectedGenes = this.$store.state.filters.genes;
-      this.selectedMeta = this.$store.state.filters.meta;
+      const filters = JSON.parse(JSON.stringify(this.$store.state.filters));
+      this.$set(this, 'selectedMeta', filters.meta);
+      this.$set(this, 'selectedFeatures', filters.features);
+      this.selectMetaType(Object.keys(filters.meta)[0]);
+      this.updateMetaQuery();
     }
   },
 };

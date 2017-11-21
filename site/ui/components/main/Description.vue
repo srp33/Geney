@@ -15,7 +15,7 @@
       <li>
         <i class="fa fa-2x fa-flask" aria-hidden="true"></i>
         <br>
-        <span id="dataset-num-genes">{{ dataset.numGenes }} Genes</span>
+        <span id="dataset-num-features">{{ dataset.numFeatures }} {{ dataset.featureDescriptionPlural | capitalize }}</span>
       </li>
       <li>
         <i class="fa fa-2x fa-gears" aria-hidden="true"></i>
@@ -23,7 +23,7 @@
         <span id="dataset-num-meta-types">{{ dataset.numMetaTypes }} Meta Data Types</span>
       </li>
     </ul>
-    <router-link :to="'/dataset/' + dataset.id + '/filter'" class="btn btn-primary btn-lg" id="dataset-next-btn">Select Samples & Genes</router-link>
+    <router-link :to="'/dataset/' + dataset.id + '/filter'" class="btn btn-primary btn-lg" id="dataset-next-btn">Select Samples & {{ dataset.featureDescriptionPlural | capitalize }}</router-link>
   </div>
 </template>
 
@@ -53,8 +53,8 @@ export default {
   margin-top: 25px;
   margin-bottom: 50px;
   li {
-    display: inline-block;
-    margin: 0 10px;
+    // display: inline-block;
+    margin: 15px 10px;
     font-size: 1.25em;
   }
 }

@@ -19,25 +19,31 @@ export default {
     };
   },
   mounted () {
+    // preserve the scope of the update function using bind
     this.update = this.update.bind(this);
-    let settings = this.settings || {};
+    const settings = this.settings || {};
+    let options = this.options || [];
+    if ((typeof settings.load) === 'function' && Array.isArray(this.value) && this.value.length > 0) {
+      options = this.value.map(item => ({name: item}));
+    }
     const selectizeOps = {
       maxItems: settings.maxItems || null,
       valueField: settings.valueField || 'name',
       labelField: settings.labelField || 'name',
       searchField: settings.searchField || 'name',
-      options: this.options,
+      options: options,
       create: false,
       items: this.value,
       maxOptions: settings.maxOptions || 500,
       onChange: this.update,
       render: settings.render || undefined,
       load: settings.load || undefined,
+      preload: !!settings.load,
     };
-
+    // turn the select in our element into a selectize and save a reference to it
     this.selectize = $(this.$el).find('select').selectize(selectizeOps)[0].selectize;
 
-    // mark the selectize as dirty
+    // mark the selectize as dirty when it loses focus for the first time
     $(this.$el).find('.selectize-input').one('focusout', (e) => {
       $(e.currentTarget).addClass('dirty');
     });
@@ -50,6 +56,7 @@ export default {
     this.update(this.value);
   },
   methods: {
+    // this function is called whenever the user changes the value of the selectize
     update (values) {
       this.$emit('updated', values);
       const div = $(this.$el).find('.selectize-input');
@@ -66,10 +73,14 @@ export default {
     },
   },
   watch: {
+    // update the selectize when the options change
+    // this happens when you switch between meta types
     'options' (to, from) {
       this.selectize.clear();
       this.selectize.clearOptions();
-      this.selectize.addOption(this.options);
+      if (Array.isArray(this.options)) {
+        this.selectize.addOption(this.options);
+      }
       if (this.value) {
         for (let val of this.value) {
           this.selectize.addItem(val, true);
