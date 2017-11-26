@@ -182,6 +182,14 @@ class SQLiteDao:
 		cursor.close()	
 		return names	
 
+	def get_all_variable_names(self) -> List[str]:
+		names = list()
+		cursor = self.__con.cursor()
+		for feature in cursor.execute(GET_ALL_VARIABLE_NAMES):
+			names.append(feature[0])
+		cursor.close()	
+		return names		
+
 	def search_features(self, search_val:str) -> List[str]:
 		names = list()
 		cursor = self.__con.cursor()

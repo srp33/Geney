@@ -4,12 +4,17 @@ export default {
   },
   filters (state, value) {
     state.filters = value;
+    if (state.filters && state.selectedMetaTypes.length === 0) {
+      state.selectedMetaTypes = Object.keys(state.filters);
+    }
   },
   datasets (state, value) {
     state.datasets = value;
   },
   dataset (state, value) {
     state.dataset = value;
+    state.selectedFeatures = [];
+    state.selectedMetaTypes = [];
   },
   user (state, value) {
     state.user = value;
@@ -31,5 +36,11 @@ export default {
     if (state.dataset && state.dataset.id && !state.cachedMeta[state.dataset.id]) {
       state.cachedMeta[state.dataset.id] = {};
     }
+  },
+  selectedFeatures (state, payload) {
+    state.selectedFeatures = payload;
+  },
+  selectedMetaTypes (state, payload) {
+    state.selectedMetaTypes = payload;
   },
 };

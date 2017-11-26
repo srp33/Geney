@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-06/schema#",
   "id": "http://geney.byu.edu/schemas/query.json",
   "type": "object",
-  "required": ["features", "meta"],
+  "required": ["features", "filters", "metaTypes"],
   "properties": {
     "features": {
       "id": "/properties/features",
@@ -11,7 +11,7 @@
         "type": "string"
       }
     },
-    "meta": {
+    "filters": {
       "type": "object",
       "minProperties": 1,
       "additionalProperties": {
@@ -20,6 +20,13 @@
           {"$ref": "#/definitions/filterOptionList"},
           {"type": "null"}
         ]
+      }
+    },
+    "metaTypes": {
+      "id": "/properties/metaTypes",
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     }
   },

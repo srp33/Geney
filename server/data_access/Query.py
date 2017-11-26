@@ -19,14 +19,11 @@ class Query:
 
 	@property
 	def meta_filters(self) -> Iterator[MetaFilter]:
-		return MetaFilterIter(self.__def['meta'])
+		return MetaFilterIter(self.__def['filters'])
 
 	@property
 	def meta_filter_names(self) -> List[str]:
-		names = []
-		for meta_filter in self.meta_filters:
-			names.append(meta_filter.name)
-		return names
+		return self.__def['metaTypes']
 
 	@property
 	def feature_filters(self) -> List[str]:

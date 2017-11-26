@@ -24,11 +24,13 @@ SAMPLE_ID = "sampleID"
 # SQL queries
 GET_VARIABLE = 'SELECT variableID, variableType FROM variableTable WHERE variableName = ?;'
 GET_VARIABLE_OPTIONS = 'SELECT numOptions, options FROM variableTable WHERE variableID = ?;'
+GET_ALL_VARIABLE_NAMES = 'SELECT variableName FROM variableTable;'
 
 COUNT_FEATURES = 'SELECT COUNT(*) FROM featureTable;'
 GET_FEATURENAMES = 'SELECT featureName from featureTable;'
 
 GET_FEATURE_IDS = 'SELECT featureID, featureName FROM featureTable WHERE featureName IN ({items:s}) ORDER BY featureID ASC;'
+GET_ALL_FEATURE_NAMES = 'SELECT featureName FROM featureTable ORDER BY featureID ASC;'
 GET_ALL_FEATURE_NAMES = 'SELECT featureName FROM featureTable ORDER BY featureID ASC;'
 
 GET_SAMPLE_NAME = 'SELECT sampleName from sampleTable WHERE sampleID = ?;'

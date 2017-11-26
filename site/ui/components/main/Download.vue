@@ -7,6 +7,46 @@
         <h3 v-if="numSamples >= 0" id="num-samples-selected">You have selected {{ numSamples }} samples.</h3>
         <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
       </div>
+
+      <div class="col-sm-6 offset-sm-3 column-selection" id="features">
+        <h4>Select {{ dataset.featureDescriptionPlural | capitalize }}</h4>
+
+        <b-form-radio-group v-model="radios.features" stacked>
+          <b-form-radio value="all">Download All {{ dataset.featureDescriptionPlural | capitalize }}</b-form-radio>
+          <b-form-radio value="selected">Download Selected {{ dataset.featureDescriptionPlural | capitalize }}</b-form-radio>
+        </b-form-radio-group>
+
+        <div v-show="radios.features === 'selected'">
+          <selectize
+            :options="metaData.features.options"
+            :value="selectedFeatures"
+            @updated="updateFeatures"
+            :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural)"
+            :settings="getSelectizeSettings('features', metaData.features)"
+            id="features"></selectize>
+        </div>
+      </div>
+
+      <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
+        <h4>Select Metadata Types</h4>
+
+        <b-form-radio-group v-model="radios.metaTypes" stacked>
+          <b-form-radio value="filters">Download Metadata Types From Filters</b-form-radio>
+          <b-form-radio value="all">Download All Metadata Types</b-form-radio>
+          <b-form-radio value="selected">Download Selected Metadata Types</b-form-radio>
+        </b-form-radio-group>
+
+        <div v-show="radios.metaTypes === 'selected'">
+          <selectize
+            :options="metaTypes"
+            :value="selectedMetaTypes"
+            placeholder="Select meta type to filter"
+            @updated="updateMetaTypes"
+            :settings="metaTypeSettings"
+            id="meta-types"></selectize>
+        </div>
+      </div>
+
     </div>
 
 
@@ -42,8 +82,8 @@ export default {
     return {
       fileformats: {
         options: [
-          {value: 'csv', name: 'Comma Separated Values ( .csv )'},
           {value: 'tsv', name: 'Tab Separated Values ( .tsv )'},
+          {value: 'csv', name: 'Comma Separated Values ( .csv )'},
           {value: 'json', name: 'JavaScript Object Notation ( .json )'},
         ],
         settings: {
@@ -52,24 +92,78 @@ export default {
         },
       },
       options: {
-        fileformat: 'csv',
+        fileformat: 'tsv',
       },
       numSamples: null,
+      checkboxes: {
+        allFeatures: true,
+        allMetaTypes: true,
+      },
+      radios: {
+        features: 'selected',
+        metaTypes: 'filters',
+      },
     };
   },
   computed: {
     filters () {
       return this.$store.state.filters;
     },
+    dataset () {
+      return this.$store.state.dataset;
+    },
+    metaData () {
+      return this.$store.state.metaData;
+    },
+    // this is a copy and paste from Filter.vue
+    // TODO: move these two functions to their own module so it's not duplicated
+    metaTypes () {
+      if (this.metaData && this.metaData.meta) {
+        return Object.keys(this.metaData.meta).map(x => ({'name': x}));
+      } else if (this.$store.state.filters && this.$store.state.filters.meta) {
+        return Object.keys(this.$store.state.filters.meta).map(val => ({ name: val }));
+      } else {
+        return [];
+      }
+    },
+    metaTypeSettings () {
+      const baseSettings = {};
+      if (this.metaData && this.metaData.meta === null) {
+        const loadfn = function (query, callback) {
+          this.$http.get(
+            `/api/datasets/${this.$route.params.dataset}/meta/search/${query}`
+          ).then(response => {
+            const items = response.data.map(item => {
+              return {name: item};
+            });
+            callback(items);
+          }, failedResponse => {
+            console.log(failedResponse);
+            callback();
+          });
+        };
+        baseSettings.load = loadfn.bind(this);
+        return baseSettings;
+      } else {
+        return baseSettings;
+      }
+    },
+    selectedFeatures () {
+      return this.$store.state.selectedFeatures;
+    },
+    selectedMetaTypes () {
+      return this.$store.state.selectedMetaTypes;
+    },
   },
   created () {
     const filters = this.$store.state.filters;
-    if (!filters || !filters.meta) {
+    if (!filters) {
       const newPath = this.$route.fullPath.replace(/\/download.*/, '');
       router.replace(newPath);
     } else {
+      const query = {filters: filters, features: [], metaTypes: []};
       console.log(`/api/datasets/${this.$route.params.dataset}/samples`);
-      this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, filters).then(response => {
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, query).then(response => {
         this.$set(this, 'numSamples', response.body);
       }, response => {
         this.$set(this, 'numSamples', -1);
@@ -79,10 +173,72 @@ export default {
   mounted () {
   },
   methods: {
+    updateFeatures (features) {
+      if (!features) {
+        features = [];
+      }
+      this.$store.commit('selectedFeatures', features);
+      // this.$set(this, 'selectedFeatures', features);
+    },
+    updateMetaTypes (metaTypes) {
+      if (!metaTypes) {
+        metaTypes = [];
+      }
+      this.$store.commit('selectedMetaTypes', metaTypes);
+      // this.$set(this, 'selectedMetaTypes', metaTypes);
+    },
+    // this is a copy and paste from Filter.vue
+    // TODO: move this function to it's own module so it's not duplicated
+    getSelectizeSettings (metaType, metaData) {
+      const settings = {};
+      if (metaData.options === null) {
+        const loadfn = function (query, callback) {
+          this.$http.get(
+            `/api/datasets/${this.$route.params.dataset}/meta/${metaType}/search/${query}`
+          ).then(response => {
+            const items = response.data.map(item => {
+              return {name: item};
+            });
+            callback(items);
+          }, failedResponse => {
+            console.log(failedResponse);
+            callback();
+          });
+        };
+        settings.load = loadfn.bind(this);
+      }
+      return settings;
+    },
     download () {
-      const payload = {};
-      Object.assign(payload, this.filters); // copy values from filters
-      payload.options = this.options;
+      let metaTypes, features;
+
+      switch (this.radios.metaTypes) {
+        case 'all':
+          metaTypes = [];
+          break;
+        case 'filters':
+          metaTypes = Object.keys(this.filters);
+          break;
+        case 'selected':
+          metaTypes = this.selectedMetaTypes;
+          break;
+      }
+
+      switch (this.radios.features) {
+        case 'all':
+          features = [];
+          break;
+        case 'selected':
+          features = this.selectedFeatures;
+          break;
+      }
+
+      const payload = {
+        filters: this.filters,
+        options: this.options,
+        features: features,
+        metaTypes: metaTypes,
+      };
 
       const form = document.createElement('form');
       form.setAttribute('method', 'post');
@@ -110,6 +266,13 @@ h1, h2, h3 {
 .form-group {
   label {
     font-size: 1.25em;
+  }
+}
+.column-selection {
+  margin-top: 25px;
+  margin-bottom: 25px;
+  h4 {
+    font-weight: 300;
   }
 }
 </style>

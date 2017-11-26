@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, json, sqlite3
 from pprint import pprint
-from typing import Set, Any, Iterable
+from typing import Set, List, Any, Iterable
 from .Query import Query
 from .Dao import SQLiteDao, Hdf5Dao
 from .Exceptions import RequestError, ServerError
@@ -61,10 +61,11 @@ class GeneyDataset:
 	def get_filtered_data(self, filters, illegal_chars=[]):
 		query = Query(filters, self.__description)
 		sample_ids = self.query_samples(query)
-		meta_names = query.meta_filter_names
+		meta_names = self.get_query_metatype_names(query)
 
 		if SAMPLE_ID in meta_names:
 			meta_names.remove(SAMPLE_ID)
+		print(meta_names)
 
 		# TODO figure out the max number of items for files we can build
 		feature_slices, num_features_requested = self.get_query_feature_slices(query)
@@ -94,6 +95,13 @@ class GeneyDataset:
 		sqlite_dao.close()
 		hdf5_dao.close()
 
+
+	def get_query_metatype_names(self, query: Query) -> List[str]:
+		if len(query.meta_filter_names):
+			return query.meta_filter_names
+		else:
+			with SQLiteDao(self.__dir) as dao:
+				return dao.get_all_variable_names()
 	# returns a list of tuple pairs, where each pair represents 
 	# a start and end to the slice of features to grab from the HDF5 file
 	# as well as the total number of features requested

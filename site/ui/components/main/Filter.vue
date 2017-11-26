@@ -66,15 +66,6 @@
         </div>
       </div>
 
-      <h1 style="margin-top:50px;">Select {{ dataset.featureDescriptionPlural | capitalize }}</h1>
-      <selectize
-        :options="metaData.features.options"
-        :value="selectedFeatures"
-        @updated="updateFeatures"
-        :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural)"
-        :settings="getSelectizeSettings('features', metaData.features)"
-        id="features"></selectize>
-
     </div>
     <div id="description" class="col-12 spacer">
       <div v-if="numKeys > 0">
@@ -104,14 +95,14 @@
 
           <h4 v-if="num < numKeys - 1"><strong>AND</strong></h4>
         </h4>
-        <div v-if="selectedFeatures && selectedFeatures.length">
+        <!-- <div v-if="selectedFeatures && selectedFeatures.length">
           <h3>And you want only the
             <strong>{{ selectedFeatures.length }}</strong>
             <span v-if="selectedFeatures.length > 1">{{ dataset.featureDescriptionPlural }}</span>
             <span v-else>{{ dataset.featureDescription }}</span>
             listed above.</h3>
-        </div>
-        <h3 v-else>And you want <strong>ALL</strong> of the {{ dataset.featureDescriptionPlural }}.</h3>
+        </div> -->
+        <!-- <h3 v-else>And you want <strong>ALL</strong> of the {{ dataset.featureDescriptionPlural }}.</h3> -->
 
         <h2>Is that correct?</h2>
         <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Confirm</button>
@@ -135,7 +126,6 @@ export default {
   },
   data () {
     return {
-      selectedFeatures: [],
       currentMetaType: '',
       selectedMeta: {},
       currentMeta: {},
@@ -271,12 +261,6 @@ export default {
       }
       this.$set(this, 'currentMeta', {});
     },
-    updateFeatures (features) {
-      if (!features) {
-        features = [];
-      }
-      this.$set(this, 'selectedFeatures', features);
-    },
     updateSelectedMeta (value, index, key = false) {
       if (key === false) {
         this.$set(this.selectedMeta, this.currentMetaType, value);
@@ -309,7 +293,7 @@ export default {
       this.$set(this, 'metaQuery', query);
     },
     commit () {
-      this.$store.commit('filters', {meta: this.metaQuery, features: this.selectedFeatures});
+      this.$store.commit('filters', this.metaQuery);
       router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
     },
     addLogicSet () {
@@ -407,9 +391,9 @@ export default {
   created () {
     if (this.$store.state.filters) {
       const filters = JSON.parse(JSON.stringify(this.$store.state.filters));
-      this.$set(this, 'selectedMeta', filters.meta);
-      this.$set(this, 'selectedFeatures', filters.features);
-      this.selectMetaType(Object.keys(filters.meta)[0]);
+      this.$set(this, 'selectedMeta', filters);
+      // this.$set(this, 'selectedFeatures', filters.features);
+      this.selectMetaType(Object.keys(filters)[0]);
       this.updateMetaQuery();
     }
   },
