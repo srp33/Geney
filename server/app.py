@@ -6,8 +6,12 @@ from responders.TsvResponse import TsvResponse
 from responders.JsonResponse import JsonResponse
 import json
 from data_access.Dataset import GeneyDataset
-import os
-DATA_PATH = os.getenv('GENEY_DATA_PATH', '/Users/pjtatlow/projects/web/geney/data/')
+import os, sys
+
+DATA_PATH = os.getenv('GENEY_DATA_PATH', '')
+if len(DATA_PATH) === 0:
+    print('GENEY_DATA_PATH NOT SET!')
+    sys.exit(1)
 
 RESPONDERS = {
     'tsv': TsvResponse,
@@ -94,8 +98,4 @@ def bad_request(error='bad request'):
 app.register_error_handler(404, not_found)
 
 if __name__ == '__main__':
-
-            # print(directory)
-    # api = MyAPI(datasets)
-    # print(api.not_found(123))
     app.run(debug=True, host='0.0.0.0', port=9998)
