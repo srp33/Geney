@@ -9,7 +9,7 @@ from data_access.Dataset import GeneyDataset
 import os, sys
 
 DATA_PATH = os.getenv('GENEY_DATA_PATH', '')
-if len(DATA_PATH) === 0:
+if len(DATA_PATH) == 0:
     print('GENEY_DATA_PATH NOT SET!')
     sys.exit(1)
 
