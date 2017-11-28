@@ -84,7 +84,10 @@ class GeneyDataset:
 			yield sample_name
 			for meta_name in meta_names:
 				if meta_name in sample_metadata:
-					yield sample_metadata[meta_name]
+					if any(illegal_char in sample_metadata[meta_name] for illegal_char in illegal_chars) :
+						yield "\"" + sample_metadata[meta_name] + "\""
+					else :
+						yield sample_metadata[meta_name] 
 				else:
 					yield ''
 
