@@ -6,7 +6,7 @@
       <selectize
         :options="metaTypes"
         :value="currentMetaType"
-        placeholder="Select meta type to filter"
+        placeholder="Select variables to filter on"
         @updated="selectMetaType"
         :settings="metaTypeSettings"
         id="meta-types"></selectize>
@@ -18,7 +18,7 @@
           :options="currentMeta.options"
           :value="currentSelectedMeta"
           @updated="x => updateSelectedMeta(x)"
-          placeholder="Filter Meta"
+          placeholder="Select value(s) to include"
           :settings="getSelectizeSettings(currentMetaType, currentMeta)"
           id="current-meta-type"></selectize>
 

@@ -28,19 +28,19 @@
       </div>
 
       <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
-        <h4>Select Metadata Types</h4>
+        <h4>Select Variables</h4>
 
         <b-form-radio-group v-model="radios.metaTypes" stacked>
-          <b-form-radio value="filters">Download Only Metadata Types Used In Filters</b-form-radio>
-          <b-form-radio value="all">Download All Metadata Types</b-form-radio>
-          <b-form-radio value="selected">Download Selected Metadata Types</b-form-radio>
+          <b-form-radio value="filters">Download Only Variables Used In Filters</b-form-radio>
+          <b-form-radio value="all">Download All Variables</b-form-radio>
+          <b-form-radio value="selected">Download Selected Variables</b-form-radio>
         </b-form-radio-group>
 
         <div v-show="radios.metaTypes === 'selected'">
           <selectize
             :options="metaTypes"
             :value="selectedMetaTypes"
-            placeholder="Select meta type to filter"
+            placeholder="Variables"
             @updated="updateMetaTypes"
             :settings="metaTypeSettings"
             id="meta-types"></selectize>
@@ -168,7 +168,6 @@ export default {
       router.replace(newPath);
     } else {
       const query = {filters: filters, features: [], metaTypes: []};
-      console.log(`/api/datasets/${this.$route.params.dataset}/samples`);
       this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, query).then(response => {
         this.$set(this, 'numSamples', response.body);
       }, response => {
