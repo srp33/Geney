@@ -2,11 +2,11 @@ from .GeneyResponse import GeneyResponse
 from fastnumbers import isreal
 
 class JsonResponse(GeneyResponse):
-    def __init__(self, dataset, query):
+    def __init__(self, dataset, query, gzip_output=False):
         headers = {
             "Content-Disposition": "attachment; filename={}.json".format(dataset.dataset_id)
         }            
-        super(JsonResponse, self).__init__(dataset, query, headers, "text/plain")
+        super(JsonResponse, self).__init__(dataset, query, headers, "text/plain", gzip_output)
     
     def generate(self, dataset, query):
         yield '['

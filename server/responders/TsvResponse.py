@@ -1,11 +1,12 @@
 from .GeneyResponse import GeneyResponse
 
 class TsvResponse(GeneyResponse):
-    def __init__(self, dataset, query):
+    def __init__(self, dataset, query, gzip_output=False):
+        gzip_ext = '.gz' if gzip_output else ''
         headers = {
-            "Content-Disposition": "attachment; filename={}.tsv".format(dataset.dataset_id)
-        }            
-        super(TsvResponse, self).__init__(dataset, query, headers, 'text/tab-separated-values')
+            "Content-Disposition": "attachment; filename={}.tsv{}".format(dataset.dataset_id, gzip_ext)
+        }
+        super(TsvResponse, self).__init__(dataset, query, headers, 'text/tab-separated-values', gzip_output)
     
     def generate(self, dataset, query):
         new_row = True

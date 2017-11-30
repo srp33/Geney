@@ -10,7 +10,7 @@ import os, sys
 
 DATA_PATH = os.getenv('GENEY_DATA_PATH', '')
 if len(DATA_PATH) == 0:
-    print('GENEY_DATA_PATH NOT SET!')
+    print('"GENEY_DATA_PATH" environment variable not set!')
     sys.exit(1)
 
 RESPONDERS = {
@@ -72,22 +72,29 @@ def count_samples(dataset_id):
 @app.route('/api/datasets/<string:dataset_id>/download', strict_slashes=False, methods=['POST'])
 def download(dataset_id):
     if dataset_id in DATASETS:
-        query = json.loads(request.form.get('query'))
-        if ('options' not in query) or ('fileformat' not in query['options']):
+        try:
+            query = json.loads(request.form.get('query'))
+            options = json.loads(request.form.get('options'))
+        except Exception:
             return bad_request()
-        options = query['options']
-        query.pop('options')
+        
+        if 'fileformat' not in options:
+            return bad_request()
+
         file_format = options['fileformat']
 
         if file_format not in RESPONDERS:
             return bad_request()
 
+        gzip_output = options['gzip'] if ('gzip' in options) else False
+
+        # TODO: Validate query before starting response
+
         responder = RESPONDERS[file_format]
 
-        return responder(DATASETS[dataset_id], query)
+        return responder(DATASETS[dataset_id], query, gzip_output)
     else:
         return not_found('unknown meta id')
-
 
 def not_found(error='not found'):
     return make_response(jsonify({'error': "not found"}), 404)

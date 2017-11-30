@@ -31,7 +31,7 @@
         <h4>Select Metadata Types</h4>
 
         <b-form-radio-group v-model="radios.metaTypes" stacked>
-          <b-form-radio value="filters">Download Metadata Types From Filters</b-form-radio>
+          <b-form-radio value="filters">Download Only Metadata Types Used In Filters</b-form-radio>
           <b-form-radio value="all">Download All Metadata Types</b-form-radio>
           <b-form-radio value="selected">Download Selected Metadata Types</b-form-radio>
         </b-form-radio-group>
@@ -61,7 +61,12 @@
           @updated="x => options.fileformat = x"
           :settings="fileformats.settings" ></selectize>
       </div>
-
+      <div class="col-12">
+        <b-form-checkbox id="checkbox1"
+                      v-model="options.gzip">
+          Gzip Downloaded File
+        </b-form-checkbox>
+      </div>
 
       <button class="btn btn-primary btn-lg" @click="download" id="download-btn">Download</button>
     </div>
@@ -93,6 +98,7 @@ export default {
       },
       options: {
         fileformat: 'tsv',
+        gzip: false,
       },
       numSamples: null,
       checkboxes: {
@@ -233,9 +239,8 @@ export default {
           break;
       }
 
-      const payload = {
+      const query = {
         filters: this.filters,
-        options: this.options,
         features: features,
         metaTypes: metaTypes,
       };
@@ -245,15 +250,22 @@ export default {
       form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download`);
       form.setAttribute('target', '_blank');
 
-      const hiddenField = document.createElement('input');
-      hiddenField.setAttribute('type', 'hidden');
-      hiddenField.setAttribute('name', 'query');
-      hiddenField.setAttribute('value', JSON.stringify(payload));
+      const queryField = document.createElement('input');
+      queryField.setAttribute('type', 'hidden');
+      queryField.setAttribute('name', 'query');
+      queryField.setAttribute('value', JSON.stringify(query));
 
-      form.appendChild(hiddenField);
+      const optionsField = document.createElement('input');
+      optionsField.setAttribute('type', 'hidden');
+      optionsField.setAttribute('name', 'options');
+      optionsField.setAttribute('value', JSON.stringify(this.options));
+
+      form.appendChild(queryField);
+      form.appendChild(optionsField);
 
       document.body.appendChild(form);
       form.submit();
+      document.body.removeChild(form);
     },
   },
 };
@@ -267,6 +279,9 @@ h1, h2, h3 {
   label {
     font-size: 1.25em;
   }
+}
+#download-btn {
+  margin-top: 25px;
 }
 .column-selection {
   margin-top: 25px;

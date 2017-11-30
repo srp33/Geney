@@ -12,7 +12,7 @@
         id="meta-types"></selectize>
 
       <div class="spacer"></div>
-      <div id="filter" v-if="currentMetaType">
+      <div id="filter" v-if="currentMetaType && currentMeta">
 
         <selectize v-if="currentMeta.options !== 'continuous'"
           :options="currentMeta.options"
@@ -128,7 +128,7 @@ export default {
     return {
       currentMetaType: '',
       selectedMeta: {},
-      currentMeta: {},
+      currentMeta: null,
       settings: {
         oneItem: {
           maxItems: 1,
@@ -158,8 +158,8 @@ export default {
     metaTypes () {
       if (this.metaData && this.metaData.meta) {
         return Object.keys(this.metaData.meta).map(x => ({'name': x}));
-      } else if (this.$store.state.filters && this.$store.state.filters.meta) {
-        return Object.keys(this.$store.state.filters.meta).map(val => ({ name: val }));
+      } else if (this.$store.state.filters) {
+        return Object.keys(this.$store.state.filters).map(val => ({ name: val }));
       } else {
         return [];
       }
@@ -259,7 +259,7 @@ export default {
           return;
         }
       }
-      this.$set(this, 'currentMeta', {});
+      this.$set(this, 'currentMeta', null);
     },
     updateSelectedMeta (value, index, key = false) {
       if (key === false) {
@@ -361,6 +361,7 @@ export default {
         };
         settings.load = loadfn.bind(this);
       }
+      console.log(metaType, metaData.options, settings);
       return settings;
     },
     getVariableMetadata (metaType) {

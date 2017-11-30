@@ -47,6 +47,10 @@ class GeneyDataset:
 		return self.__description['numFeatures']
 	
 	@property
+	def num_samples(self) -> int:
+		return self.__description['numSamples']
+	
+	@property
 	def description(self):
 		return self.__description
 
@@ -56,7 +60,13 @@ class GeneyDataset:
 
 	def get_variable(self, variable_name):
 		with SQLiteDao(self.__dir) as dao:
-			return dao.get_variable_options(variable_name)
+			if variable_name == 'sampleID':
+				sampleIdValues = {'numOptions': self.num_samples, "options": None}
+				if self.num_samples <= MAX_OPTIONS:
+					sampleIdValues['options'] = dao.get_sample_id_options()
+				return sampleIdValues
+			else:
+				return dao.get_variable_options(variable_name)
 
 	def get_filtered_data(self, filters, illegal_chars=[]):
 		query = Query(filters, self.__description)
@@ -95,13 +105,13 @@ class GeneyDataset:
 		sqlite_dao.close()
 		hdf5_dao.close()
 
-
 	def get_query_metatype_names(self, query: Query) -> List[str]:
 		if len(query.meta_filter_names):
 			return query.meta_filter_names
 		else:
 			with SQLiteDao(self.__dir) as dao:
 				return dao.get_all_variable_names()
+
 	# returns a list of tuple pairs, where each pair represents 
 	# a start and end to the slice of features to grab from the HDF5 file
 	# as well as the total number of features requested
@@ -158,7 +168,10 @@ class GeneyDataset:
 	def search(self, meta_type, search_val):
 		with SQLiteDao(self.__dir) as dao:
 			if meta_type == '':
-				return dao.search_meta_types(search_val)
+				meta_types = dao.search_meta_types(search_val)
+				if search_val == '' or search_val in 'sampleID':
+					meta_types.insert(0, 'sampleID')
+				return meta_types
 			elif meta_type == 'features':
 				return dao.search_features(search_val)
 			elif meta_type == SAMPLE_ID:

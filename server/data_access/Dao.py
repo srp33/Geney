@@ -254,6 +254,13 @@ class SQLiteDao:
 				return None
 			return { "min": min_val, "max": max_val, "options": "continuous" }
 
+	def get_sample_id_options(self) -> Dict[str, Any]:
+		cursor = self.__con.cursor()
+		options = []
+		for sample in cursor.execute(GET_ALL_SAMPLE_NAMES):
+			options.append(sample[0])
+		cursor.close()
+		return options
 
 class Hdf5Dao:
 

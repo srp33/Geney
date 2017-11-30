@@ -1,11 +1,12 @@
 from .GeneyResponse import GeneyResponse
 
 class CsvResponse(GeneyResponse):
-    def __init__(self, dataset, query):
+    def __init__(self, dataset, query, gzip_output=False):
+        gzip_ext = '.gz' if gzip_output else ''
         headers = {
-            "Content-Disposition": "attachment; filename={}.csv".format(dataset.dataset_id)
+            "Content-Disposition": "attachment; filename={}.csv{gzip}".format(dataset.dataset_id, gzip_ext)
         }            
-        super(CsvResponse, self).__init__(dataset, query, headers, "text/plain")
+        super(CsvResponse, self).__init__(dataset, query, headers, "text/plain", gzip_output)
     
     def generate(self, dataset, query):
         new_row = True

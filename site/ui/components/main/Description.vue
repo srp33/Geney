@@ -23,7 +23,7 @@
         <span id="dataset-num-meta-types">{{ dataset.numMetaTypes }} Meta Data Types</span>
       </li>
     </ul>
-    <router-link :to="'/dataset/' + dataset.id + '/filter'" class="btn btn-primary btn-lg" id="dataset-next-btn">Select Samples & {{ dataset.featureDescriptionPlural | capitalize }}</router-link>
+    <router-link :to="'/dataset/' + dataset.id + '/filter'" class="btn btn-primary btn-lg" id="dataset-next-btn">Select Samples</router-link>
   </div>
 </template>
 
