@@ -169,7 +169,6 @@ export default {
     },
     currentSelectedMeta () {
       if (this.currentMetaType) {
-        console.log('updating currentSelectedMeta');
         return this.selectedMeta[this.currentMetaType];
       }
       return {};
@@ -212,7 +211,6 @@ export default {
             });
             callback(items);
           }, failedResponse => {
-            console.log(failedResponse);
             callback();
           });
         };
@@ -355,18 +353,15 @@ export default {
             });
             callback(items);
           }, failedResponse => {
-            console.log(failedResponse);
             callback();
           });
         };
         settings.load = loadfn.bind(this);
       }
-      console.log(metaType, metaData.options, settings);
       return settings;
     },
     getVariableMetadata (metaType) {
       return Vue.http.get(`/api/datasets/${this.dataset.id}/meta/${metaType}`).then(response => {
-        console.log(response);
         const data = response.body;
         if (Array.isArray(data.options)) {
           data.options = data.options.map(val => ({ name: val }));
