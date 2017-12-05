@@ -27,8 +27,6 @@ echo "    ports:" >> docker-compose.yml
 echo "      - "80:80"" >> docker-compose.yml
 echo "  backend-server:" >> docker-compose.yml
 echo "    image: pjtatlow/geney-server:0.0.3" >> docker-compose.yml
-echo "    ports:" >> docker-compose.yml
-echo "      - "8888:8888"" >> docker-compose.yml
 echo "    volumes:" >> docker-compose.yml
 echo "      - "./data:/root/data"" >> docker-compose.yml
 echo "    environment:" >> docker-compose.yml
