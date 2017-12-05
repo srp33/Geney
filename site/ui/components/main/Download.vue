@@ -23,27 +23,28 @@
             @updated="updateFeatures"
             :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural)"
             :settings="getSelectizeSettings('features', metaData.features)"
-            id="features"></selectize>
+            errorMessage="Required"
+            id="feature-select"></selectize>
         </div>
       </div>
 
       <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
         <h4>Select Variables</h4>
 
-        <b-form-radio-group v-model="radios.metaTypes" stacked>
-          <b-form-radio value="filters">Download Only Variables Used In Filters</b-form-radio>
+        <b-form-radio-group v-model="radios.variables" stacked>
           <b-form-radio value="all">Download All Variables</b-form-radio>
           <b-form-radio value="selected">Download Selected Variables</b-form-radio>
         </b-form-radio-group>
 
-        <div v-show="radios.metaTypes === 'selected'">
+        <div v-show="radios.variables === 'selected'">
           <selectize
             :options="metaTypes"
-            :value="selectedMetaTypes"
+            :value="selectedVariables"
             placeholder="Variables"
-            @updated="updateMetaTypes"
+            @updated="updateVariables"
             :settings="metaTypeSettings"
-            id="meta-types"></selectize>
+            errorMessage="Required"
+            id="variable-select"></selectize>
         </div>
       </div>
 
@@ -77,6 +78,7 @@
 <script>
 import router from '../../router';
 import selectize from '../shared/Selectize';
+import $ from 'jquery';
 
 export default {
   name: 'download',
@@ -101,13 +103,9 @@ export default {
         gzip: false,
       },
       numSamples: null,
-      checkboxes: {
-        allFeatures: true,
-        allMetaTypes: true,
-      },
       radios: {
         features: 'selected',
-        metaTypes: 'filters',
+        variables: 'selected',
       },
     };
   },
@@ -133,7 +131,9 @@ export default {
       }
     },
     metaTypeSettings () {
-      const baseSettings = {};
+      const baseSettings = {
+        required: true,
+      };
       if (this.metaData && this.metaData.meta === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
@@ -157,8 +157,8 @@ export default {
     selectedFeatures () {
       return this.$store.state.selectedFeatures;
     },
-    selectedMetaTypes () {
-      return this.$store.state.selectedMetaTypes;
+    selectedVariables () {
+      return this.$store.state.selectedVariables;
     },
   },
   created () {
@@ -183,19 +183,19 @@ export default {
         features = [];
       }
       this.$store.commit('selectedFeatures', features);
-      // this.$set(this, 'selectedFeatures', features);
     },
-    updateMetaTypes (metaTypes) {
-      if (!metaTypes) {
-        metaTypes = [];
+    updateVariables (variables) {
+      if (!variables) {
+        variables = [];
       }
-      this.$store.commit('selectedMetaTypes', metaTypes);
-      // this.$set(this, 'selectedMetaTypes', metaTypes);
+      this.$store.commit('selectedVariables', variables);
     },
     // this is a copy and paste from Filter.vue
     // TODO: move this function to it's own module so it's not duplicated
     getSelectizeSettings (metaType, metaData) {
-      const settings = {};
+      const settings = {
+        required: true,
+      };
       if (metaData.options === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
@@ -214,18 +214,32 @@ export default {
       }
       return settings;
     },
+    valid () {
+      let valid = true;
+      if (this.radios.features === 'selected' && this.selectedFeatures.length === 0) {
+        // fake the input box losing focus so it will turn red
+        $(this.$el).find('#feature-select').find('.selectize-input').trigger('focusout');
+        valid = false;
+      }
+      if (this.radios.variables === 'selected' && this.selectedVariables.length === 0) {
+        $(this.$el).find('#variable-select').find('.selectize-input').trigger('focusout');
+        valid = false;
+      }
+      return valid;
+    },
     download () {
+      console.log(this.valid());
+      if (!this.valid()) {
+        return;
+      }
       let metaTypes, features;
 
-      switch (this.radios.metaTypes) {
+      switch (this.radios.variables) {
         case 'all':
           metaTypes = [];
           break;
-        case 'filters':
-          metaTypes = Object.keys(this.filters);
-          break;
         case 'selected':
-          metaTypes = this.selectedMetaTypes;
+          metaTypes = this.selectedVariables;
           break;
       }
 

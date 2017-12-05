@@ -2,6 +2,9 @@
 
   <div class="selectize">
     <select :placeholder="placeholder" autofocus="false"></select>
+    <transition name="slide-fade">
+      <span class="error-message" v-show="dirty && invalid && errorMessage">{{errorMessage}}</span>
+    </transition>
   </div>
 </template>
 
@@ -11,11 +14,12 @@ import 'selectize';
 
 export default {
   name: 'selectize',
-  props: ['options', 'value', 'placeholder', 'settings'],
+  props: ['options', 'value', 'placeholder', 'settings', 'errorMessage'],
   data () {
     return {
       selectize: null,
       dirty: false,
+      invalid: false,
     };
   },
   mounted () {
@@ -45,7 +49,9 @@ export default {
 
     // mark the selectize as dirty when it loses focus for the first time
     $(this.$el).find('.selectize-input').one('focusout', (e) => {
+      this.dirty = true;
       $(e.currentTarget).addClass('dirty');
+      this.setValidState(this.value);
     });
 
     // force single input to show selected value on initialization
@@ -61,14 +67,28 @@ export default {
       this.$emit('updated', values);
       const div = $(this.$el).find('.selectize-input');
       div.scrollTop($(div)[0].scrollHeight);
+      this.setValidState(values);
+    },
+    setValidState (values) {
       if (this.settings.required) {
-        if (this.settings.maxItems === 1) {
-          if (!values) {
-            div.parent().addClass('has-error');
-          } else {
-            div.parent().removeClass('has-error');
-          }
+        const div = $(this.$el).find('.selectize-input');
+        if (!this.valid(values)) {
+          div.parent().addClass('has-error');
+          this.invalid = true;
+        } else {
+          div.parent().removeClass('has-error');
+          this.invalid = false;
         }
+      }
+    },
+    valid (value) {
+      if (this.settings.maxItems === 1) {
+        return !!value;
+      } else {
+        if (!Array.isArray(value) || value.length === 0) {
+          return false;
+        }
+        return true;
       }
     },
   },
@@ -95,18 +115,34 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 h1, h2 {
   font-weight: normal;
 }
 .selectize {
   text-align: left;
 }
-
-
 .selectize-input {
   max-height: 83px !important;
   overflow-y: scroll !important;
 }
+.error-message {
+  position: relative;
+  left: 12px;
+  top: -4px;
+  color: #d9534f;
+  font-size: 14px;
+}
 
+.slide-fade-enter-active {
+  transition: all .3s ease;
+}
+.slide-fade-leave-active {
+  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
+}
 </style>

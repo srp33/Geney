@@ -4,8 +4,8 @@ export default {
   },
   filters (state, value) {
     state.filters = value;
-    if (state.filters && state.selectedMetaTypes.length === 0) {
-      state.selectedMetaTypes = Object.keys(state.filters);
+    if (state.filters) {
+      // state.selectedVariables = Object.keys(state.filters);
     }
   },
   datasets (state, value) {
@@ -14,7 +14,7 @@ export default {
   dataset (state, value) {
     state.dataset = value;
     state.selectedFeatures = [];
-    state.selectedMetaTypes = [];
+    state.selectedVariables = [];
   },
   user (state, value) {
     state.user = value;
@@ -40,7 +40,7 @@ export default {
   selectedFeatures (state, payload) {
     state.selectedFeatures = payload;
   },
-  selectedMetaTypes (state, payload) {
-    state.selectedMetaTypes = payload;
+  selectedVariables (state, payload) {
+    state.selectedVariables = payload;
   },
 };
