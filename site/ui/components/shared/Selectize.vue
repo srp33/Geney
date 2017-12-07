@@ -3,7 +3,10 @@
   <div class="selectize">
     <select :placeholder="placeholder" autofocus="false"></select>
     <transition name="slide-fade">
-      <span class="error-message" v-show="dirty && invalid && errorMessage">{{errorMessage}}</span>
+      <span class="error-message" v-if="errorMessage">
+        <span v-if="dirty && invalid">{{errorMessage}}</span>
+        &nbsp; <!-- just to keep it from expanding and shrinking when the message appears and disappears -->
+      </span>
     </transition>
   </div>
 </template>

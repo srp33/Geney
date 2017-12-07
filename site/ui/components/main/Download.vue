@@ -4,7 +4,11 @@
     <div class="col-12">
       <h1>Download</h1>
       <div v-if="numSamples != null">
-        <h3 v-if="numSamples >= 0" id="num-samples-selected">You have selected {{ numSamples }} samples.</h3>
+        <h3 v-if="numSamples > 0" id="num-samples-selected">You have selected {{ numSamples }} samples.</h3>
+        <span v-else-if="numSamples === 0" id="num-samples-selected">
+          <h3>Uh oh. Your filters didn't match any samples!</h3>
+          <h4>Click <router-link :to="'/dataset/' + dataset.id + '/filter'">here</router-link> to edit your filters</h4>
+        </span>
         <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
       </div>
 
@@ -69,7 +73,10 @@
         </b-form-checkbox>
       </div>
 
-      <button class="btn btn-primary btn-lg" @click="download" id="download-btn">Download</button>
+      <button class="btn btn-primary btn-lg" @click="download" id="download-btn">
+        Download
+        <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
+      </button>
     </div>
 
   </div>
@@ -160,6 +167,50 @@ export default {
     selectedVariables () {
       return this.$store.state.selectedVariables;
     },
+    downloadTooltipSettings () {
+      const settings = {
+        html: true,
+        placement: 'top',
+        title: '',
+      };
+
+      if (this.formErrors.numSamples) {
+        settings.title += `
+          <span>Your filters did not match any samples. No data to download.</span><br>
+        `;
+      } else {
+        if (this.formErrors.features) {
+          settings.title += `
+            <span>No ${this.dataset.featureDescriptionPlural} selected.</span><br>
+          `;
+        }
+
+        if (this.formErrors.variables) {
+          settings.title += `
+            <span>No variables selected.</span><br>
+          `;
+        }
+      }
+
+      return settings;
+    },
+    formErrors () {
+      let valid = true;
+      let errors = {};
+      if (this.radios.features === 'selected' && this.selectedFeatures.length === 0) {
+        valid = false;
+        errors.features = true;
+      }
+      if (this.radios.variables === 'selected' && this.selectedVariables.length === 0) {
+        valid = false;
+        errors.variables = true;
+      }
+      if (this.numSamples === 0) {
+        valid = false;
+        errors.numSamples = true;
+      }
+      return valid ? null : errors;
+    },
   },
   created () {
     const filters = this.$store.state.filters;
@@ -214,22 +265,21 @@ export default {
       }
       return settings;
     },
-    valid () {
-      let valid = true;
-      if (this.radios.features === 'selected' && this.selectedFeatures.length === 0) {
+    triggerErrorState () {
+      if (!this.formErrors) {
+        return;
+      }
+      if (this.formErrors.features) {
         // fake the input box losing focus so it will turn red
         $(this.$el).find('#feature-select').find('.selectize-input').trigger('focusout');
-        valid = false;
       }
-      if (this.radios.variables === 'selected' && this.selectedVariables.length === 0) {
+      if (this.formErrors.variables) {
         $(this.$el).find('#variable-select').find('.selectize-input').trigger('focusout');
-        valid = false;
       }
-      return valid;
     },
     download () {
-      console.log(this.valid());
-      if (!this.valid()) {
+      if (this.formErrors !== null) {
+        this.triggerErrorState();
         return;
       }
       let metaTypes, features;
@@ -295,6 +345,14 @@ h1, h2, h3 {
 }
 #download-btn {
   margin-top: 25px;
+  position: relative;
+  span {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+  }
 }
 .column-selection {
   margin-top: 25px;
