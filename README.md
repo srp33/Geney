@@ -1,5 +1,7 @@
 # Geney
 
+We have created Geney, a Web-based tool for querying large genomic datasets. You can find our current working prototype [here](http://45.56.87.243). Please let us know what you think!
+
 ## Developing Geney
 
 1. You need to have both python3 and node. If you're on a Mac, you can install homebrew and then type into your terminal `brew install python3 node`. If you're on Linux, consult your distibutions's package manager on how to install these.
