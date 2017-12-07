@@ -1,6 +1,6 @@
 # Geney
 
-We have created Geney, a Web-based tool for querying large genomic datasets. You can find our current working prototype [here](http://45.56.87.243). Please let us know what you think!
+We have created Geney, a Web-based tool for querying large genomic datasets. You can find our current working prototype [here](http://45.56.87.243). We are working to add more datasets and new functionality. If there is a publicly available dataset that you would like to be able to query with this tool, please let us know. Please also let us know if you have feedback!
 
 ## Developing Geney
 
