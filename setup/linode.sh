@@ -11,12 +11,6 @@ apt-get install docker.io -y
 
 # setup data directory
 mkdir data
-##mv dataset.tar.gz data/
-cd data
-wget -O dataset.tar.gz https://osf.io/zqmsc/download?version=1
-tar -zxvf dataset.tar.gz # I put this file in /root myself using scp before running this script
-rm dataset.tar.gz
-cd ..
 
 # create the docker-compose file
 echo "version: '3'" >> docker-compose.yml
