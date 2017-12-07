@@ -1,5 +1,20 @@
-cd data
-wget -O dataset.tar.gz https://osf.io/zqmsc/download?version=1
-tar -zxvf dataset.tar.gz
-rm dataset.tar.gz
-cd ..
+#!/bin/bash
+
+set -euo pipefail
+
+function download {
+  osfID="$1"
+
+  if [ ! -f $osfID.tar.gz ]
+  then 
+    url="https://osf.io/${osfID}/download?version=1"
+    wget -O $osfID.tar.gz "$url"
+    tar -zxvf $osfID.tar.gz
+    rm $osfID.tar.gz
+  fi
+}
+
+currentDir=$(pwd)
+cd /root/data
+download zqmsc
+cd $currentDir

@@ -1,3 +1,7 @@
+#!/bin/bash
+
+cd ~
+
 # Disable IPV6 because this stops it from being able to reach security.ubuntu.com 
 # during the apt-get update for some reason
 echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
@@ -10,7 +14,7 @@ apt-get update
 apt-get install docker.io -y
 
 # setup data directory
-mkdir data
+mkdir -p data
 
 # create the docker-compose file
 echo "version: '3'" >> docker-compose.yml
