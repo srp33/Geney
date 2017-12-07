@@ -1,6 +1,6 @@
 # Geney
 
-![alt text](https://github.com/srp33/Geney/blob/master/site/ui/assets/geney-lamp.png | width=400)
+![alt text](https://github.com/srp33/Geney/blob/master/site/ui/assets/geney-lamp.png){:width="50%"}
 
 Geney is a Web-based tool for querying large genomic datasets. You can filter data based on sample-level annotations, and you can select your specific genes of interest. Currently, Geney focuses mostly on genomic and transcriptomic data, but it is flexible enough to be able to handle other types of data, too.
 
