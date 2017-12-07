@@ -14,4 +14,10 @@ function download {
   fi
 }
 
+currentDir=$(pwd)
+cd /root/data
 download zqmsc
+cd $currentDir
+
+docker-compose down
+docker-compose up -d
