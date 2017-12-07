@@ -5,7 +5,7 @@ export default {
   filters (state, value) {
     state.filters = value;
     if (state.filters) {
-      // state.selectedVariables = Object.keys(state.filters);
+      state.selectedVariables = Object.keys(state.filters);
     }
   },
   datasets (state, value) {

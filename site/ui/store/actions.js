@@ -6,15 +6,16 @@ export default {
     Vue.http.get('/api/datasets').then(response => {
       const datasets = response.data;
       for (let datasetId in datasets) {
+        datasets[datasetId].id = datasetId;
         if (!datasets[datasetId].featureDescription) {
-          datasets[datasetId].featureDescription = 'features';
-          datasets[datasetId].id = datasetId;
+          datasets[datasetId].featureDescriptionPlural = 'features';
+          datasets[datasetId].featureDescription = 'feature';
         }
       }
-      context.commit('datasets', response.data);
+      context.commit('datasets', datasets);
       if (router.currentRoute.params.dataset) {
         const id = router.currentRoute.params.dataset;
-        let dataset = response.data[id] || {};
+        let dataset = datasets[id] || {};
         context.dispatch('setDataset', dataset);
       }
     }, response => {
@@ -53,22 +54,23 @@ export default {
         }
       }
       Vue.http.get(`/api/datasets/${context.state.dataset.id}/meta`).then(response => {
-        for (let key in response.data.meta) {
-          const metaType = response.data.meta[key];
+        const metadata = response.data;
+        for (let key in metadata.meta) {
+          const metaType = metadata.meta[key];
           if (Array.isArray(metaType.options)) {
             metaType.options = metaType.options.map(x => ({
               'name': x,
             }));
           }
         }
-        if (Array.isArray(response.data.features.options)) {
-          response.data.features.options = response.data.features.options.map(x => ({
+        if (Array.isArray(metadata.features.options)) {
+          metadata.features.options = metadata.features.options.map(x => ({
             'name': x,
           }));
         }
-        response.data.dataset = context.state.dataset.id;
-        // window.localStorage.setItem(context.state.dataset.id + '_data', JSON.stringify(response.data));
-        context.commit('metaData', response.data);
+        metadata.dataset = context.state.dataset.id;
+        // window.localStorage.setItem(context.state.dataset.id + '_data', JSON.stringify(metadata));
+        context.commit('metaData', metadata);
       }, response => {
         console.log('FAILED', response);
         router.replace('/404');
