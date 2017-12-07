@@ -27,7 +27,7 @@
             @updated="updateFeatures"
             :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural)"
             :settings="getSelectizeSettings('features', metaData.features)"
-            errorMessage="Required"
+            :errorMessage="'Please select some ' + dataset.featureDescriptionPlural + ' or click \'Download all ' + $options.filters.capitalize(dataset.featureDescriptionPlural) +'\''"
             id="feature-select"></selectize>
         </div>
       </div>
@@ -47,7 +47,7 @@
             placeholder="Variables"
             @updated="updateVariables"
             :settings="metaTypeSettings"
-            errorMessage="Required"
+            errorMessage="Please select from variables or click 'Download All Variables'"
             id="variable-select"></selectize>
         </div>
       </div>
