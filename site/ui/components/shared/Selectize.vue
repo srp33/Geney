@@ -2,12 +2,11 @@
 
   <div class="selectize">
     <select :placeholder="placeholder" autofocus="false"></select>
-    <transition name="slide-fade">
+
       <span class="error-message" v-if="errorMessage">
         <span v-if="dirty && invalid">{{errorMessage}}</span>
         &nbsp; <!-- just to keep it from expanding and shrinking when the message appears and disappears -->
       </span>
-    </transition>
   </div>
 </template>
 
@@ -135,17 +134,5 @@ h1, h2 {
   top: -4px;
   color: #d9534f;
   font-size: 14px;
-}
-
-.slide-fade-enter-active {
-  transition: all .3s ease;
-}
-.slide-fade-leave-active {
-  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
-}
-.slide-fade-enter, .slide-fade-leave-to
-/* .slide-fade-leave-active below version 2.1.8 */ {
-  transform: translateX(10px);
-  opacity: 0;
 }
 </style>

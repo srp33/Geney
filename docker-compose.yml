@@ -1,14 +1,18 @@
 version: '3'
 
 services:
-  ui-server:
-    image: pjtatlow/geney-ui:0.0.3
-    ports:
-      - "8080:8080"
   backend-server:
-    image: pjtatlow/geney-server:0.0.3
+    build:
+      context: server
+      dockerfile: docker/dev.dockerfile
+    ports:
+      - 9998:9998
     volumes:
-      - "./data:/root/data"
+      - "./server:/root"
+      - "${GENEY_DATA_PATH}:/root/data"
     environment:
-      - GUNICORN_CMD_ARGS=--workers=4 --bind=:8888 --worker-class=eventlet --worker-connections 100
       - GENEY_DATA_PATH=/root/data
+      - GENEY_URL=localhost
+  
+  redis:
+    image: "redis:alpine"

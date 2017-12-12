@@ -26,6 +26,7 @@
     "sqlite3": "^3.1.8"
   },
   "devDependencies": {
+    "animate.css": "^3.5.2",
     "autoprefixer": "^7.1.2",
     "avoriaz": "^3.0.0",
     "babel-core": "^6.25.0",

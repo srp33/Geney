@@ -73,10 +73,20 @@
         </b-form-checkbox>
       </div>
 
-      <button class="btn btn-primary btn-lg" @click="download" id="download-btn">
-        Download
-        <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
-      </button>
+      <div class="col-12">
+        <button class="btn btn-primary btn-lg" @click="download" id="download-btn" :disabled="formErrors">
+          Download
+          <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
+        </button>
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-primary btn-lg" @click="plot" id="plot-btn" :disabled="formErrors">
+          Visualize with plot.ly
+          <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
+        </button>
+      </div>
+
     </div>
 
   </div>
@@ -174,21 +184,23 @@ export default {
         title: '',
       };
 
-      if (this.formErrors.numSamples) {
-        settings.title += `
-          <span>Your filters did not match any samples. No data to download.</span><br>
-        `;
-      } else {
-        if (this.formErrors.features) {
+      if (this.formErrors) {
+        if (this.formErrors.numSamples) {
           settings.title += `
-            <span>No ${this.dataset.featureDescriptionPlural} selected.</span><br>
+            <span>Your filters did not match any samples. No data to download.</span><br>
           `;
-        }
+        } else {
+          if (this.formErrors.features) {
+            settings.title += `
+              <span>No ${this.dataset.featureDescriptionPlural} selected.</span><br>
+            `;
+          }
 
-        if (this.formErrors.variables) {
-          settings.title += `
-            <span>No variables selected.</span><br>
-          `;
+          if (this.formErrors.variables) {
+            settings.title += `
+              <span>No variables selected.</span><br>
+            `;
+          }
         }
       }
 
@@ -330,6 +342,62 @@ export default {
       form.submit();
       document.body.removeChild(form);
     },
+    plot () {
+      if (this.formErrors !== null) {
+        this.triggerErrorState();
+        return;
+      }
+      let metaTypes, features;
+
+      switch (this.radios.variables) {
+        case 'all':
+          metaTypes = [];
+          break;
+        case 'selected':
+          metaTypes = this.selectedVariables;
+          break;
+      }
+
+      switch (this.radios.features) {
+        case 'all':
+          features = [];
+          break;
+        case 'selected':
+          features = this.selectedFeatures;
+          break;
+      }
+
+      const query = {
+        filters: this.filters,
+        features: features,
+        metaTypes: metaTypes,
+      };
+
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/link`, query).then(response => {
+        const data = response.data;
+        if (data.link) {
+          const linkElem = document.createElement('a');
+          linkElem.setAttribute('href', `https://plot.ly/external/?url=${data.link}`);
+          linkElem.setAttribute('target', '_blank');
+          document.body.appendChild(linkElem);
+          linkElem.click();
+          document.body.removeChild(linkElem);
+        } else {
+          this.$store.commit('addAlert', {
+            variant: 'danger',
+            message: 'Error generating link. Please try again later.',
+            show: 3,
+          });
+        }
+      }, error => {
+        console.error(error);
+        this.$store.commit('addAlert', {
+          variant: 'danger',
+          message: 'Error generating link. Please try again later.',
+          show: 3,
+        });
+      });
+    },
   },
 };
 </script>
@@ -343,7 +411,7 @@ h1, h2, h3 {
     font-size: 1.25em;
   }
 }
-#download-btn {
+#download-btn, #plot-btn {
   margin-top: 25px;
   position: relative;
   span {
@@ -354,6 +422,10 @@ h1, h2, h3 {
     width: 100%;
   }
 }
+#plot-btn {
+  margin-bottom: 25px;
+}
+
 .column-selection {
   margin-top: 25px;
   margin-bottom: 25px;

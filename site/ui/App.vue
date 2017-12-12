@@ -3,9 +3,7 @@
     <navbar></navbar>
 
     <div id="content">
-      <!--<transition :enter-active-class="enterTransition" :leave-active-class="leaveTransition" >-->
-        <router-view></router-view>
-      <!--</transition>-->
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -76,71 +74,6 @@ h1, h2, h3 {
       top: 25px;
       width: 100%;
     }
-  }
-
-  /* Transitions from Animate.css */
-  .animated {
-    animation-duration: 0.8s;
-    animation-fill-mode: both;
-  }
-
-  $from: 300%;
-  $to: -50%;
-
-  @keyframes slideInRight {
-    from {
-      transform: translate3d($from, 0, 0);
-      visibility: visible;
-    }
-
-    to {
-      transform: translate3d($to, 0, 0);
-    }
-  }
-  .slideInRight {
-    animation-name: slideInRight;
-  }
-  @keyframes slideInLeft {
-    from {
-      transform: translate3d(-$from, 0, 0);
-      visibility: visible;
-    }
-
-    to {
-      transform: translate3d($to, 0, 0);
-    }
-  }
-
-  .slideInLeft {
-    animation-name: slideInLeft;
-  }
-  @keyframes slideOutLeft {
-    from {
-      transform: translate3d($to, 0, 0);
-    }
-
-    to {
-      visibility: hidden;
-      transform: translate3d(-$from, 0, 0);
-    }
-  }
-
-  .slideOutLeft {
-    animation-name: slideOutLeft;
-  }
-  @keyframes slideOutRight {
-    from {
-      transform: translate3d($to, 0, 0);
-    }
-
-    to {
-      visibility: hidden;
-      transform: translate3d($from, 0, 0);
-    }
-  }
-
-  .slideOutRight {
-    animation-name: slideOutRight;
   }
 
 }

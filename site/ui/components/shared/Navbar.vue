@@ -44,14 +44,18 @@
     </b-navbar>
 
     <div class="alerts-container">
-      <div v-for="(alert, index) in alerts" :key="index">
-        <b-alert
-          :variant="alert.variant"
-          dismissible
-          :show="alert.show">
-          {{ alert.message }}
-        </b-alert>
-      </div>
+      <transition-group
+        name="custom-classes-transition"
+        enter-active-class="animated slideInRight">
+        <div v-for="(alert, index) in alerts" :key="index">
+          <b-alert
+            :variant="alert.variant"
+            dismissible
+            :show="alert.show">
+            {{ alert.message }}
+          </b-alert>
+        </div>
+      </transition-group>
     </div>
 
   </div>
