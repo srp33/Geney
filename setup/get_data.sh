@@ -8,10 +8,17 @@ function download {
   if [ ! -f $osfID.tar.gz ]
   then 
     url="https://osf.io/${osfID}/download?version=1"
-    wget -O data/$osfID.tar.gz "$url"
-    tar -zxvf data/$osfID.tar.gz -C data/
-    rm data/$osfID.tar.gz
+    wget -O $osfID.tar.gz "$url"
+    tar -zxvf $osfID.tar.gz
+    rm $osfID.tar.gz
   fi
 }
 
+#currentDir=$(pwd)
+cd /root/data
 download zqmsc
+
+docker-compose down
+docker-compose up -d
+
+#cd $currentDir
