@@ -32,7 +32,10 @@ DATASETS = {}
 
 for directory in os.listdir(DATA_PATH):
     if os.path.isdir(os.path.join(DATA_PATH, directory)):
-        DATASETS[directory] = GeneyDataset(os.path.join(DATA_PATH, directory))
+        try:
+            DATASETS[directory] = GeneyDataset(os.path.join(DATA_PATH, directory))
+        except Exception:
+            sys.stderr.write('UNABLE TO LOAD DATASET "{}"'.format(directory))
 
 app = Flask(__name__)
 
