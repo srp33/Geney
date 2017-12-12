@@ -4,7 +4,7 @@ services:
   ui-server:
     image: pjtatlow/geney-ui:0.0.4
     ports:
-      - 8080:8080
+      - 80:80
   backend-server:
     image: pjtatlow/geney-server:0.0.4
     volumes:
@@ -12,6 +12,6 @@ services:
     environment:
       - GUNICORN_CMD_ARGS=--workers=4 --bind=:8888 --worker-class=eventlet --worker-connections 100
       - GENEY_DATA_PATH=/root/data
-      - GENEY_URL=localhost
+      - GENEY_URL=http://45.56.87.243
   redis:
-    image: "redis:alpine"
+    image: redis:alpine

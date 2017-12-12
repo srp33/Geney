@@ -8,7 +8,7 @@ COPY responders/*.py /app/responders/
 RUN apt-get update && \
     apt-get install -y gcc
 
-RUN pip install Flask==0.12.2 fastnumbers h5py gunicorn jsonschema greenlet eventlet
+RUN pip install Flask==0.12.2 fastnumbers h5py gunicorn jsonschema greenlet eventlet redis
 
 WORKDIR /app/
 

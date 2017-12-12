@@ -21,16 +21,19 @@ echo "version: '3'" >> docker-compose.yml
 echo "" >> docker-compose.yml
 echo "services:" >> docker-compose.yml
 echo "  ui-server:" >> docker-compose.yml
-echo "    image: pjtatlow/geney-ui:0.0.3" >> docker-compose.yml
+echo "    image: pjtatlow/geney-ui:0.0.4" >> docker-compose.yml
 echo "    ports:" >> docker-compose.yml
-echo "      - "80:80"" >> docker-compose.yml
+echo "      - 80:80" >> docker-compose.yml
 echo "  backend-server:" >> docker-compose.yml
-echo "    image: pjtatlow/geney-server:0.0.3" >> docker-compose.yml
+echo "    image: pjtatlow/geney-server:0.0.4" >> docker-compose.yml
 echo "    volumes:" >> docker-compose.yml
 echo "      - "./data:/root/data"" >> docker-compose.yml
 echo "    environment:" >> docker-compose.yml
 echo "      - GUNICORN_CMD_ARGS=--workers=4 --bind=:8888 --worker-class=eventlet --worker-connections 100" >> docker-compose.yml
 echo "      - GENEY_DATA_PATH=/root/data" >> docker-compose.yml
+echo "      - GENEY_URL=http://45.56.87.243" >> docker-compose.yml
+echo "  redis:" >> docker-compose.yml
+echo "    image: redis:alpine" >> docker-compose.yml
 
 # install docker-compose
 curl -o /usr/local/bin/docker-compose -L "https://github.com/docker/compose/releases/download/1.17.1/docker-compose-$(uname -s)-$(uname -m)"
