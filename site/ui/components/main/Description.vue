@@ -2,7 +2,7 @@
 
   <div class="description top" v-if="dataset">
     <img class="logo" src="../../assets/geney-no-lamp.png">
-    <h1 id="dataset-name">{{ dataset.name }}</h1>
+    <h1 id="dataset-name">{{ dataset.title }}</h1>
     <h4 id="dataset-description">
       <vue-markdown :source="dataset.description"></vue-markdown>
     </h4>

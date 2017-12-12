@@ -50,8 +50,8 @@ export default {
   },
   mounted () {
     // console.log()
-    if (this.$store.state.dataset.name) {
-      this.$set(this, 'title', this.$store.state.dataset.name);
+    if (this.$store.state.dataset.title) {
+      this.$set(this, 'title', this.$store.state.dataset.title);
     }
     this.mde = new SimpleMDE({
       element: document.getElementById('mde'),
@@ -115,7 +115,7 @@ export default {
     // we set the watcher here because the datsset isn't always ready when the page loads
     // this makes sure the mde gets the value it needs
     '$store.state.dataset' () {
-      this.$set(this, 'title', this.$store.state.dataset.name);
+      this.$set(this, 'title', this.$store.state.dataset.title);
       this.mde.value(this.$store.state.dataset.description);
     },
   },

@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-block row justify-content-center">
-      <h2 class="card-title col-12"><router-link :to="'/dataset/' + data.id">{{data.name}}</router-link></h2>
+      <h2 class="card-title col-12"><router-link :to="'/dataset/' + data.id">{{data.title}}</router-link></h2>
       <vue-markdown class="card-text" :class="{'truncated': hidden}" :source="data.description"></vue-markdown>
       <small class="change-size col-12" @click="toggleText()">
         <span v-if="hidden && truncated">Show More</span>

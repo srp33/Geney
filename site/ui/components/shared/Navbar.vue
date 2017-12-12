@@ -78,7 +78,7 @@ export default {
         crumbs.push({link: '/', text: 'Select Dataset', route: 'Home'});
         if (this.$store.state.dataset.id) {
           let datasetPath = '/dataset/' + this.$store.state.dataset.id + '/';
-          crumbs.push({link: datasetPath, text: this.$store.state.dataset.name, route: 'Description'});
+          crumbs.push({link: datasetPath, text: this.$store.state.dataset.title, route: 'Description'});
           if (this.$route.path.indexOf('filter') >= 0) {
             crumbs.push({link: datasetPath + 'filter', text: 'Filter', route: 'Filter'});
           }
