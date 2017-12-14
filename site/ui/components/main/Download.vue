@@ -15,12 +15,12 @@
       <div class="col-sm-6 offset-sm-3 column-selection" id="features">
         <h4>Select {{ dataset.featureDescriptionPlural | capitalize }}</h4>
 
-        <b-form-radio-group v-model="radios.features" stacked>
+        <b-form-radio-group v-model="featuresRadioValue" stacked>
           <b-form-radio value="all">Download All {{ dataset.featureDescriptionPlural | capitalize }}</b-form-radio>
           <b-form-radio value="selected">Download Selected {{ dataset.featureDescriptionPlural | capitalize }}</b-form-radio>
         </b-form-radio-group>
 
-        <div v-show="radios.features === 'selected'">
+        <div v-show="featuresRadioValue === 'selected'">
           <selectize
             :options="metaData.features.options"
             :value="selectedFeatures"
@@ -35,12 +35,12 @@
       <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
         <h4>Select Variables</h4>
 
-        <b-form-radio-group v-model="radios.variables" stacked>
+        <b-form-radio-group v-model="variablesRadioValue" stacked>
           <b-form-radio value="all">Download All Variables</b-form-radio>
           <b-form-radio value="selected">Download Selected Variables</b-form-radio>
         </b-form-radio-group>
 
-        <div v-show="radios.variables === 'selected'">
+        <div v-show="variablesRadioValue === 'selected'">
           <selectize
             :options="metaTypes"
             :value="selectedVariables"
@@ -129,10 +129,6 @@ export default {
         gzip: false,
       },
       numSamples: null,
-      radios: {
-        features: 'selected',
-        variables: 'selected',
-      },
     };
   },
   computed: {
@@ -235,11 +231,11 @@ export default {
     formErrors () {
       let valid = true;
       let errors = {};
-      if (this.radios.features === 'selected' && this.selectedFeatures.length === 0) {
+      if (this.featuresRadioValue === 'selected' && this.selectedFeatures.length === 0) {
         valid = false;
         errors.features = true;
       }
-      if (this.radios.variables === 'selected' && this.selectedVariables.length === 0) {
+      if (this.variablesRadioValue === 'selected' && this.selectedVariables.length === 0) {
         valid = false;
         errors.variables = true;
       }
@@ -265,7 +261,7 @@ export default {
     numColumns () {
       let numFeatures, numVariables;
 
-      switch (this.radios.features) {
+      switch (this.featuresRadioValue) {
         case 'all':
           numFeatures = this.dataset.numFeatures;
           break;
@@ -274,7 +270,7 @@ export default {
           break;
       }
 
-      switch (this.radios.variables) {
+      switch (this.variablesRadioValue) {
         case 'all':
           numVariables = this.dataset.numMetaTypes;
           break;
@@ -284,6 +280,22 @@ export default {
       }
 
       return numFeatures + numVariables;
+    },
+    variablesRadioValue: {
+      get () {
+        return this.$store.state.downloadRadios.variables;
+      },
+      set (value) {
+        this.$store.commit('variablesRadioValue', value);
+      },
+    },
+    featuresRadioValue: {
+      get () {
+        return this.$store.state.downloadRadios.features;
+      },
+      set (value) {
+        this.$store.commit('featuresRadioValue', value);
+      },
     },
   },
   created () {
@@ -415,7 +427,7 @@ export default {
     getQuery () {
       let metaTypes, features;
 
-      switch (this.radios.variables) {
+      switch (this.variablesRadioValue) {
         case 'all':
           metaTypes = [];
           break;
@@ -424,7 +436,7 @@ export default {
           break;
       }
 
-      switch (this.radios.features) {
+      switch (this.featuresRadioValue) {
         case 'all':
           features = [];
           break;

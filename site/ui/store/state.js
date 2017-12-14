@@ -11,4 +11,8 @@ export default {
   users: [],
   cachedMeta: {},
   lastMetaType: null,
+  downloadRadios: {
+    features: null,
+    variables: null,
+  },
 };
