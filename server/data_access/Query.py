@@ -30,9 +30,13 @@ class Query:
 		return self.__def['features'] if len(self.__def['features']) > 0 else None
 
 	@property
-	def num_features(self) -> bool:
+	def num_features(self) -> int:
 		num_feature_filters = len(self.__def['features'])
 		return num_feature_filters if num_feature_filters > 0 else self.__max_features
+
+	@property
+	def num_filters(self) -> int:
+		return len(self.__def['filters'].keys())
 
 	@property
 	def md5(self) -> str:

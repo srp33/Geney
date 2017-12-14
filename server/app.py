@@ -79,7 +79,11 @@ def search(dataset_id, meta_type='', search_str=''):
 @app.route('/api/datasets/<string:dataset_id>/samples', strict_slashes=False, methods=['POST'])
 def count_samples(dataset_id):
     if dataset_id in DATASETS:
-        return jsonify(DATASETS[dataset_id].get_num_samples_matching_filters(request.get_json()))
+        count = DATASETS[dataset_id].get_num_samples_matching_filters(request.get_json())
+        if count is None:
+            return bad_request()
+            
+        return jsonify(count)
     else:
         return not_found('unknown meta id')        
 

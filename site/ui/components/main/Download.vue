@@ -80,11 +80,15 @@
         </button>
       </div>
 
-      <div class="col-12">
-        <button class="btn btn-primary btn-lg" @click="plot" id="plot-btn" :disabled="formErrors">
+      <div class="col-12" id="plot-container">
+        <button class="btn btn-primary btn-lg" @click="plot" id="plot-btn" :disabled="plotlyErrors">
           Visualize with plot.ly
-          <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
+          <span v-if="plotlyErrors" v-b-tooltip="plotlyTooltipSettings"></span>
         </button>
+      </div>
+
+      <div class="col-12">
+        <router-link class="btn btn-secondary" :to="`/dataset/${dataset.id}/filter`">Back</router-link>
       </div>
 
     </div>
@@ -96,6 +100,11 @@
 import router from '../../router';
 import selectize from '../shared/Selectize';
 import $ from 'jquery';
+
+// based on some rough napkin math
+// 20 characters per item, with a limit of 5MB is about 25000, and we'll give ourselves some wiggleroom
+const MAX_ITEMS_PLOTLY = 22500;
+const MAX_COLS_PLOTLY = 25;
 
 export default {
   name: 'download',
@@ -182,6 +191,7 @@ export default {
         html: true,
         placement: 'top',
         title: '',
+        trigger: 'click',
       };
 
       if (this.formErrors) {
@@ -206,6 +216,23 @@ export default {
 
       return settings;
     },
+    plotlyTooltipSettings () {
+      const settings = this.downloadTooltipSettings;
+      settings.container = '#plot-container';
+      if (this.plotlyErrors) {
+        if (this.plotlyErrors.maxItems) {
+          settings.title += `
+            <span>Too many results to visualize with plot.ly. Please filter your data more.</span><br>
+          `;
+        }
+        if (this.plotlyErrors.maxColumns) {
+          settings.title += `
+            <span>${this.numColumns} ${this.dataset.featureDescriptionPlural} and variables selected. No more than ${MAX_COLS_PLOTLY} allowed.</span><br>
+          `;
+        }
+      }
+      return settings;
+    },
     formErrors () {
       let valid = true;
       let errors = {};
@@ -222,6 +249,42 @@ export default {
         errors.numSamples = true;
       }
       return valid ? null : errors;
+    },
+    plotlyErrors () {
+      let valid = this.formErrors === null;
+      let errors = valid ? {} : this.formErrors;
+      if ((this.numSamples * this.numColumns) > MAX_ITEMS_PLOTLY) {
+        errors.maxItems = true;
+        valid = false;
+      }
+      if (this.numColumns > MAX_COLS_PLOTLY) {
+        errors.maxColumns = true;
+        valid = false;
+      }
+      return valid ? null : errors;
+    },
+    numColumns () {
+      let numFeatures, numVariables;
+
+      switch (this.radios.features) {
+        case 'all':
+          numFeatures = this.dataset.numFeatures;
+          break;
+        case 'selected':
+          numFeatures = this.selectedVariables.length;
+          break;
+      }
+
+      switch (this.radios.variables) {
+        case 'all':
+          numVariables = this.dataset.numMetaTypes;
+          break;
+        case 'selected':
+          numVariables = this.selectedFeatures.length;
+          break;
+      }
+
+      return numFeatures + numVariables;
     },
   },
   created () {
@@ -294,31 +357,7 @@ export default {
         this.triggerErrorState();
         return;
       }
-      let metaTypes, features;
-
-      switch (this.radios.variables) {
-        case 'all':
-          metaTypes = [];
-          break;
-        case 'selected':
-          metaTypes = this.selectedVariables;
-          break;
-      }
-
-      switch (this.radios.features) {
-        case 'all':
-          features = [];
-          break;
-        case 'selected':
-          features = this.selectedFeatures;
-          break;
-      }
-
-      const query = {
-        filters: this.filters,
-        features: features,
-        metaTypes: metaTypes,
-      };
+      const query = this.getQuery();
 
       const form = document.createElement('form');
       form.setAttribute('method', 'post');
@@ -347,31 +386,7 @@ export default {
         this.triggerErrorState();
         return;
       }
-      let metaTypes, features;
-
-      switch (this.radios.variables) {
-        case 'all':
-          metaTypes = [];
-          break;
-        case 'selected':
-          metaTypes = this.selectedVariables;
-          break;
-      }
-
-      switch (this.radios.features) {
-        case 'all':
-          features = [];
-          break;
-        case 'selected':
-          features = this.selectedFeatures;
-          break;
-      }
-
-      const query = {
-        filters: this.filters,
-        features: features,
-        metaTypes: metaTypes,
-      };
+      const query = this.getQuery();
 
       this.$http.post(`/api/datasets/${this.$route.params.dataset}/link`, query).then(response => {
         const data = response.data;
@@ -397,6 +412,33 @@ export default {
           show: 3,
         });
       });
+    },
+    getQuery () {
+      let metaTypes, features;
+
+      switch (this.radios.variables) {
+        case 'all':
+          metaTypes = [];
+          break;
+        case 'selected':
+          metaTypes = this.selectedVariables;
+          break;
+      }
+
+      switch (this.radios.features) {
+        case 'all':
+          features = [];
+          break;
+        case 'selected':
+          features = this.selectedFeatures;
+          break;
+      }
+
+      return {
+        filters: this.filters,
+        features: features,
+        metaTypes: metaTypes,
+      };
     },
   },
 };
@@ -431,6 +473,12 @@ h1, h2, h3 {
   margin-bottom: 25px;
   h4 {
     font-weight: 300;
+  }
+}
+
+#plot-container {
+  .tooltip-inner {
+    max-width: 1000px !important;
   }
 }
 </style>

@@ -43,4 +43,7 @@ export default {
   selectedVariables (state, payload) {
     state.selectedVariables = payload;
   },
+  lastMetaType (state, payload) {
+    state.lastMetaType = payload;
+  },
 };

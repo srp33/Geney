@@ -13,7 +13,6 @@
     },
     "filters": {
       "type": "object",
-      "minProperties": 1,
       "additionalProperties": {
         "anyOf": [
           {"$ref": "#/definitions/continuousOperationList"},

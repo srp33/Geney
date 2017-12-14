@@ -26,7 +26,7 @@
           <h6>This meta type is continuous. Please select the range of numbers you would like to select.</h6>
           <h6>Min: {{metaDataMin}}</h6>
           <h6>Max: {{metaDataMax}}</h6>
-          <div class="logic-set row" v-for="(logicSet, index) in selectedMeta[this.currentMetaType]" :key="currentMetaType + '_' + index">
+          <div class="logic-set row" v-for="(logicSet, index) in selectedMeta[this.currentMetaType]" :key="logicSet.randomKey">
 
             <div class="form-group col" :class="{'has-danger': errors.has(currentMetaType + '_' + index + '_operator')}">
               <selectize
@@ -108,7 +108,8 @@
         <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Confirm</button>
       </div>
       <div v-else>
-        <h2>Please select some filters so we can grant your wish.</h2>
+        <h2>You have not selected any filters.</h2>
+        <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Continue</button>
       </div>
     </div>
   </div>
@@ -260,6 +261,9 @@ export default {
       this.$set(this, 'currentMeta', null);
     },
     updateSelectedMeta (value, index, key = false) {
+      if (value) {
+        this.$store.commit('lastMetaType', this.currentMetaType);
+      }
       if (key === false) {
         this.$set(this.selectedMeta, this.currentMetaType, value);
       } else {
@@ -278,7 +282,10 @@ export default {
           const list = [];
           for (let item of query[metaType]) {
             if (this.validLogicSet(metaType, item)) {
-              list.push(item);
+              list.push({
+                operator: item.operator,
+                value: item.value,
+              });
             }
           }
           if (list.length === 0) {
@@ -295,16 +302,20 @@ export default {
       router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
     },
     addLogicSet () {
-      const list = this.selectedMeta[this.currentMetaType];
+      const list = this.selectedMeta[this.currentMetaType].slice();
       list.push({
         operator: null,
         value: null,
+        randomKey: Math.random(),
       });
       this.updateSelectedMeta(list);
       this.$forceUpdate();
     },
     removeLogicSet (index) {
-      const list = this.currentSelectedMeta.slice().splice(index, 1);
+      console.log('before', this.selectedMeta[this.currentMetaType], index);
+      const list = this.selectedMeta[this.currentMetaType].slice();
+      list.splice(index, 1);
+      console.log('after', list);
       this.updateSelectedMeta(list);
       this.$forceUpdate();
       Vue.nextTick(() => {
@@ -389,7 +400,11 @@ export default {
       const filters = JSON.parse(JSON.stringify(this.$store.state.filters));
       this.$set(this, 'selectedMeta', filters);
       // this.$set(this, 'selectedFeatures', filters.features);
-      this.selectMetaType(Object.keys(filters)[0]);
+      if (this.$store.state.lastMetaType) {
+        this.selectMetaType(this.$store.state.lastMetaType);
+      } else {
+        this.selectMetaType(Object.keys(filters)[0]);
+      }
       this.updateMetaQuery();
     }
   },

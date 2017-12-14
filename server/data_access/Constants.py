@@ -9,9 +9,9 @@ REQUIRED_FILES = [DESCRIPTION_FILE, METADATA_DB, DATA_FILE, METADATA_JSON]
 HDF5_DATA_PATH = 'data/'
 
 # Meta Type constants
-TEXT = 'Text'
-REAL = 'Real'
-INTEGER = 'Integer'
+TEXT = 'text'
+REAL = 'real'
+INTEGER = 'integer'
 
 # Config constants
 MAX_OPTIONS = 1000
@@ -35,6 +35,7 @@ GET_ALL_FEATURE_NAMES = 'SELECT featureName FROM featureTable ORDER BY featureID
 
 GET_SAMPLE_NAME = 'SELECT sampleName FROM sampleTable WHERE sampleID = ?;'
 GET_SAMPLE_IDS = 'SELECT sampleID FROM sampleTable WHERE sampleName in ({items:s}) ORDER BY sampleID ASC;'
+GET_ALL_SAMPLE_IDS = 'SELECT sampleID FROM sampleTable ORDER BY sampleID ASC;'
 GET_ALL_SAMPLE_NAMES = 'SELECT sampleName FROM sampleTable;'
 
 SEARCH_FEATURES = 'SELECT DISTINCT featureName FROM featureTable WHERE featureName LIKE ? ORDER BY featureID ASC LIMIT {limit};'.format(limit=SEARCH_LIMIT)

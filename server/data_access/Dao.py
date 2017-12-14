@@ -29,11 +29,11 @@ class SQLiteDao:
 		# get table to search for dataset ids
 		meta_id, meta_type = self.get_variable(meta_filter.name)
 		values = meta_filter.values
-		if meta_type == TEXT:
+		if meta_type.lower() == TEXT:
 			return self.__filter_text(meta_id, values)
-		elif meta_type == INTEGER:
+		elif meta_type.lower() == INTEGER:
 			return self.__filter_integer(meta_id, values)
-		elif meta_type == REAL:
+		elif meta_type.lower() == REAL:
 			return self.__filter_real(meta_id, values)
 		else:
 			return None
@@ -137,6 +137,14 @@ class SQLiteDao:
 		sampleIDs = []
 		cursor = self.__con.cursor()
 		for sampleID in cursor.execute(query):
+			sampleIDs.append(int(sampleID[0]))
+		cursor.close()
+		return sampleIDs
+
+	def get_all_sample_ids(self) -> List[int]:
+		sampleIDs = []
+		cursor = self.__con.cursor()
+		for sampleID in cursor.execute(GET_ALL_SAMPLE_IDS):
 			sampleIDs.append(int(sampleID[0]))
 		cursor.close()
 		return sampleIDs

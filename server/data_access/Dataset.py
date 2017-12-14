@@ -144,29 +144,39 @@ class GeneyDataset:
 			return query.feature_filters
 
 	def get_num_samples_matching_filters(self, filters) -> int:
-		return len(self.query_samples(Query(filters, self.__description)))
+		try :
+			query = Query(filters, self.__description)
+			if query.num_filters > 0:
+				return len(self.query_samples(query))
+			else:
+				return self.num_samples
+		except RequestError:
+			return None
 
 	# returns set of sample ids that match filters
 	def query_samples(self, query: Query) -> Set[int]:
-		sample_ids = None
 		with SQLiteDao(self.__dir) as dao:
-			for meta_filter in query.meta_filters:
-				if meta_filter.name == SAMPLE_ID:
-					matched = dao.get_sample_ids(meta_filter.values)
-				else:
-					matched = dao.get_samples_matching_filter(meta_filter)
-				# if any one filter has no matches, there is no point in continuing to search
-				if len(matched) == 0:
-					return frozenset()
-				# if this if the first filter queried, it starts off our set
-				if sample_ids is None:
-					sample_ids = matched
-				else: # otherwise get the intersection of all matched sample ids
-					sample_ids.intersection_update(matched)
-					# if no sample ids match filters, we're done
-					if len(sample_ids) == 0:
+			if query.num_filters > 0: # if they added any filters
+				sample_ids = None
+				for meta_filter in query.meta_filters:
+					if meta_filter.name == SAMPLE_ID:
+						matched = dao.get_sample_ids(meta_filter.values)
+					else:
+						matched = dao.get_samples_matching_filter(meta_filter)
+					# if any one filter has no matches, there is no point in continuing to search
+					if len(matched) == 0:
 						return frozenset()
-		return frozenset(sample_ids)
+					# if this if the first filter queried, it starts off our set
+					if sample_ids is None:
+						sample_ids = matched
+					else: # otherwise get the intersection of all matched sample ids
+						sample_ids.intersection_update(matched)
+						# if no sample ids match filters, we're done
+						if len(sample_ids) == 0:
+							return frozenset()
+				return frozenset(sample_ids)
+			else: # they added no filters so all sample ids "match"
+				return frozenset(dao.get_all_sample_ids())
 
 	def search(self, meta_type, search_val):
 		with SQLiteDao(self.__dir) as dao:

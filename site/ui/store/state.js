@@ -10,4 +10,5 @@ export default {
   alerts: [],
   users: [],
   cachedMeta: {},
+  lastMetaType: null,
 };
