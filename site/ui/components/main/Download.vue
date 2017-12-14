@@ -191,7 +191,6 @@ export default {
         html: true,
         placement: 'top',
         title: '',
-        trigger: 'click',
       };
 
       if (this.formErrors) {
@@ -217,7 +216,7 @@ export default {
       return settings;
     },
     plotlyTooltipSettings () {
-      const settings = this.downloadTooltipSettings;
+      const settings = Object.assign({}, this.downloadTooltipSettings);
       settings.container = '#plot-container';
       if (this.plotlyErrors) {
         if (this.plotlyErrors.maxItems) {
