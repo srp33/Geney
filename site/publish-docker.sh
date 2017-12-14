@@ -36,4 +36,4 @@ else
 fi
 
 docker build -t "$REPO:$VERSION" .
-docker push "$REPO:$VERSION"
+#docker push "$REPO:$VERSION"

@@ -4,11 +4,13 @@ services:
   ui-server:
     image: pjtatlow/geney-ui:0.0.4
     ports:
-      - 80:80
+      - 8080:80
+    volumes:
+      - ./ssl:/etc/ssl
   backend-server:
     image: pjtatlow/geney-server:0.0.4
     volumes:
-      - "./data:/root/data"
+      - ./data:/root/data
     environment:
       - GUNICORN_CMD_ARGS=--workers=4 --bind=:8888 --worker-class=eventlet --worker-connections 100
       - GENEY_DATA_PATH=/root/data
