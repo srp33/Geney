@@ -15,6 +15,8 @@ export default {
     state.dataset = value;
     state.selectedFeatures = [];
     state.selectedVariables = [];
+    state.downloadRadios.features = 'selected';
+    state.downloadRadios.variables = 'selected';
   },
   user (state, value) {
     state.user = value;
@@ -45,5 +47,29 @@ export default {
   },
   lastMetaType (state, payload) {
     state.lastMetaType = payload;
+  },
+  featuresRadioValue (state, payload) {
+    switch (payload) {
+      case 'all':
+        state.downloadRadios.features = 'all';
+        break;
+      case 'selected':
+        state.downloadRadios.features = 'selected';
+        break;
+      default:
+        throw new Error(`unknown features radio type ${payload}`);
+    }
+  },
+  variablesRadioValue (state, payload) {
+    switch (payload) {
+      case 'all':
+        state.downloadRadios.variables = 'all';
+        break;
+      case 'selected':
+        state.downloadRadios.variables = 'selected';
+        break;
+      default:
+        throw new Error(`unknown variables radio type ${payload}`);
+    }
   },
 };

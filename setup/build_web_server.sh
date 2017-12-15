@@ -21,11 +21,11 @@ echo "version: '3'" >> docker-compose.yml
 echo "" >> docker-compose.yml
 echo "services:" >> docker-compose.yml
 echo "  ui-server:" >> docker-compose.yml
-echo "    image: pjtatlow/geney-ui:0.0.4" >> docker-compose.yml
+echo "    image: pjtatlow/geney-ui:0.0.5" >> docker-compose.yml
 echo "    ports:" >> docker-compose.yml
 echo "      - 80:80" >> docker-compose.yml
 echo "  backend-server:" >> docker-compose.yml
-echo "    image: pjtatlow/geney-server:0.0.4" >> docker-compose.yml
+echo "    image: pjtatlow/geney-server:0.0.5" >> docker-compose.yml
 echo "    volumes:" >> docker-compose.yml
 echo "      - "./data:/root/data"" >> docker-compose.yml
 echo "    environment:" >> docker-compose.yml
