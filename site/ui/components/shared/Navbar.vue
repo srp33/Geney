@@ -15,6 +15,9 @@
       <b-navbar-brand class="above-breadcrumbs" to="/">
         <span>Geney</span>
       </b-navbar-brand>
+      <b-navbar-brand class="above-breadcrumbs ml-auto" to='/contact'>
+          <div>Contact Us</div>
+      </b-navbar-brand>
 
         <!-- Commenting out the login section for now...  -->
         <!-- <b-nav is-nav-bar class="ml-auto" right-alignment>
