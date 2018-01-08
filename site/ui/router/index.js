@@ -22,6 +22,11 @@ export default new Router({
       component: Components.About,
     },
     {
+      path: '/contact',
+      name: 'Contact Us',
+      component: Components.Contact,
+    },
+    {
       path: '/dataset/:dataset/',
       name: 'Description',
       component: Components.Description,
