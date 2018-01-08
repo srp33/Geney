@@ -17,6 +17,11 @@ export default new Router({
       component: Components.Error404,
     },
     {
+      path: '/about',
+      name: 'About',
+      component: Components.About,
+    },
+    {
       path: '/dataset/:dataset/',
       name: 'Description',
       component: Components.Description,
