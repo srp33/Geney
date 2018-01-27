@@ -33,21 +33,21 @@
       </div>
 
       <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
-        <h4>Select Variables</h4>
+        <h4>Select Metadata Variables</h4>
 
         <b-form-radio-group v-model="variablesRadioValue" stacked>
-          <b-form-radio value="all">Download All Variables</b-form-radio>
-          <b-form-radio value="selected">Download Selected Variables</b-form-radio>
+          <b-form-radio value="all">Download All Metadata Variables</b-form-radio>
+          <b-form-radio value="selected">Download Selected Metadata Variables</b-form-radio>
         </b-form-radio-group>
 
         <div v-show="variablesRadioValue === 'selected'">
           <selectize
             :options="metaTypes"
             :value="selectedVariables"
-            placeholder="Variables"
+            placeholder="Metadata Variables"
             @updated="updateVariables"
             :settings="metaTypeSettings"
-            errorMessage="Please select from variables or click 'Download All Variables'"
+            errorMessage="Please select from variables or click 'Download All Metadata Variables'"
             id="variable-select"></selectize>
         </div>
       </div>

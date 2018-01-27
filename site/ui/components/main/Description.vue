@@ -20,7 +20,7 @@
       <li>
         <i class="fa fa-2x fa-gears" aria-hidden="true"></i>
         <br>
-        <span id="dataset-num-meta-types">{{ dataset.numMetaTypes }} Meta Data Types</span>
+        <span id="dataset-num-meta-types">{{ dataset.numMetaTypes }} Meta Data Variables</span>
       </li>
     </ul>
     <router-link :to="'/dataset/' + dataset.id + '/filter'" class="btn btn-primary btn-lg" id="dataset-next-btn">Select Samples</router-link>

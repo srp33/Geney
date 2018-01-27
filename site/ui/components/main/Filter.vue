@@ -6,7 +6,7 @@
       <selectize
         :options="metaTypes"
         :value="currentMetaType"
-        placeholder="Select variables to filter on"
+        placeholder="Select metadata variables to filter on"
         @updated="selectMetaType"
         :settings="metaTypeSettings"
         id="meta-types"></selectize>
