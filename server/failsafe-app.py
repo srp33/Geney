@@ -1,5 +1,5 @@
 from flask_failsafe import failsafe
-
+# this file is purely for development, so you can still reload the python server when it's running inside a docker container
 @failsafe
 def create_app():
   from app import app
