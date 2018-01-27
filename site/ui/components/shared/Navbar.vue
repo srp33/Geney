@@ -15,6 +15,10 @@
       <b-navbar-brand class="above-breadcrumbs" to="/">
         <span>Geney</span>
       </b-navbar-brand>
+      <b-navbar-nav class="above-breadcrumbs ml-auto">
+        <b-nav-item href="/about" class="pr-2">About</b-nav-item>
+        <b-nav-item href="/contact">Contact</b-nav-item>
+      </b-navbar-nav>
 
         <!-- Commenting out the login section for now...  -->
         <!-- <b-nav is-nav-bar class="ml-auto" right-alignment>
@@ -151,6 +155,7 @@ export default {
 }
 .above-breadcrumbs {
   z-index:80;
+  flex-flow: row;
 }
 .nav, .navbar {
   // display: flex;
