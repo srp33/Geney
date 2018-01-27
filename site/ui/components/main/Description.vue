@@ -58,4 +58,8 @@ export default {
     font-size: 1.25em;
   }
 }
+#dataset-description {
+  text-align: left;
+  padding: 0 50px;
+}
 </style>
