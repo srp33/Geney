@@ -1,8 +1,8 @@
 <img src="https://github.com/srp33/Geney/blob/master/site/ui/assets/geney-lamp.png" alt="Geney logo" width="40%" />
 
-Geney is a Web-based tool for querying large genomic datasets. You can filter data based on sample-level annotations, and you can select your specific genes of interest. Currently, Geney focuses mostly on genomic and transcriptomic data, but it is flexible enough to be able to handle other types of data, too.
-
 **You can find our current working prototype [here](http://45.56.87.243). We are working to add more datasets and new functionality. If there is a publicly available dataset that you would like to be able to query with this tool, please let us know. Please also let us know if you have feedback!**
+
+Geney is a Web-based tool for querying large genomic datasets. You can filter data based on sample-level annotations, and you can select your specific genes of interest. Currently, Geney focuses mostly on genomic and transcriptomic data, but it is flexible enough to be able to handle other types of data, too.
 
 ## Developing Geney
 
