@@ -78,6 +78,8 @@ export default {
   cursor: pointer;
   color: #0275D8;
   padding: 0;
+  display: block;
+  margin-top: 5px;
 }
 .truncated {
   max-height: 150px;

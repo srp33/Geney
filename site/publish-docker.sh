@@ -35,5 +35,6 @@ else
   fi
 fi
 
+npm run build
 docker build -t "$REPO:$VERSION" .
 docker push "$REPO:$VERSION"
