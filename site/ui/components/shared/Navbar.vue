@@ -13,7 +13,7 @@
       </div>
 
       <b-navbar-brand class="above-breadcrumbs" to="/">
-        <span>Geney</span>
+        Geney
       </b-navbar-brand>
 
         <!-- Commenting out the login section for now...  -->
@@ -159,6 +159,7 @@ export default {
 .navbar-brand {
   text-align: left;
   display: inline;
+  color: white;
   img {
       height: 50px;
       margin-top: -15px;
@@ -201,11 +202,13 @@ div.nav-item.center-nav {
   height: 40px;
 
   ol.breadcrumb {
+    text-align: left;
     display: inline-block;
     padding: 0.5em 0.5em;
     margin-bottom: 0px;
     background-color: transparent;
     li.breadcrumb-item {
+      display: inline-block;
       &::before {
         color: white;
       }
