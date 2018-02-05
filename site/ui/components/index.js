@@ -4,8 +4,8 @@ module.exports = {
   Filter: require('./main/Filter'),
   Download: require('./main/Download'),
   Error404: require('./shared/Error404'),
-  About: require('./shared/About'),
-  Contact: require('./shared/Contact'),
+  About: require('./main/About'),
+  Contact: require('./main/Contact'),
   // The below components are disabled until we have need for the admin login
   // Login: require('./shared/Login'),
   // Admin: require('./admin/Admin'),

@@ -34,13 +34,13 @@ export default {
 
 <style lang="scss" scoped>
 .contact {
-    margin: 20px 40px 20px 40px;
+    margin: 80px 60px 20px 60px;
     h1 {
-        font-size: 7em;
+        font-size: 5em;
         // font-weight: bold;
     }
     p {
-        font-size: 2em;
+        font-size:20pt;
         text-align: left;
     }
 }
