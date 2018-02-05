@@ -25,7 +25,7 @@
             :options="metaData.features.options"
             :value="selectedFeatures"
             @updated="updateFeatures"
-            :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural)"
+            :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural) + ' - begin typing to see more results'"
             :settings="getSelectizeSettings('features', metaData.features)"
             :errorMessage="'Please select some ' + dataset.featureDescriptionPlural + ' or click \'Download all ' + $options.filters.capitalize(dataset.featureDescriptionPlural) +'\''"
             id="feature-select"></selectize>
@@ -33,21 +33,21 @@
       </div>
 
       <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
-        <h4>Select Variables</h4>
+        <h4>Select Metadata Variables</h4>
 
         <b-form-radio-group v-model="variablesRadioValue" stacked>
-          <b-form-radio value="all">Download All Variables</b-form-radio>
-          <b-form-radio value="selected">Download Selected Variables</b-form-radio>
+          <b-form-radio value="all">Download All Metadata Variables</b-form-radio>
+          <b-form-radio value="selected">Download Selected Metadata Variables</b-form-radio>
         </b-form-radio-group>
 
         <div v-show="variablesRadioValue === 'selected'">
           <selectize
             :options="metaTypes"
             :value="selectedVariables"
-            placeholder="Variables"
+            placeholder="Metadata Variables - begin typing to see more results"
             @updated="updateVariables"
             :settings="metaTypeSettings"
-            errorMessage="Please select from variables or click 'Download All Variables'"
+            errorMessage="Please select from variables or click 'Download All Metadata Variables'"
             id="variable-select"></selectize>
         </div>
       </div>
