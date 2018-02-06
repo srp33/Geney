@@ -3,11 +3,11 @@ module.exports = {
   Description: require('./main/Description'),
   Filter: require('./main/Filter'),
   Download: require('./main/Download'),
-  Error404: require('./shared/Error404'),
+  Error404: require('./main/Error404'),
   About: require('./main/About'),
   Contact: require('./main/Contact'),
   // The below components are disabled until we have need for the admin login
-  // Login: require('./shared/Login'),
+  // Login: require('./main/Login'),
   // Admin: require('./admin/Admin'),
   // ManageDatasets: require('./admin/datasets/ManageDatasets'),
   // AddDataset: require('./admin/datasets/AddDataset'),
