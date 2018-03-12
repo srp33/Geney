@@ -4,25 +4,32 @@
     <div class="col-sm-6">
       <h1>Filter Samples</h1>
       <div class="spacer"></div>
-      <h4><selectize
-        :options="metaTypes"
-        :value="currentMetaType"
-        placeholder="Variables"
-        @updated="selectMetaType"
-        :settings="metaTypeSettings"
-        id="meta-types"></selectize></h4>
+      <b-row>
+        <b-col cols="3"><h4 class="variables">Variables:</h4></b-col>
+        <b-col cols="9">
+          <selectize
+          :options="metaTypes"
+          :value="''"
+          placeholder="Variables"
+          @updated="selectMetaType"
+          :settings="metaTypeSettings"
+          id="meta-types"></selectize>
+        </b-col>
+      </b-row>
       <div v-if="types.length> 0">
         <div class="spacer"></div>
+        <div class="line"></div>
         <div class="spacer"></div>
         <div v-for="metaType in types" :key="metaType">
           <div class="spacer"></div>
           <div v-if="getOptions(metaType).options !== 'continuous'">
-            <h4>{{metaType}}
+            <h4>
               <button
-                  class=" btn btn-sm btn-danger"
-                  @click="removeFilter(metaType)">
-                  <i class="fa fa-minus" aria-hidden="true"></i>
-                </button>
+                class="btn btn-sm btn-danger"
+                @click="removeFilter(metaType)">
+                <i class="fa fa-minus" aria-hidden="true"></i>
+              </button>
+              {{metaType}}
             </h4>
             <selectize v-if="getOptions(metaType).options !== 'continuous'"
             :options="getOptions(metaType).options"
@@ -34,18 +41,17 @@
           </div>
 
           <div v-else>
-            <h4>{{metaType}}
+            <h4>
               <button
-                  class=" btn btn-sm btn-danger"
-                  @click="removeFilter(metaType)">
-                  <i class="fa fa-minus" aria-hidden="true"></i>
-                </button>
-                <button class="btn btn-sm btn-success" @click="addLogicSet(metaType)">
-                <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
-                </button>
+                class=" btn btn-sm btn-danger"
+                @click="removeFilter(metaType)">
+                <i class="fa fa-minus" aria-hidden="true"></i>
+              </button>
+              <button class="btn btn-sm btn-success" @click="addLogicSet(metaType)">
+              <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
+              </button>
+              {{metaType}}<h6>  ({{metaDataMin(metaType)}}-{{metaDataMax(metaType)}})</h6>
             </h4>
-            <!-- <h6>This meta type is continuous. Please select the range of numbers you would like to select.</h6> -->
-            <h6>Min: {{metaDataMin(metaType)}} Max: {{metaDataMax(metaType)}}</h6>
             {{selectMetaType[metaType]}}
             <div class="logic-set row" v-for="(logicSet, index) in selectedMeta[metaType]" :key="logicSet.randomKey">
 
@@ -191,7 +197,7 @@
           </div> -->
           <!-- <h3 v-else>And you want <strong>ALL</strong> of the {{ dataset.featureDescriptionPlural }}.</h3> -->
 
-          <h2>Is that correct?</h2>
+          <h2>Continue with these filters?</h2>
           <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Confirm</button>
         </div>
         <div v-else>
@@ -252,7 +258,7 @@ export default {
           list.push(this.selectedMetaTypes[i]);
         }
       }
-      return list;
+      return list.sort();
     },
     numKeys () {
       return Object.keys(this.metaQuery).length;
@@ -341,9 +347,6 @@ export default {
     },
     getValues (metaType) {
       return this.metaQuery[metaType];
-    },
-    test (value) {
-      console.log(value);
     },
     resetFilters () {
       this.selectedMeta = {};
@@ -581,10 +584,26 @@ export default {
 h1, h2, h3 {
   font-weight: normal;
 }
+
+h4 {
+  text-align: left;
+}
+
+h6 {
+  display: inline;
+}
 .spacer, .logic-set, .add-logic-set {
   margin-top: 15px;
 }
 .confirm-btn {
   margin-bottom: 50px;
+}
+
+.line {
+  border-bottom: 2px solid black;
+}
+
+.variables {
+  margin-top: 5px;
 }
 </style>
