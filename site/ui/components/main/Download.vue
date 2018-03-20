@@ -17,18 +17,28 @@
 
         <b-form-radio-group v-model="featuresRadioValue" stacked>
           <b-form-radio value="all">Download All {{ dataset.featureDescriptionPlural | capitalize }}</b-form-radio>
-          <b-form-radio value="selected">Download Selected {{ dataset.featureDescriptionPlural | capitalize }}</b-form-radio>
+          <b-form-radio value="selected">Download Selected {{ dataset.featureDescriptionPlural | capitalize }} and/or {{ dataset.featureDescription | capitalize}} sets</b-form-radio>
         </b-form-radio-group>
 
         <div v-show="featuresRadioValue === 'selected'">
-          <selectize
+          <selectize class="top-cussion"
             :options="metaData.features.options"
             :value="selectedFeatures"
             @updated="updateFeatures"
-            :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural) + ' - begin typing to see more results'"
+            :placeholder="'Individual ' + $options.filters.capitalize(dataset.featureDescriptionPlural) + ' - begin typing to see more results'"
             :settings="getSelectizeSettings('features', metaData.features)"
             :errorMessage="'Please select some ' + dataset.featureDescriptionPlural + ' or click \'Download all ' + $options.filters.capitalize(dataset.featureDescriptionPlural) +'\''"
             id="feature-select"></selectize>
+          <div v-if="geneSets !== null">
+            <selectize v-if="geneSets !== null"
+              :options="geneSets"
+              :value="selectedSets"
+              @updated="updateSets"
+              :placeholder="$options.filters.capitalize(dataset.featureDescription) + ' Sets - begin typing to see more results'"
+              :settings="{}"
+              id="feature-select"></selectize>
+              *Information about gene sets can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
+          </div>
         </div>
       </div>
 
@@ -132,6 +142,17 @@ export default {
     };
   },
   computed: {
+    geneSets () {
+      if (this.metaData.geneSets) {
+        var options = Object.keys(this.metaData.geneSets);
+        const items = options.map(item => {
+          return {name: item};
+        });
+        return items;
+      } else {
+        return null;
+      }
+    },
     filters () {
       return this.$store.state.filters;
     },
@@ -178,6 +199,9 @@ export default {
     },
     selectedFeatures () {
       return this.$store.state.selectedFeatures;
+    },
+    selectedSets () {
+      return this.$store.state.selectedSets;
     },
     selectedVariables () {
       return this.$store.state.selectedVariables;
@@ -231,7 +255,7 @@ export default {
     formErrors () {
       let valid = true;
       let errors = {};
-      if (this.featuresRadioValue === 'selected' && this.selectedFeatures.length === 0) {
+      if (this.featuresRadioValue === 'selected' && this.selectedFeatures.length === 0 && this.selectedSets.length === 0) {
         valid = false;
         errors.features = true;
       }
@@ -321,6 +345,12 @@ export default {
       }
       this.$store.commit('selectedFeatures', features);
     },
+    updateSets (sets) {
+      if (!sets) {
+        sets = [];
+      }
+      this.$store.commit('selectedSets', sets);
+    },
     updateVariables (variables) {
       if (!variables) {
         variables = [];
@@ -330,9 +360,7 @@ export default {
     // this is a copy and paste from Filter.vue
     // TODO: move this function to it's own module so it's not duplicated
     getSelectizeSettings (metaType, metaData) {
-      const settings = {
-        required: true,
-      };
+      const settings = {};
       if (metaData.options === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
@@ -441,7 +469,11 @@ export default {
           features = [];
           break;
         case 'selected':
-          features = this.selectedFeatures;
+          if (this.selectedSets.length > 0) {
+            features = this.getFeatures();
+          } else {
+            features = this.selectedFeatures;
+          }
           break;
       }
 
@@ -450,6 +482,22 @@ export default {
         features: features,
         metaTypes: metaTypes,
       };
+    },
+    getFeatures () {
+      var features = new Set(this.selectedFeatures);
+      console.log([...features]);
+      var geneSets = this.metaData.geneSets;
+      for (var i = 0; i < this.selectedSets.length; i++) {
+        features = this.union(features, new Set(geneSets[this.selectedSets[i]]));
+      }
+      console.log([...features]);
+      return [...features];
+    },
+    union (setA, setB) {
+      for (var elem of setB) {
+        setA.add(elem);
+      }
+      return setA;
     },
   },
 };
@@ -477,6 +525,10 @@ h1, h2, h3 {
 }
 #plot-btn {
   margin-bottom: 25px;
+}
+
+.top-cussion {
+  margin-top: 10px;
 }
 
 .column-selection {
