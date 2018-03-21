@@ -38,6 +38,7 @@
               :settings="{}"
               id="feature-select"></selectize>
               *Information about gene sets can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
+              <h5>Total Number of {{ dataset.featureDescriptionPlural | capitalize }} Selected: {{ numFeatures }}</h5>
           </div>
         </div>
       </div>
@@ -305,6 +306,9 @@ export default {
 
       return numFeatures + numVariables;
     },
+    numFeatures () {
+      return this.getFeatures().length;
+    },
     variablesRadioValue: {
       get () {
         return this.$store.state.downloadRadios.variables;
@@ -486,11 +490,13 @@ export default {
     getFeatures () {
       var features = new Set(this.selectedFeatures);
       console.log([...features]);
-      var geneSets = this.metaData.geneSets;
-      for (var i = 0; i < this.selectedSets.length; i++) {
-        features = this.union(features, new Set(geneSets[this.selectedSets[i]]));
+      if (this.metaData.geneSets && this.selectedSets.length > 0) {
+        var geneSets = this.metaData.geneSets;
+        for (var i = 0; i < this.selectedSets.length; i++) {
+          features = this.union(features, new Set(geneSets[this.selectedSets[i]]['genes']));
+        }
+        console.log([...features]);
       }
-      console.log([...features]);
       return [...features];
     },
     union (setA, setB) {
@@ -506,6 +512,9 @@ export default {
 <style lang="scss" scoped>
 h1, h2, h3 {
   font-weight: normal;
+}
+h5 {
+  margin-top: 10px;
 }
 .form-group {
   label {
