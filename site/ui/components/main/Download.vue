@@ -149,6 +149,11 @@ export default {
         const items = options.map(item => {
           return {name: item};
         });
+        for (var set in items) {
+          var numGenes = this.metaData.geneSets[items[set]['name']]['genes'].length;
+          items[set]['name'] = items[set]['name'] + ' (' + numGenes + ')';
+          // console.log(numGenes);
+        }
         return items;
       } else {
         return null;
@@ -493,7 +498,7 @@ export default {
       if (this.metaData.geneSets && this.selectedSets.length > 0) {
         var geneSets = this.metaData.geneSets;
         for (var i = 0; i < this.selectedSets.length; i++) {
-          features = this.union(features, new Set(geneSets[this.selectedSets[i]]['genes']));
+          features = this.union(features, new Set(geneSets[this.selectedSets[i].replace(/( \(\d*\)$)/g, '')]['genes']));
         }
         console.log([...features]);
       }
