@@ -29,7 +29,7 @@
             :settings="getSelectizeSettings('features', metaData.features)"
             :errorMessage="'Please select some ' + dataset.featureDescriptionPlural + ' or click \'Download all ' + $options.filters.capitalize(dataset.featureDescriptionPlural) +'\''"
             id="feature-select"></selectize>
-          <div v-if="geneSets !== null">
+          <div v-if="geneSets !== null && Object.keys(geneSets).length > 0">
             <selectize v-if="geneSets !== null"
               :options="geneSets"
               :value="selectedSets"
