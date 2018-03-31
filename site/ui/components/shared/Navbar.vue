@@ -73,7 +73,9 @@ import router from '../../router';
 export default {
   name: 'navbar',
   data () {
-    return { };
+    return {
+      staticPages: ['About', 'Contact', 'DatasetNotFound'],
+    };
   },
   computed: {
     breadcrumbs () {
@@ -126,7 +128,6 @@ export default {
       }
       return [];
     },
-    staticPages: (Array) => ['About', 'Contact', 'DatasetNotFound'],
   },
   methods: {
     logout () {
