@@ -2,7 +2,7 @@
   <div>
     <b-navbar toggleable="md" type="inverse" variant="success">
 
-    <div class="nav-item center-nav">
+    <div v-if="staticPages.indexOf(currentRoute) < 0" class="nav-item center-nav">
         <!-- <b-breadcrumb :items="breadcrumbs"/> -->
         <ol class="breadcrumb">
           <li class="breadcrumb-item" :class="{'active': breadcrumb.active}" v-for="(breadcrumb, index) in breadcrumbs" :key="index">
@@ -16,8 +16,8 @@
         <span>Geney</span>
       </b-navbar-brand>
       <b-navbar-nav class="above-breadcrumbs ml-auto">
-        <b-nav-item href="/about" class="pr-2">About</b-nav-item>
-        <b-nav-item href="/contact">Contact</b-nav-item>
+        <b-nav-item to="/about" class="pr-2">About</b-nav-item>
+        <b-nav-item to="/contact">Contact</b-nav-item>
       </b-navbar-nav>
 
         <!-- Commenting out the login section for now...  -->
@@ -126,6 +126,7 @@ export default {
       }
       return [];
     },
+    staticPages: (Array) => ['About', 'Contact', 'DatasetNotFound'],
   },
   methods: {
     logout () {

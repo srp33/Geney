@@ -31,7 +31,6 @@ class GeneyDataset:
 
 	@property
 	def dataset_id(self) -> str:
-		print(self.__id)
 		return self.__id
 
 	@property
@@ -75,7 +74,6 @@ class GeneyDataset:
 
 		if SAMPLE_ID in meta_names:
 			meta_names.remove(SAMPLE_ID)
-		print(meta_names)
 
 		# TODO figure out the max number of items for files we can build
 		feature_slices, num_features_requested = self.get_query_feature_slices(query)
@@ -190,25 +188,4 @@ class GeneyDataset:
 			elif meta_type == SAMPLE_ID:
 				return dao.search_sample_id(search_val)
 			else:
-				print("SEARCHING META TYPE", meta_type)
 				return dao.search_meta_type(meta_type, search_val)
-
-		
-if __name__ == '__main__':
-	dataset = GeneyDataset('/Users/pjtatlow/projects/web/geney/data/mRNA_CCLE_isoform/')
-	# pprint(dataset.metadata)
-
-	filters = {
-		'meta': {
-			'Histology': ["carcinoma"],
-			'Hist Subtype1': ['small_cell_carcinoma']
-		},
-		'features': ['ENST00000000233.9','ENST00000042381.8', 'ENST00000215368.3', 'ENST00000219789.10', 'ENST00000497803.1', 'ENST00000534252.2', 'ENST00000576964.5', 'ENST00000621460.1'],
-		# 'features': [],
-	}
-	rows = -1
-	for text in dataset.filter_data(filters):
-		rows += 1
-		sys.stderr.write(text)
-		sys.stderr.flush()
-		# print('WROTE ROW', rows)

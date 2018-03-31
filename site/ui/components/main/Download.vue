@@ -25,7 +25,7 @@
             :options="metaData.features.options"
             :value="selectedFeatures"
             @updated="updateFeatures"
-            :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural)"
+            :placeholder="'All ' + $options.filters.capitalize(dataset.featureDescriptionPlural) + ' - begin typing to see more results'"
             :settings="getSelectizeSettings('features', metaData.features)"
             :errorMessage="'Please select some ' + dataset.featureDescriptionPlural + ' or click \'Download all ' + $options.filters.capitalize(dataset.featureDescriptionPlural) +'\''"
             id="feature-select"></selectize>
@@ -44,7 +44,7 @@
           <selectize
             :options="metaTypes"
             :value="selectedVariables"
-            placeholder="Metadata Variables"
+            placeholder="Metadata Variables - begin typing to see more results"
             @updated="updateVariables"
             :settings="metaTypeSettings"
             errorMessage="Please select from variables or click 'Download All Metadata Variables'"
