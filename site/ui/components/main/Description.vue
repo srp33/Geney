@@ -4,7 +4,11 @@
     <img class="logo" src="../../assets/geney-no-lamp.png">
     <h1 id="dataset-name">{{ dataset.title }}</h1>
     <h4 id="dataset-description">
-      <vue-markdown :source="dataset.description"></vue-markdown>
+      <vue-markdown :class="{'truncated': hidden}" :source="dataset.description"></vue-markdown>
+      <small class="change-size" @click="toggleText()">
+        <span v-if="hidden && truncated">Show More</span>
+        <span v-if="!truncated && !hidden">Show Less</span>
+      </small>
     </h4>
     <ul class="meta-types">
       <li>
@@ -35,11 +39,19 @@ export default {
   components: { VueMarkdown },
   data () {
     return {
+      truncated: true,
+      hidden: true,
     };
   },
   computed: {
     dataset () {
       return this.$store.state.dataset;
+    },
+  },
+  methods: {
+    toggleText () {
+      this.$set(this, 'hidden', !this.hidden);
+      this.$set(this, 'truncated', !this.truncated);
     },
   },
 };
@@ -58,6 +70,22 @@ export default {
     font-size: 1.25em;
   }
 }
+
+.change-size {
+  cursor: pointer;
+  color: #0275D8;
+  padding: 0;
+  display: block;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.truncated {
+  max-height: 120px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
 #dataset-description {
   text-align: left;
   padding: 0 50px;
