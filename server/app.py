@@ -30,8 +30,8 @@ RESPONDERS = {
     'json': JsonResponse,
 }
 
-
-
+# dictionary of commands and their respective handlers
+# each command function registers itself in this dictionary after it is defined
 COMMANDS = {}
 
 # cache of datasets so we don't have to go to redis everytime we need a dataset

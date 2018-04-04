@@ -1,6 +1,6 @@
 <template>
   <div class="card">
-    <div class="card-block row justify-content-center">
+    <div class="justify-content-center card-body">
       <h2 class="card-title col-12"><router-link :to="'/dataset/' + data.id">{{data.title}}</router-link></h2>
       <vue-markdown class="card-text" :class="{'truncated': hidden}" :source="data.description"></vue-markdown>
       <small class="change-size col-12" @click="toggleText()">
@@ -77,6 +77,9 @@ export default {
 .change-size {
   cursor: pointer;
   color: #0275D8;
+  padding: 0;
+  display: block;
+  margin-top: 5px;
 }
 .truncated {
   max-height: 150px;
@@ -85,6 +88,7 @@ export default {
 }
 .card-title {
   a {
+    font-weight: 500;
     color: inherit;
     text-decoration: none;
   }

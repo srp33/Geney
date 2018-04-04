@@ -2,7 +2,7 @@
   <div>
     <b-navbar toggleable="md" type="inverse" variant="success">
 
-    <div class="nav-item center-nav">
+    <div v-if="staticPages.indexOf(currentRoute) < 0" class="nav-item center-nav">
         <!-- <b-breadcrumb :items="breadcrumbs"/> -->
         <ol class="breadcrumb">
           <li class="breadcrumb-item" :class="{'active': breadcrumb.active}" v-for="(breadcrumb, index) in breadcrumbs" :key="index">
@@ -13,8 +13,12 @@
       </div>
 
       <b-navbar-brand class="above-breadcrumbs" to="/">
-        <span>Geney</span>
+        Geney
       </b-navbar-brand>
+      <b-navbar-nav class="above-breadcrumbs ml-auto">
+        <b-nav-item to="/about" class="pr-2">About</b-nav-item>
+        <b-nav-item to="/contact">Contact</b-nav-item>
+      </b-navbar-nav>
 
         <!-- Commenting out the login section for now...  -->
         <!-- <b-nav is-nav-bar class="ml-auto" right-alignment>
@@ -69,7 +73,9 @@ import router from '../../router';
 export default {
   name: 'navbar',
   data () {
-    return { };
+    return {
+      staticPages: ['About', 'Contact', 'DatasetNotFound'],
+    };
   },
   computed: {
     breadcrumbs () {
@@ -151,6 +157,7 @@ export default {
 }
 .above-breadcrumbs {
   z-index:80;
+  flex-flow: row;
 }
 .nav, .navbar {
   // display: flex;
@@ -159,6 +166,7 @@ export default {
 .navbar-brand {
   text-align: left;
   display: inline;
+  color: white;
   img {
       height: 50px;
       margin-top: -15px;
@@ -201,11 +209,13 @@ div.nav-item.center-nav {
   height: 40px;
 
   ol.breadcrumb {
+    text-align: left;
     display: inline-block;
     padding: 0.5em 0.5em;
     margin-bottom: 0px;
     background-color: transparent;
     li.breadcrumb-item {
+      display: inline-block;
       &::before {
         color: white;
       }

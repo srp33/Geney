@@ -15,7 +15,7 @@
       <div class="col-sm-6 offset-sm-3 column-selection" id="features">
         <h4>Select {{ dataset.featureDescriptionPlural | capitalize }}</h4>
 
-        <b-form-radio-group v-model="featuresRadioValue" stacked>
+        <b-form-radio-group v-model="featuresRadioValue" stacked class="left-align">
           <b-form-radio value="all">Download All {{ dataset.featureDescriptionPlural | capitalize }}</b-form-radio>
           <b-form-radio value="selected">Download Selected {{ dataset.featureDescriptionPlural | capitalize }} and/or {{ dataset.featureDescription | capitalize}} sets</b-form-radio>
         </b-form-radio-group>
@@ -46,8 +46,8 @@
       <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
         <h4>Select Metadata Variables</h4>
 
-        <b-form-radio-group v-model="variablesRadioValue" stacked>
-          <b-form-radio value="all">Download All Metadata Variables</b-form-radio>
+        <b-form-radio-group v-model="variablesRadioValue" stacked class="left-align">
+          <b-form-radio value="all"><span class="radio-label">Download All Metadata Variables</span></b-form-radio>
           <b-form-radio value="selected">Download Selected Metadata Variables</b-form-radio>
         </b-form-radio-group>
 
@@ -514,7 +514,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 h1, h2, h3 {
   font-weight: normal;
 }
@@ -557,5 +557,9 @@ h5 {
   .tooltip-inner {
     max-width: 1000px !important;
   }
+}
+
+.left-align {
+  text-align: left;
 }
 </style>
