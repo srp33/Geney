@@ -171,6 +171,9 @@ export default {
 .above-breadcrumbs {
   z-index:80;
   flex-flow: row;
+  a {
+    color: white;
+  }
 }
 .nav, .navbar {
   // display: flex;
