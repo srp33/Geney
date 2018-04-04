@@ -31,7 +31,7 @@
               </button>
               {{metaType}}
             </h4>
-            <selectize v-if="getOptions(metaType).options !== 'continuous'"
+            <selectize
             :options="getOptions(metaType).options"
             :value="getValues(metaType)"
             @updated="x => updateSelectedMeta(metaType, x)"
@@ -47,10 +47,7 @@
                 @click="removeFilter(metaType)">
                 <i class="fa fa-minus" aria-hidden="true"></i>
               </button>
-              <button class="btn btn-sm btn-success" @click="addLogicSet(metaType)">
-              <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
-              </button>
-              {{metaType}}<h6>  ({{metaDataMin(metaType)}}-{{metaDataMax(metaType)}})</h6>
+              {{metaType}}<h6><br>(min: {{metaDataMin(metaType)}} - max: {{metaDataMax(metaType)}})</h6>
             </h4>
             {{selectMetaType[metaType]}}
             <div class="logic-set row" v-for="(logicSet, index) in selectedMeta[metaType]" :key="logicSet.randomKey">
@@ -85,6 +82,9 @@
                 </button>
               </div>
             </div>
+            <button class="pull-right btn btn-sm btn-success" @click="addLogicSet(metaType)">
+              <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
+              </button>
           </div>
         </div>
       </div>
@@ -117,6 +117,7 @@ export default {
       selectedMetaTypes: [],
       selectedMeta: {},
       currentMeta: null,
+      option: '',
       settings: {
         oneItem: {
           maxItems: 1,
@@ -306,10 +307,8 @@ export default {
       this.$forceUpdate();
     },
     removeLogicSet (metaType, index) {
-      console.log('before', this.selectedMeta[metaType], index);
       const list = this.selectedMeta[metaType].slice();
       list.splice(index, 1);
-      console.log('after', list);
       this.updateSelectedMeta(metaType, list);
       this.$forceUpdate();
       Vue.nextTick(() => {
@@ -381,7 +380,6 @@ export default {
     },
     initializeContinuousType (metaType) {
       const meta = this.getMeta(metaType);
-      console.log(meta);
       if (meta && meta.options === 'continuous') {
         if (!this.selectedMeta[metaType] || this.selectedMeta[metaType].length === 0) {
           this.selectedMeta[metaType] = [];

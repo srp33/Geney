@@ -103,9 +103,9 @@ export default {
         return this.$store.state.dataset.title;
       } else {
         var titleArray = this.$store.state.dataset.title.split(' ');
-        var newTitle = titleArray[0].concat(' ', titleArray[1], ' ', titleArray[2], '...');
-        if (newTitle.length > 30) {
-          return newTitle.splice(0, 27).concat('...');
+        var newTitle = titleArray.slice(0, 3).join(' ');
+        if (newTitle.length > 30 || titleArray.length > 3) {
+          return newTitle.concat('...');
         } else {
           return newTitle;
         }
