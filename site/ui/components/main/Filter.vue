@@ -9,7 +9,7 @@
         <b-col cols="9">
           <selectize
           :options="metaTypes"
-          :value="''"
+          :value="option"
           placeholder="Variables"
           @updated="selectMetaType"
           :settings="metaTypeSettings"
@@ -82,7 +82,7 @@
                 </button>
               </div>
             </div>
-            <button class="pull-right btn btn-sm btn-success" @click="addLogicSet(metaType)">
+            <button class="right-side btn btn-sm btn-success" @click="addLogicSet(metaType)">
               <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
               </button>
           </div>
@@ -183,7 +183,7 @@ export default {
       return this.$store.state.dataset;
     },
     metaTypeSettings () {
-      const baseSettings = { maxItems: 1 };
+      const baseSettings = { maxItems: 1, clearValue: true };
       if (this.metaData && this.metaData.meta === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
@@ -238,6 +238,7 @@ export default {
       if (metaType && metaType !== undefined && this.selectedMetaTypes.indexOf(metaType) === -1) {
         this.selectedMetaTypes.push(metaType);
       }
+      this.option = null;
       if (metaType) {
         if (this.metaData && this.metaData.meta === null) {
           if (!this.cachedMeta[metaType]) { // not in cache so request it from the server
@@ -429,5 +430,10 @@ h6 {
 
 .variables {
   margin-top: 5px;
+}
+
+.right-side {
+  margin-right: -17px;
+  float: right;
 }
 </style>
