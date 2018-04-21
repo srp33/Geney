@@ -84,7 +84,7 @@ export default {
         crumbs.push({link: '/', text: 'Select Dataset', route: 'Home'});
         if (this.$store.state.dataset.id) {
           let datasetPath = '/dataset/' + this.$store.state.dataset.id + '/';
-          crumbs.push({link: datasetPath, text: this.$store.state.dataset.title, route: 'Description'});
+          crumbs.push({link: datasetPath, text: this.datasetTitle, route: 'Description'});
           if (this.$route.path.indexOf('filter') >= 0) {
             crumbs.push({link: datasetPath + 'filter', text: 'Filter', route: 'Filter'});
           }
@@ -97,6 +97,19 @@ export default {
         crumbs[crumbs.length - 1].active = true;
       }
       return crumbs;
+    },
+    datasetTitle () {
+      if (this.$store.state.dataset.title.length < 20) {
+        return this.$store.state.dataset.title;
+      } else {
+        var titleArray = this.$store.state.dataset.title.split(' ');
+        var newTitle = titleArray.slice(0, 3).join(' ');
+        if (newTitle.length > 30 || titleArray.length > 3) {
+          return newTitle.concat('...');
+        } else {
+          return newTitle;
+        }
+      }
     },
     currentRoute () {
       return this.$route.name;
@@ -158,6 +171,9 @@ export default {
 .above-breadcrumbs {
   z-index:80;
   flex-flow: row;
+  a {
+    color: white;
+  }
 }
 .nav, .navbar {
   // display: flex;
