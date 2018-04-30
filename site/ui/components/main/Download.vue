@@ -21,7 +21,7 @@
         </b-form-radio-group>
 
         <div v-show="featuresRadioValue === 'selected'">
-          <selectize class="top-cussion"
+          <selectize class="top-cushion"
             :options="metaData.features.options"
             :value="selectedFeatures"
             @updated="updateFeatures"
@@ -30,7 +30,7 @@
             :errorMessage="'Please select some ' + dataset.featureDescriptionPlural + ' or click \'Download all ' + $options.filters.capitalize(dataset.featureDescriptionPlural) +'\''"
             id="feature-select"></selectize>
           <div v-if="geneSets !== null && Object.keys(geneSets).length > 0">
-            <selectize v-if="geneSets !== null"
+            <selectize
               :options="geneSets"
               :value="selectedSets"
               @updated="updateSets"
@@ -494,13 +494,11 @@ export default {
     },
     getFeatures () {
       var features = new Set(this.selectedFeatures);
-      console.log([...features]);
       if (this.metaData.geneSets && this.selectedSets.length > 0) {
         var geneSets = this.metaData.geneSets;
         for (var i = 0; i < this.selectedSets.length; i++) {
           features = this.union(features, new Set(geneSets[this.selectedSets[i].replace(/( \(\d*\)$)/g, '')]['genes']));
         }
-        console.log([...features]);
       }
       return [...features];
     },
@@ -541,7 +539,7 @@ h5 {
   margin-bottom: 25px;
 }
 
-.top-cussion {
+.top-cushion {
   margin-top: 10px;
 }
 
