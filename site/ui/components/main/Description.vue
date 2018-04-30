@@ -6,8 +6,8 @@
     <h4 id="dataset-description">
       <vue-markdown :class="{'truncated': hidden}" :source="dataset.description"></vue-markdown>
       <small class="change-size" @click="toggleText()">
-        <span v-if="hidden && truncated">Show More</span>
-        <span v-if="!truncated && !hidden">Show Less</span>
+        <span v-if="hidden">Show More</span>
+        <span v-if="!hidden">Show Less</span>
       </small>
     </h4>
     <ul class="meta-types">
@@ -39,7 +39,6 @@ export default {
   components: { VueMarkdown },
   data () {
     return {
-      truncated: true,
       hidden: true,
     };
   },
@@ -51,7 +50,6 @@ export default {
   methods: {
     toggleText () {
       this.$set(this, 'hidden', !this.hidden);
-      this.$set(this, 'truncated', !this.truncated);
     },
   },
 };
