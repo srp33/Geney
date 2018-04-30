@@ -70,6 +70,9 @@ export default {
       const div = $(this.$el).find('.selectize-input');
       div.scrollTop($(div)[0].scrollHeight);
       this.setValidState(values);
+      if (this.settings.clearValue) {
+        this.selectize.clear();
+      }
     },
     setValidState (values) {
       if (this.settings.required) {
