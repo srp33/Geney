@@ -3,7 +3,7 @@ import os, json, sqlite3
 from pprint import pprint
 from typing import Set, List, Any, Iterable
 from .Query import Query
-from .Dao import SQLiteDao, Hdf5Dao
+from .Dao import SQLiteDao, Hdf5Dao, ParquetDao
 from .Exceptions import RequestError, ServerError
 from .Constants import *
 
@@ -57,9 +57,13 @@ class GeneyDataset:
 	def metadata_path(self):
 		return self.__dir + METADATA_JSON
 
+	@property
+	def groups_path(self):
+		return self.__dir + GROUPS_JSON
+
 	def get_variable(self, variable_name):
-		with SQLiteDao(self.__dir) as dao:
-			if variable_name == 'sampleID':
+		with ParquetDao(self.directory) as dao:
+			if variable_name == SAMPLE_COLUMN:
 				sampleIdValues = {'numOptions': self.num_samples, "options": None}
 				if self.num_samples <= MAX_OPTIONS:
 					sampleIdValues['options'] = dao.get_sample_id_options()
@@ -189,3 +193,8 @@ class GeneyDataset:
 				return dao.search_sample_id(search_val)
 			else:
 				return dao.search_meta_type(meta_type, search_val)
+
+if __name__ == '__main__':
+	dset = GeneyDataset("/Volumes/KIMBALLUSB/ParquetData/LINCS_PhaseII_Level3/")
+	results = dset.get_variable("1-Mar")
+	print(results)

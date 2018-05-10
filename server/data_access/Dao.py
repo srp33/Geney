@@ -4,6 +4,8 @@ import numpy as np
 from .Constants import *
 from .Query import Query, MetaFilter
 from .Exceptions import RequestError, ServerError
+from .Use_Parquet_Code.UseParquet import *
+import json
 
 class SQLiteDao:
 
@@ -282,3 +284,39 @@ class Hdf5Dao:
 
 	def close(self):
 		self.__hdf5.close()
+
+class ParquetDao:
+
+	def __init__(self, directory):
+		# self.__file = directory
+		self.__file = "{}{}".format(directory, DATA_FILE)
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		return exc_val
+
+	def getFilterOptions(self):
+		return getColumnNames(self.__file)
+
+	def get_sample_id_options(self) -> List:
+		sample_info = getColumnInfo(self.__file, SAMPLE_COLUMN)
+		return sample_info.uniqueValues
+
+	def get_variable_options(self, variable_name) -> Dict[str, Any]:
+		column_info = getColumnInfo(self.__file, variable_name)
+		if column_info.dataType == 'discrete':
+			return {"numOptions": len(column_info.uniqueValues), "options": column_info.uniqueValues}
+		elif column_info.dataType == 'continuous':
+			min_val = min(column_info.uniqueValues)
+			max_val = max(column_info.uniqueValues)
+			return {"min": min_val, "max": max_val, "options": "continuous"}
+		else:
+			return None
+
+
+if __name__ == '__main__':
+	dao = ParquetDao('/Volumes/KIMBALLUSB/ParquetData/LINCS_PhaseII_Level3/METABRIC.pq')
+	filter_options = dao.getFilterOptions()
+	groups = {"MetaData": [], "Genes": filter_options}

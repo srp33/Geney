@@ -14,16 +14,17 @@ from responders.JsonResponse import JsonResponse
 from data_access.Dataset import GeneyDataset
 from data_access.Query import Query
 
-DATA_PATH = os.getenv('GENEY_DATA_PATH', '')
-if not DATA_PATH:
-    print('"GENEY_DATA_PATH" environment variable not set!', flush=True)
-    sys.exit(1)
-
-URL = os.getenv('GENEY_URL', '')
-if not URL:
-    print('"GENEY_URL" environment variable not set!', flush=True)
-    sys.exit(1)
-
+# DATA_PATH = os.getenv('GENEY_DATA_PATH', '')
+# if not DATA_PATH:
+#     print('"GENEY_DATA_PATH" environment variable not set!', flush=True)
+#     sys.exit(1)
+#
+# URL = os.getenv('GENEY_URL', '')
+# if not URL:
+#     print('"GENEY_URL" environment variable not set!', flush=True)
+#     sys.exit(1)
+DATA_PATH = "/Volumes/KIMBALLUSB/ParquetData/"
+URL = "localhost:8080"
 RESPONDERS = {
     'tsv': TsvResponse,
     'csv': CsvResponse,
@@ -42,7 +43,7 @@ DATASETS = {}
 
 app = Flask(__name__)
 
-redis_con = redis.StrictRedis(host='redis')
+redis_con = redis.StrictRedis(host='localhost')
 redis_con.flushdb()
 
 def load_datasets() -> None:
@@ -117,6 +118,21 @@ def get_datasets():
         return Response(descriptions, mimetype='application/json')
     else:
         return not_found()
+
+@app.route('/api/datasets/<string:dataset_id>/groups', strict_slashes=False)
+def get_groups(dataset_id):
+    dataset = get_dataset(dataset_id)
+    if dataset is None:
+        return not_found()
+    return send_file(dataset.groups_path)
+
+@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>', strict_slashes=False)
+def get_options(dataset_id, variable_name):
+    dataset = get_dataset(dataset_id)
+    if dataset is None:
+        return not_found()
+    results = dataset.get_variable(variable_name)
+    return jsonify(results)
 
 @app.route('/api/datasets/<string:dataset_id>/meta', strict_slashes=False)
 @app.route('/api/datasets/<string:dataset_id>/meta/<string:variable_name>', strict_slashes=False)

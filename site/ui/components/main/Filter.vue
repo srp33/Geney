@@ -1,10 +1,95 @@
 <template>
 
-  <div class="filter top row justify-content-center" v-if="metaData">
+  <div class="filter top row justify-content-center" v-if="groups">
     <div class="col-sm-6">
       <h1>Filter Samples</h1>
-      <div class="spacer"></div>
-      <b-row>
+      <div v-for="key in Object.keys(groups)" class="spacer">
+        <b-row>
+          <b-col cols="3"><h4 class="variables">{{key}}:</h4></b-col>
+          <b-col cols="9">
+            <selectize
+            :options="groups[key]"
+            :value="option"
+            placeholder="Variables"
+            @updated="selectVariable"
+            :settings="variableSettings"
+            id="meta-types"></selectize>
+          </b-col>
+          </b-row>
+      </div>
+      <!-- <div v-if="currentMetaTypes.length> 0">
+          <div class="spacer"></div>
+          <div class="line"></div>
+          <div class="spacer"></div>
+          <div v-for="metaType in currentMetaTypes" :key="metaType">
+            <div class="spacer"></div>
+            <div v-if="getOptions(metaType).options !== 'continuous'">
+              <h4>
+                <button
+                  class="btn btn-sm btn-danger"
+                  @click="removeFilter(metaType)">
+                  <i class="fa fa-minus" aria-hidden="true"></i>
+                </button>
+                {{metaType}}
+              </h4>
+              <selectize
+              :options="getOptions(metaType).options"
+              :value="getValues(metaType)"
+              @updated="x => updateSelectedMeta(metaType, x)"
+              placeholder="Select value(s) to include - begin typing to see more results"
+              :settings="getSelectizeSettings(metaType, getOptions(metaType))"
+              :id="metaType"></selectize>
+            </div>
+
+            <div v-else>
+              <h4>
+                <button
+                  class=" btn btn-sm btn-danger"
+                  @click="removeFilter(metaType)">
+                  <i class="fa fa-minus" aria-hidden="true"></i>
+                </button>
+                {{metaType}}<h6><br>(min: {{metaDataMin(metaType)}} - max: {{metaDataMax(metaType)}})</h6>
+              </h4>
+              {{selectMetaType[metaType]}}
+              <div class="logic-set row" v-for="(logicSet, index) in selectedMeta[metaType]" :key="logicSet.randomKey">
+
+                <div class="form-group col" :class="{'has-danger': errors.has(metaType + '_' + index + '_operator')}">
+                  <selectize
+                    :options="operatorList"
+                    :value="logicSet.operator"
+                    placeholder="Select Operator"
+                    @updated="x => updateSelectedMeta(metaType, x, index, 'operator')"
+                    :settings="settings.logicOperators"></selectize>
+                </div>
+
+                <div class="form-group col" :class="{'has-danger': errors.has(metaType + '_' + index + '_value')}">
+                  <input
+                    type="number"
+                    class="form-control"
+                    :value="logicSet.value"
+                    :min="metaDataMin(metaType)"
+                    :max="metaDataMax(metaType)"
+                    :name="metaType + '_' + index + '_value'"
+                    v-validate="`required|min_value:${metaDataMin(metaType)}|max_value:${metaDataMax(metaType)}`"
+                    @input="x => updateSelectedMeta(metaType, Number(x.target.value), index, 'value')"
+                    :class="{'form-control-danger': errors.has(metaType + '_' + index + '_value')}">
+                </div>
+                <div class="pull-right">
+                  <button
+                    class=" btn btn-sm btn-danger"
+                    style="margin-top:5.5px"
+                    @click="removeLogicSet(metaType, index)">
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+              <button class="right-side btn btn-sm btn-success" @click="addLogicSet(metaType)">
+                <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+          </div>
+        </div> -->
+      <!-- <b-row>
         <b-col cols="3"><h4 class="variables">Variables:</h4></b-col>
         <b-col cols="9">
           <selectize
@@ -97,7 +182,7 @@
           <h2>You have not selected any filters.</h2>
           <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Continue</button>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -115,6 +200,7 @@ export default {
   data () {
     return {
       selectedMetaTypes: [],
+      selectedVariables: [],
       selectedMeta: {},
       currentMeta: null,
       option: '',
@@ -138,6 +224,8 @@ export default {
         '!=': 'Not Equal To',
       },
       metaQuery: {},
+      variableQuery: {},
+      options: {},
     };
   },
   computed: {
@@ -149,6 +237,18 @@ export default {
       for (var i in this.selectedMetaTypes) {
         if (list.indexOf(this.selectedMetaTypes[i]) === -1) {
           list.push(this.selectedMetaTypes[i]);
+        }
+      }
+      return list.sort();
+    },
+    currentVariables () {
+      const list = [];
+      for (var variable in this.variableQuery) {
+        list.push(variable);
+      }
+      for (var i in this.selectedVariables) {
+        if (list.indexOf(this.selectedVariables[i]) === -1) {
+          list.push(this.selectedVariables[i]);
         }
       }
       return list.sort();
@@ -168,6 +268,9 @@ export default {
     metaData () {
       return this.$store.state.metaData;
     },
+    groups () {
+      return this.$store.state.groups;
+    },
     operatorList () {
       const list = [];
       for (let operator in this.operators) {
@@ -182,8 +285,8 @@ export default {
     dataset () {
       return this.$store.state.dataset;
     },
-    metaTypeSettings () {
-      const baseSettings = { maxItems: 1, clearValue: true };
+    variableSettings () {
+      const baseSettings = { maxItems: 1, clearValue: false };
       if (this.metaData && this.metaData.meta === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
@@ -255,6 +358,26 @@ export default {
           this.initializeContinuousType(metaType);
         }
       }
+    },
+    selectVariable (variable) {
+      if (variable && variable !== undefined && this.selectedVariables.indexOf(variable) === -1) {
+        this.selectedVariables.push(variable);
+        const loadfn = function (context, variable, callback) {
+          context.$http.get(
+            `/api/datasets/${context.$route.params.dataset}/options/${variable}`
+          ).then(response => {
+            var items = response.data;
+            callback(variable, items);
+          }, failedResponse => {
+            callback(variable, []);
+          });
+        };
+        loadfn(this, variable, this.updateVariableOptions);
+      }
+      this.option = null;
+    },
+    updateVariableOptions (variable, items) {
+      this.options[variable] = items;
     },
     updateSelectedMeta (metaType, value, index, key = false) {
       if (value && value !== undefined && metaType !== undefined) {

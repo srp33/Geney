@@ -1,4 +1,7 @@
 export default {
+  groups (state, value) {
+    state.groups = value;
+  },
   metaData (state, value) {
     state.metaData = value;
   },

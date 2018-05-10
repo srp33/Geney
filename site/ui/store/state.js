@@ -2,6 +2,7 @@ export default {
   metaData: null,
   datasets: null,
   dataset: {},
+  groups: null,
   filters: null,
   selectedFeatures: [],
   selectedVariables: [],

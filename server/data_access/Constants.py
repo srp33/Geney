@@ -1,12 +1,14 @@
 import re
 # Filename constants
 DESCRIPTION_FILE = 'description.json'
-DATA_FILE = 'data.h5'
+DATA_FILE = 'data.pq'
 METADATA_DB = 'metadata.sqlite'
 METADATA_JSON = 'metadata.json'
-REQUIRED_FILES = [DESCRIPTION_FILE, METADATA_DB, DATA_FILE, METADATA_JSON]
-
+GROUPS_JSON = 'groups.json'
+REQUIRED_FILES = [DESCRIPTION_FILE, DATA_FILE, GROUPS_JSON]
+SAMPLE_COLUMN = "Sample"
 HDF5_DATA_PATH = 'data/'
+
 
 # Meta Type constants
 TEXT = 'text'
