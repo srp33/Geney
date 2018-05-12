@@ -134,6 +134,14 @@ export default {
       }
     }
   },
+  getOptions (context, datasetId) {
+    Vue.http.get(`/api/datasets/${datasetId}/options`).then(response => {
+      const options = response.data;
+      context.commit('options', options);
+    }, response => {
+      console.log('FAILED', response);
+    });
+  },
   logout (context) {
     localStorage.removeItem('jwt');
     context.commit('user', null);

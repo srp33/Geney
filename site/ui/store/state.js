@@ -3,6 +3,7 @@ export default {
   datasets: null,
   dataset: {},
   groups: null,
+  options: null,
   filters: null,
   selectedFeatures: [],
   selectedSets: [],

@@ -17,31 +17,33 @@
           </b-col>
           </b-row>
       </div>
-      <!-- <div v-if="currentMetaTypes.length> 0">
+        <div v-if="currentVariables.length> 0">
           <div class="spacer"></div>
           <div class="line"></div>
           <div class="spacer"></div>
-          <div v-for="metaType in currentMetaTypes" :key="metaType">
+          <div v-for="variable in currentVariables" :key="variable">
             <div class="spacer"></div>
-            <div v-if="getOptions(metaType).options !== 'continuous'">
+            <div v-if="getOptions(variable).options !== 'continuous'">
               <h4>
                 <button
                   class="btn btn-sm btn-danger"
-                  @click="removeFilter(metaType)">
+                  @click="removeFilter(variable)">
                   <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
                 {{metaType}}
               </h4>
               <selectize
-              :options="getOptions(metaType).options"
-              :value="getValues(metaType)"
-              @updated="x => updateSelectedMeta(metaType, x)"
+              :options="getOptions(variable).options"
+              :value="getValues(variable)"
+              @updated="x => updateSelectedFilters(variable, x)"
               placeholder="Select value(s) to include - begin typing to see more results"
-              :settings="getSelectizeSettings(metaType, getOptions(metaType))"
-              :id="metaType"></selectize>
+              :settings="getSelectizeSettings(variable, getOptions(variable))"
+              :id="variable"></selectize>
             </div>
 
-            <div v-else>
+          </div>
+        </div>
+            <!-- <div v-else>
               <h4>
                 <button
                   class=" btn btn-sm btn-danger"
@@ -190,6 +192,7 @@
 <script>
 import router from '../../router';
 import Vue from 'vue';
+// import { mapGetters } from 'vuex';
 const selectize = require('../shared/Selectize');
 
 export default {
@@ -202,6 +205,7 @@ export default {
       selectedMetaTypes: [],
       selectedVariables: [],
       selectedMeta: {},
+      selectedFilters: {},
       currentMeta: null,
       option: '',
       settings: {
@@ -225,7 +229,6 @@ export default {
       },
       metaQuery: {},
       variableQuery: {},
-      options: {},
     };
   },
   computed: {
@@ -323,18 +326,18 @@ export default {
       }
       return 0;
     },
-    getValues (metaType) {
-      return this.metaQuery[metaType];
+    getValues (variable) {
+      return this.variableQuery[variable];
     },
-    removeFilter (metaType) {
-      delete this.selectedMeta[metaType];
-      delete this.metaQuery[metaType];
-      var index = this.selectedMetaTypes.indexOf(metaType);
-      this.selectedMetaTypes = this.selectedMetaTypes.splice(0, index).concat(this.selectedMetaTypes.splice(index + 1));
+    removeFilter (variable) {
+      delete this.selectedFilters[variable];
+      delete this.variableQuery[variable];
+      var index = this.selectedVariables.indexOf(variable);
+      this.selectedVariables = this.selectedVariables.splice(0, index).concat(this.selectedVariables.splice(index + 1));
       this.$forceUpdate();
     },
     getOptions (metaType) {
-      return this.$store.state.metaData.meta[metaType];
+      return this.$store.state.options[metaType];
     },
     selectMetaType (metaType) {
       console.log('selected ' + metaType);
@@ -362,17 +365,17 @@ export default {
     selectVariable (variable) {
       if (variable && variable !== undefined && this.selectedVariables.indexOf(variable) === -1) {
         this.selectedVariables.push(variable);
-        const loadfn = function (context, variable, callback) {
-          context.$http.get(
-            `/api/datasets/${context.$route.params.dataset}/options/${variable}`
-          ).then(response => {
-            var items = response.data;
-            callback(variable, items);
-          }, failedResponse => {
-            callback(variable, []);
-          });
-        };
-        loadfn(this, variable, this.updateVariableOptions);
+        // const loadfn = function (context, variable, callback) {
+        //   context.$http.get(
+        //     `/api/datasets/${context.$route.params.dataset}/options/${variable}`
+        //   ).then(response => {
+        //     var items = response.data;
+        //     callback(variable, items);
+        //   }, failedResponse => {
+        //     callback(variable, []);
+        //   });
+        // };
+        // loadfn(this, variable, this.updateVariableOptions);
       }
       this.option = null;
     },
@@ -386,6 +389,17 @@ export default {
           this.$set(this.selectedMeta, metaType, value);
         } else {
           this.$set(this.selectedMeta[metaType][index], key, value);
+        }
+        this.updateMetaQuery();
+      }
+    },
+    updateSelectedFilters (variable, value, index, key = false) {
+      if (value && value !== undefined && variable !== undefined) {
+        this.$store.commit('lastMetaType', variable);
+        if (key === false) {
+          this.$set(this.selectedFilters, variable, value);
+        } else {
+          this.$set(this.selectedFilters[variable][index], key, value);
         }
         this.updateMetaQuery();
       }
@@ -524,6 +538,7 @@ export default {
       }
       this.updateMetaQuery();
     }
+    this.$store.dispatch('getOptions', this.$route.params.dataset);
   },
 };
 </script>

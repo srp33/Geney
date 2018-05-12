@@ -2,6 +2,9 @@ export default {
   groups (state, value) {
     state.groups = value;
   },
+  options (state, value) {
+    state.options = value;
+  },
   metaData (state, value) {
     state.metaData = value;
   },
