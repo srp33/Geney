@@ -5,6 +5,7 @@ export default {
   groups: null,
   filters: null,
   selectedFeatures: [],
+  selectedSets: [],
   selectedVariables: [],
   datasetName: null,
   user: null,

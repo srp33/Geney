@@ -45,6 +45,9 @@ export default {
   selectedFeatures (state, payload) {
     state.selectedFeatures = payload;
   },
+  selectedSets (state, payload) {
+    state.selectedSets = payload;
+  },
   selectedVariables (state, payload) {
     state.selectedVariables = payload;
   },
