@@ -2,7 +2,7 @@ import sqlite3, h5py
 from typing import List, Set, Dict, Any, Tuple
 import numpy as np
 from .Constants import *
-from .Query import Query, MetaFilter
+from .Query import MetaFilter
 from .Exceptions import RequestError, ServerError
 from .Use_Parquet_Code.UseParquet import *
 import json
@@ -297,7 +297,7 @@ class ParquetDao:
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		return exc_val
 
-	def getFilterOptions(self):
+	def get_variables(self):
 		return getColumnNames(self.__file)
 
 	def get_sample_id_options(self) -> List:
@@ -318,5 +318,5 @@ class ParquetDao:
 
 if __name__ == '__main__':
 	dao = ParquetDao('/Volumes/KIMBALLUSB/ParquetData/LINCS_PhaseII_Level3/METABRIC.pq')
-	filter_options = dao.getFilterOptions()
+	filter_options = dao.get_variables()
 	groups = {"MetaData": [], "Genes": filter_options}
