@@ -28,6 +28,7 @@ export default {
       if (to.params.dataset !== from.params.dataset) {
         // remove any set filters
         this.$store.commit('filters', null);
+        this.$store.commit('selectedSets', []);
         // make sure we have datasets
         if (this.$store.state.datasets) {
           // find dataset and set it in the store
