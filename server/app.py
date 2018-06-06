@@ -54,7 +54,7 @@ DATASETS = {}
 
 app = Flask(__name__)
 
-redis_con = redis.StrictRedis(host='localhost')
+redis_con = redis.StrictRedis(host='redis')
 redis_con.flushdb()
 
 def load_datasets() -> None:
@@ -222,10 +222,10 @@ def download(dataset_id):
     # TODO: Validate query before starting response
 
     file_path = dataset.query(query, file_format, gzip_output, DOWNLOAD_LOCATION)
-    extention = re.search(r'\..*', file_path).group(0)
+    extension = re.search(r'\..*', file_path).group(0)
     if file_path:
         return send_file(file_path, mimetype=mime_type, as_attachment=True,
-                         attachment_filename="{}{}".format(dataset_id, extention))
+                         attachment_filename="{}{}".format(dataset_id, extension))
     else:
         return bad_request()
 

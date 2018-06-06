@@ -345,6 +345,11 @@ class ParquetDao:
 		continuous_filters = []
 		discrete_filters = []
 		features = query.feature_filters
+		if not features or len(features) == 0:
+			features = []
+			include_all_columns = True
+		else:
+			include_all_columns = False
 		for filter in query.filters:
 			values = filter.values
 			if type(values[0]) != str:
@@ -366,8 +371,8 @@ class ParquetDao:
 						continuous_filters.append(ss.ContinuousQuery(filter.name, operatorEnum, value['value']))
 			else:
 				discrete_filters.append(ss.DiscreteQuery(filter.name, values))
-		ss.exportQueryResults(self.__file, location, file_type, features,
-							  continuous_filters, discrete_filters)
+		ss.exportQueryResults(self.__file, location, file_type, features, continuous_filters, discrete_filters,
+							  includeAllColumns=include_all_columns)
 		return location
 
 
