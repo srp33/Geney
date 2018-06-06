@@ -6,6 +6,7 @@ import pickle
 import sys
 import time
 import redis
+import re
 
 from flask import Flask, make_response, Response, jsonify, request, send_file
 from responders.CsvResponse import CsvResponse
@@ -14,21 +15,31 @@ from responders.JsonResponse import JsonResponse
 from data_access.Dataset import GeneyDataset
 from data_access.Query import Query
 
-# DATA_PATH = os.getenv('GENEY_DATA_PATH', '')
-# if not DATA_PATH:
-#     print('"GENEY_DATA_PATH" environment variable not set!', flush=True)
-#     sys.exit(1)
-#
-# URL = os.getenv('GENEY_URL', '')
-# if not URL:
-#     print('"GENEY_URL" environment variable not set!', flush=True)
-#     sys.exit(1)
-DATA_PATH = "/Volumes/KIMBALLUSB/ParquetData/"
-URL = "localhost:8080"
+DATA_PATH = os.getenv('GENEY_DATA_PATH', '')
+if not DATA_PATH:
+    print('"GENEY_DATA_PATH" environment variable not set!', flush=True)
+    sys.exit(1)
+
+URL = os.getenv('GENEY_URL', '')
+if not URL:
+    print('"GENEY_URL" environment variable not set!', flush=True)
+    sys.exit(1)
+DOWNLOAD_LOCATION = os.getenv('DOWNLOAD_LOCATION', '')
+if not DOWNLOAD_LOCATION:
+    print('"DOWNLOAD_LOCATION" environment variable not set!', flush=True)
+    sys.exit(1)
+
 RESPONDERS = {
     'tsv': TsvResponse,
     'csv': CsvResponse,
     'json': JsonResponse,
+}
+
+MIME_TYPES = {
+    'csv': 'text/csv',
+    'json': 'text/json',
+    'tsv': 'text/tsv',
+    'gzip': 'application/gzip'
 }
 
 # dictionary of commands and their respective handlers
@@ -126,45 +137,49 @@ def get_groups(dataset_id):
         return not_found()
     return send_file(dataset.groups_path)
 
+@app.route('/api/datasets/<string:dataset_id>/options', strict_slashes=False)
 @app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>', strict_slashes=False)
-def get_options(dataset_id, variable_name):
+def get_options(dataset_id, variable_name=None):
     dataset = get_dataset(dataset_id)
     if dataset is None:
         return not_found()
-    results = dataset.get_variable(variable_name)
-    return jsonify(results)
-
-@app.route('/api/datasets/<string:dataset_id>/meta', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/meta/<string:variable_name>', strict_slashes=False)
-def meta(dataset_id, variable_name=None):
-    dataset = get_dataset(dataset_id)
-    if dataset is None:
-        return not_found()
-
-    if variable_name is None: # they're requesting all of the metadata
-        return send_file(dataset.metadata_path)
-    else: # they want the metadata for a specific variable
+    if variable_name:
         results = dataset.get_variable(variable_name)
-
-        if results is None:
-            return not_found()
-
         return jsonify(results)
+    else:
+        return send_file(dataset.options_path)
 
-@app.route('/api/datasets/<string:dataset_id>/meta/<string:meta_type>/search/<string:search_str>', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/meta/<string:meta_type>/search', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/meta/search/<string:search_str>', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/meta/search', strict_slashes=False)
-def search(dataset_id, meta_type='', search_str=''):
-    dataset = get_dataset(dataset_id)
-    if dataset is None:
-        return not_found()
+# @app.route('/api/datasets/<string:dataset_id>/meta', strict_slashes=False)
+# @app.route('/api/datasets/<string:dataset_id>/meta/<string:variable_name>', strict_slashes=False)
+# def meta(dataset_id, variable_name=None):
+#     dataset = get_dataset(dataset_id)
+#     if dataset is None:
+#         return not_found()
+#
+#     if variable_name is None: # they're requesting all of the metadata
+#         return send_file(dataset.metadata_path)
+#     else: # they want the metadata for a specific variable
+#         results = dataset.get_variable(variable_name)
+#
+#         if results is None:
+#             return not_found()
+#
+#         return jsonify(results)
 
-    search_results = dataset.search(meta_type, search_str)
-    if search_results is None:
-        return not_found()
-
-    return jsonify(search_results)
+# @app.route('/api/datasets/<string:dataset_id>/meta/<string:meta_type>/search/<string:search_str>', strict_slashes=False)
+# @app.route('/api/datasets/<string:dataset_id>/meta/<string:meta_type>/search', strict_slashes=False)
+# @app.route('/api/datasets/<string:dataset_id>/meta/search/<string:search_str>', strict_slashes=False)
+# @app.route('/api/datasets/<string:dataset_id>/meta/search', strict_slashes=False)
+# def search(dataset_id, meta_type='', search_str=''):
+#     dataset = get_dataset(dataset_id)
+#     if dataset is None:
+#         return not_found()
+#
+#     search_results = dataset.search(meta_type, search_str)
+#     if search_results is None:
+#         return not_found()
+#
+#     return jsonify(search_results)
 
 @app.route('/api/datasets/<string:dataset_id>/samples', strict_slashes=False, methods=['POST'])
 def count_samples(dataset_id):
@@ -194,31 +209,24 @@ def download(dataset_id):
         return bad_request()
 
     file_format = options['fileformat']
-
     if file_format not in RESPONDERS:
         return bad_request()
 
     gzip_output = options['gzip'] if ('gzip' in options) else False
 
+    if gzip_output:
+        mime_type = MIME_TYPES['gzip']
+    else:
+        mime_type = MIME_TYPES[file_format]
+
     # TODO: Validate query before starting response
 
-    responder = RESPONDERS[file_format]
-
-    return responder(dataset, query, gzip_output)
-
-@app.route('/api/datasets/<string:dataset_id>/link', strict_slashes=False, methods=['POST'])
-def generate_link(dataset_id):
-    dataset = get_dataset(dataset_id)
-    if dataset is None:
-        return not_found()
-    try:
-        query_str = request.get_json()
-        query = Query(query_str, dataset.description)
-        redis_con.set('{}_{}'.format(dataset_id, query.md5), json.dumps(query_str))
-        return jsonify({
-            'link': '{base}/api/datasets/{dataset}/link/{hash}'.format(base=URL, dataset=dataset_id, hash=query.md5)
-        })
-    except Exception:
+    file_path = dataset.query(query, file_format, gzip_output, DOWNLOAD_LOCATION)
+    extention = re.search(r'\..*', file_path).group(0)
+    if file_path:
+        return send_file(file_path, mimetype=mime_type, as_attachment=True,
+                         attachment_filename="{}{}".format(dataset_id, extention))
+    else:
         return bad_request()
 
 @app.route('/api/datasets/<string:dataset_id>/link/<string:query_hash>', strict_slashes=False, methods=['GET'])

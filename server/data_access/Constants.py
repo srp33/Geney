@@ -5,8 +5,8 @@ DATA_FILE = 'data.pq'
 METADATA_DB = 'metadata.sqlite'
 METADATA_JSON = 'metadata.json'
 GROUPS_JSON = 'groups.json'
+OPTIONS_JSON = 'options.json'
 REQUIRED_FILES = [DESCRIPTION_FILE, DATA_FILE, GROUPS_JSON]
-SAMPLE_COLUMN = "Sample"
 HDF5_DATA_PATH = 'data/'
 
 
@@ -21,7 +21,7 @@ MAX_ITEMS_IN_OUTPUT_FILE = 500000
 SEARCH_LIMIT = 100
 
 # Others
-SAMPLE_ID = "sampleID"
+SAMPLE_ID = "Sample"
 
 # SQL queries
 GET_VARIABLE = 'SELECT variableID, variableType FROM variableTable WHERE variableName = ?;'
