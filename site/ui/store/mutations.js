@@ -3,7 +3,7 @@ export default {
     state.groups = value;
   },
   options (state, value) {
-    state.options = value;
+    state.options[value.variable] = value.options;
   },
   metaData (state, value) {
     state.metaData = value;
@@ -19,10 +19,9 @@ export default {
   },
   dataset (state, value) {
     state.dataset = value;
-    state.selectedFeatures = [];
+    state.selectedFeatures = {};
     state.selectedVariables = [];
-    state.downloadRadios.features = 'selected';
-    state.downloadRadios.variables = 'selected';
+    state.downloadRadios = {};
   },
   user (state, value) {
     state.user = value;
@@ -46,7 +45,7 @@ export default {
     }
   },
   selectedFeatures (state, payload) {
-    state.selectedFeatures = payload;
+    state.selectedFeatures[payload.group] = payload.value;
   },
   selectedSets (state, payload) {
     state.selectedSets = payload;
@@ -56,6 +55,9 @@ export default {
   },
   lastMetaType (state, payload) {
     state.lastMetaType = payload;
+  },
+  downloadRadios (state, payload) {
+    state.downloadRadios[payload.group] = payload.value;
   },
   featuresRadioValue (state, payload) {
     switch (payload) {

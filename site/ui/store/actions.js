@@ -111,6 +111,8 @@ export default {
       Vue.http.get(`/api/datasets/${context.state.dataset.id}/groups`).then(response => {
         const groups = response.data;
         for (let key in groups) {
+          context.commit('downloadRadios', {group: key, value: 'selected'});
+          context.commit('selectedFeatures', {group: key, value: []});
           if (Array.isArray(groups[key])) {
             groups[key] = groups[key].map(x => ({
               'name': x,
@@ -133,14 +135,6 @@ export default {
         router.replace('/404');
       }
     }
-  },
-  getOptions (context, datasetId) {
-    Vue.http.get(`/api/datasets/${datasetId}/options`).then(response => {
-      const options = response.data;
-      context.commit('options', options);
-    }, response => {
-      console.log('FAILED', response);
-    });
   },
   logout (context) {
     localStorage.removeItem('jwt');

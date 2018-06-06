@@ -8,6 +8,14 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production', // strict mode is only for development
   state: state,
+  getters: {
+    getOptions: () => {
+      return state.options;
+    },
+    getDownloadRadios: () => {
+      return state.downloadRadios;
+    },
+  },
   mutations: mutations,
   actions: actions,
 });

@@ -3,9 +3,9 @@ export default {
   datasets: null,
   dataset: {},
   groups: null,
-  options: null,
+  options: {},
   filters: null,
-  selectedFeatures: [],
+  selectedFeatures: {},
   selectedSets: [],
   selectedVariables: [],
   datasetName: null,
@@ -14,8 +14,5 @@ export default {
   users: [],
   cachedMeta: {},
   lastMetaType: null,
-  downloadRadios: {
-    features: null,
-    variables: null,
-  },
+  downloadRadios: {},
 };
