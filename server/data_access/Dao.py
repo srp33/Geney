@@ -3,7 +3,7 @@ import sqlite3
 import time
 from typing import List, Set, Dict, Any, Tuple
 
-import UseParquet as ss
+import ShapeShifter.ShapeShifter.UseParquet as ss
 from .Constants import *
 # from .Exceptions import RequestError
 from .Query import Query
