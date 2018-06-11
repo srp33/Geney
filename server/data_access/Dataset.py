@@ -7,8 +7,11 @@ from .Dao import ParquetDao
 from .Exceptions import RequestError, ServerError
 from .Constants import *
 from subprocess import check_call
+import pickle
 
 import sys
+
+METADATA_PKL = 'metadata.pkl'
 
 class GeneyDataset:
 
@@ -56,7 +59,7 @@ class GeneyDataset:
 
 	@property
 	def metadata_path(self):
-		return self.__dir + METADATA_JSON
+		return self.__dir + METADATA_PKL
 
 	@property
 	def groups_path(self):
@@ -67,15 +70,47 @@ class GeneyDataset:
 		return self.__dir + OPTIONS_JSON
 
 	def get_variable(self, variable_name):
-		with ParquetDao(self.directory) as dao:
-			if variable_name == SAMPLE_ID:
-				sampleIdValues = {'numOptions': self.num_samples, "options": None}
-				if self.num_samples <= MAX_OPTIONS:
-					sampleIdValues['options'] = dao.get_sample_id_options()
-				return sampleIdValues
-			else:
-				return dao.get_variable_options(variable_name)
+		with open(self.metadata_path, 'rb') as fp:
+			metadata = pickle.load(fp)
+			if type(metadata['meta'][variable_name]['options']) is list and len(metadata['meta'][variable_name]['options']) > 100:
+				metadata['meta'][variable_name]['options'] = None
+			return metadata['meta'][variable_name]
 
+	def get_groups(self):
+		with open(self.groups_path) as fp:
+			groups = json.load(fp)
+			for group in groups.keys():
+				if len(groups[group]) > 100:
+					groups[group] = None
+			return groups
+
+	def search_group(self, group_name, search_str):
+		with open(self.groups_path) as fp:
+			groups = json.load(fp)
+			if group_name not in groups.keys():
+				return []
+			else:
+				target_group = groups[group_name]
+			if not search_str:
+				return groups[group_name][:100]
+			options = []
+			for option in target_group:
+				if search_str in option:
+					options.append(option)
+			return options[:100]
+
+	def search_options(self, variable_name, search_str):
+		with open(self.metadata_path, 'rb') as fp:
+			metadata = pickle.load(fp)
+			options = []
+			if variable_name not in metadata['meta'].keys():
+				return []
+			if not search_str:
+				return metadata['meta'][variable_name]['options'][:100]
+			for option in metadata['meta'][variable_name]['options']:
+				if option and search_str in option:
+					options.append(option)
+			return options[:100]
 	# def get_filtered_data(self, filters, illegal_chars=[]):
 	# 	query = Query(filters, self.__description)
 	# 	sample_ids = self.query_samples(query)

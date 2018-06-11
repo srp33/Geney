@@ -3,7 +3,7 @@
   <div class="filter top row justify-content-center" v-if="groups">
     <div class="col-sm-6">
       <h1>Filter Samples</h1>
-      <div v-for="key in Object.keys(groups)" class="spacer">
+      <div v-for="key in Object.keys(groups)" class="spacer" :key="key">
         <b-row>
           <b-col cols="3"><h4 class="variables">{{key}}:</h4></b-col>
           <b-col cols="9">
@@ -12,7 +12,7 @@
             :value="option"
             placeholder="Variables"
             @updated="selectVariable"
-            :settings="variableSettings"
+            :settings="variableSettings(key)"
             id="meta-types"></selectize>
           </b-col>
           </b-row>
@@ -47,7 +47,7 @@
                   @click="removeFilter(variable)">
                 <i class="fa fa-minus" aria-hidden="true"></i>
               </button>
-                {{variable}}<h6><br>(min: {{variableMin(variable)}} - max: {{variableMax(variable)}})</h6>
+                {{variable}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
             </h4>
               <!-- {{selectVariable[variable]}} -->
               <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable]" :key="logicSet.randomKey">
@@ -179,12 +179,17 @@ export default {
     dataset () {
       return this.$store.state.dataset;
     },
-    variableSettings () {
+    cachedMeta () {
+      return this.$store.state.cachedMeta[this.dataset.id];
+    },
+  },
+  methods: {
+    variableSettings (group) {
       const baseSettings = { maxItems: 1, clearValue: false };
-      if (this.metaData && this.metaData.meta === null) {
+      if (this.groups && this.groups[group] === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
-            `/api/datasets/${this.$route.params.dataset}/meta/search/${query}`
+            `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
               return {name: item};
@@ -200,11 +205,6 @@ export default {
         return baseSettings;
       }
     },
-    cachedMeta () {
-      return this.$store.state.cachedMeta[this.dataset.id];
-    },
-  },
-  methods: {
     variableMin (variable) {
       if (this.options[variable].options === 'continuous') {
         return this.options[variable].min;
@@ -270,7 +270,7 @@ export default {
             this.initializeContinuousType(variable);
           }
         });
-      // this.option = null;
+        this.option = null;
       }
     },
     updateSelectedMeta (metaType, value, index, key = false) {
@@ -379,7 +379,7 @@ export default {
       if (this.options[variable].options === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
-            `/api/datasets/${this.$route.params.dataset}/meta/${variable}/search/${query}`
+            `/api/datasets/${this.$route.params.dataset}/options/${variable}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
               return {name: item};

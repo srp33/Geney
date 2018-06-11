@@ -54,7 +54,7 @@ DATASETS = {}
 
 app = Flask(__name__)
 
-redis_con = redis.StrictRedis(host='redis')
+redis_con = redis.StrictRedis(host='localhost')
 redis_con.flushdb()
 
 def load_datasets() -> None:
@@ -135,7 +135,16 @@ def get_groups(dataset_id):
     dataset = get_dataset(dataset_id)
     if dataset is None:
         return not_found()
-    return send_file(dataset.groups_path)
+    return jsonify(dataset.get_groups())
+
+@app.route('/api/datasets/<string:dataset_id>/groups/<string:group_name>/search', strict_slashes=False)
+@app.route('/api/datasets/<string:dataset_id>/groups/<string:group_name>/search/<string:search_str>',
+           strict_slashes=False)
+def search_group(dataset_id, group_name, search_str=None):
+    dataset = get_dataset(dataset_id)
+    if dataset is None:
+        return not_found()
+    return jsonify(dataset.search_group(group_name, search_str))
 
 @app.route('/api/datasets/<string:dataset_id>/options', strict_slashes=False)
 @app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>', strict_slashes=False)
@@ -148,6 +157,16 @@ def get_options(dataset_id, variable_name=None):
         return jsonify(results)
     else:
         return send_file(dataset.options_path)
+
+@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>/search', strict_slashes=False)
+@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>/search/<string:search_str>',
+           strict_slashes=False)
+def search_options(dataset_id, variable_name, search_str=None):
+    dataset = get_dataset(dataset_id)
+    if dataset is None:
+        return not_found()
+    else:
+        return jsonify(dataset.search_options(variable_name, search_str))
 
 # @app.route('/api/datasets/<string:dataset_id>/meta', strict_slashes=False)
 # @app.route('/api/datasets/<string:dataset_id>/meta/<string:variable_name>', strict_slashes=False)
