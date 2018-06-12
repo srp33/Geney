@@ -37,9 +37,19 @@ RESPONDERS = {
 
 MIME_TYPES = {
     'csv': 'text/csv',
-    'json': 'text/json',
+    'json': 'application/json',
     'tsv': 'text/tsv',
-    'gzip': 'application/gzip'
+    'gzip': 'application/gzip',
+    'html': 'text/html',
+    'excel': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'parquet': 'application/parquet',
+    'feather': 'application/feather',
+    'pickle': 'application/pickle',
+    'msgpack': 'application/msgpack',
+    'stata': 'application/stata',
+    'arff': 'application/arff',
+    'sqlite': 'application/sqlite',
+    'hdf5': 'application/hdf5'
 }
 
 # dictionary of commands and their respective handlers
@@ -230,8 +240,6 @@ def download(dataset_id, path=None):
             return bad_request()
 
         file_format = options['fileformat']
-        if file_format not in RESPONDERS:
-            return bad_request()
 
         gzip_output = options['gzip'] if ('gzip' in options) else False
 
@@ -258,8 +266,6 @@ def download(dataset_id, path=None):
             return bad_request()
 
         file_format = options['fileformat']
-        if file_format not in RESPONDERS:
-            return bad_request()
 
         gzip_output = options['gzip'] if ('gzip' in options) else False
 

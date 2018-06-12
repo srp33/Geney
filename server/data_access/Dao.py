@@ -332,43 +332,43 @@ class ParquetDao:
 
 	def get_file_from_query(self, query: Query, features, file_format, dataset_id, download_location):
 		filename = dataset_id + uuid.uuid4().hex[:8]
-		if file_format is 'csv':
+		if file_format == 'csv':
 			file_type = ss.FileTypeEnum.CSV
 			filename += ".csv"
-		elif file_format is 'json':
+		elif file_format == 'json':
 			file_type = ss.FileTypeEnum.JSON
 			filename += ".json"
-		elif file_format is 'pickle':
+		elif file_format == 'pickle':
 			file_type = ss.FileTypeEnum.Pickle
 			filename += '.pkl'
-		elif file_format is 'tsv':
+		elif file_format == 'tsv':
 			file_type = ss.FileTypeEnum.TSV
 			filename += '.tsv'
-		elif file_format is 'hdf5':
+		elif file_format == 'hdf5':
 			file_type = ss.FileTypeEnum.HDF5
 			filename += '.h5'
-		elif file_format is 'arff':
+		elif file_format == 'arff':
 			file_type = ss.FileTypeEnum.ARFF
 			filename += '.arff'
-		elif file_format is 'excel':
+		elif file_format == 'excel':
 			file_type = ss.FileTypeEnum.Excel
 			filename += '.xlsx'
-		elif file_format is 'feather':
+		elif file_format == 'feather':
 			file_type = ss.FileTypeEnum.Feather
 			filename += '.feather'
-		elif file_format is 'msgpack':
+		elif file_format == 'msgpack':
 			file_type = ss.FileTypeEnum.MsgPack
 			filename += '.msgpack'
-		elif file_format is 'parquet':
+		elif file_format == 'parquet':
 			file_type = ss.FileTypeEnum.Parquet
 			filename += '.pq'
-		elif file_format is 'stata':
+		elif file_format == 'stata':
 			file_type = ss.FileTypeEnum.Stata
 			filename += '.dta'
-		elif file_format is 'sqlite':
+		elif file_format == 'sqlite':
 			file_type = ss.FileTypeEnum.SQLite
 			filename += '.sql'
-		elif file_format is 'html':
+		elif file_format == 'html':
 			file_type = ss.FileTypeEnum.HTML
 			filename += '.html'
 		else:
