@@ -338,6 +338,39 @@ class ParquetDao:
 		elif file_format is 'json':
 			file_type = ss.FileTypeEnum.JSON
 			filename += ".json"
+		elif file_format is 'pickle':
+			file_type = ss.FileTypeEnum.Pickle
+			filename += '.pkl'
+		elif file_format is 'tsv':
+			file_type = ss.FileTypeEnum.TSV
+			filename += '.tsv'
+		elif file_format is 'hdf5':
+			file_type = ss.FileTypeEnum.HDF5
+			filename += '.h5'
+		elif file_format is 'arff':
+			file_type = ss.FileTypeEnum.ARFF
+			filename += '.arff'
+		elif file_format is 'excel':
+			file_type = ss.FileTypeEnum.Excel
+			filename += '.xlsx'
+		elif file_format is 'feather':
+			file_type = ss.FileTypeEnum.Feather
+			filename += '.feather'
+		elif file_format is 'msgpack':
+			file_type = ss.FileTypeEnum.MsgPack
+			filename += '.msgpack'
+		elif file_format is 'parquet':
+			file_type = ss.FileTypeEnum.Parquet
+			filename += '.pq'
+		elif file_format is 'stata':
+			file_type = ss.FileTypeEnum.Stata
+			filename += '.dta'
+		elif file_format is 'sqlite':
+			file_type = ss.FileTypeEnum.SQLite
+			filename += '.sql'
+		elif file_format is 'html':
+			file_type = ss.FileTypeEnum.HTML
+			filename += '.html'
 		else:
 			file_type = ss.FileTypeEnum.CSV
 			filename += ".csv"
