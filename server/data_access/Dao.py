@@ -330,7 +330,7 @@ class ParquetDao:
 		df = ss.query(self.__file, discreteQueries=discrete_filters, continuousQueries=continuous_filters)
 		return df.index.values
 
-	def get_file_from_query(self, query: Query, file_format, dataset_id, download_location):
+	def get_file_from_query(self, query: Query, features, file_format, dataset_id, download_location):
 		filename = dataset_id + uuid.uuid4().hex[:8]
 		if file_format is 'csv':
 			file_type = ss.FileTypeEnum.CSV
@@ -344,7 +344,8 @@ class ParquetDao:
 		location = os.path.join(download_location, filename)
 		continuous_filters = []
 		discrete_filters = []
-		features = query.feature_filters
+		if query.feature_filters:
+			features = features.union(set(query.feature_filters))
 		if not features or len(features) == 0:
 			features = []
 			include_all_columns = True
@@ -371,7 +372,7 @@ class ParquetDao:
 						continuous_filters.append(ss.ContinuousQuery(filter.name, operatorEnum, value['value']))
 			else:
 				discrete_filters.append(ss.DiscreteQuery(filter.name, values))
-		ss.exportQueryResults(self.__file, location, file_type, features, continuous_filters, discrete_filters,
+		ss.exportQueryResults(self.__file, location, file_type, list(features), continuous_filters, discrete_filters,
 							  includeAllColumns=include_all_columns)
 		return location
 

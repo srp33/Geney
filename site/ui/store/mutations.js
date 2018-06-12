@@ -1,4 +1,7 @@
 export default {
+  downloadPath (state, value) {
+    state.downloadPath = value;
+  },
   groups (state, value) {
     state.groups = value;
   },

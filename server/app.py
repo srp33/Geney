@@ -206,47 +206,79 @@ def count_samples(dataset_id):
     if dataset is None:
         return not_found()
 
+    body = request.get_json()
     count = dataset.get_num_samples_matching_filters(request.get_json())
     if count is None:
         return bad_request()
 
     return jsonify(count)
 
-@app.route('/api/datasets/<string:dataset_id>/download', strict_slashes=False, methods=['POST'])
-def download(dataset_id):
-    dataset = get_dataset(dataset_id)
-    if dataset is None:
-        return not_found()
+@app.route('/api/datasets/<string:dataset_id>/download/', strict_slashes=False, methods=['POST'])
+@app.route('/api/datasets/<string:dataset_id>/download/<string:path>', strict_slashes=False, methods=['POST'])
+def download(dataset_id, path=None):
+    if path:
+        dataset = get_dataset(dataset_id)
+        if dataset is None:
+            return not_found()
 
-    try:
-        query = json.loads(request.form.get('query'))
-        options = json.loads(request.form.get('options'))
-    except Exception:
-        return bad_request()
+        try:
+            options = json.loads(request.form.get('options'))
+        except Exception:
+            return bad_request()
 
-    if 'fileformat' not in options:
-        return bad_request()
+        if 'fileformat' not in options:
+            return bad_request()
 
-    file_format = options['fileformat']
-    if file_format not in RESPONDERS:
-        return bad_request()
+        file_format = options['fileformat']
+        if file_format not in RESPONDERS:
+            return bad_request()
 
-    gzip_output = options['gzip'] if ('gzip' in options) else False
+        gzip_output = options['gzip'] if ('gzip' in options) else False
 
-    if gzip_output:
-        mime_type = MIME_TYPES['gzip']
-    else:
-        mime_type = MIME_TYPES[file_format]
+        if gzip_output:
+            mime_type = MIME_TYPES['gzip']
+        else:
+            mime_type = MIME_TYPES[file_format]
+        extension = re.search(r'\..*', path).group(0)
 
-    # TODO: Validate query before starting response
-
-    file_path = dataset.query(query, file_format, gzip_output, DOWNLOAD_LOCATION)
-    extension = re.search(r'\..*', file_path).group(0)
-    if file_path:
-        return send_file(file_path, mimetype=mime_type, as_attachment=True,
+        return send_file(os.path.join(DOWNLOAD_LOCATION, path), mimetype=mime_type, as_attachment=True,
                          attachment_filename="{}{}".format(dataset_id, extension))
     else:
-        return bad_request()
+        dataset = get_dataset(dataset_id)
+        if dataset is None:
+            return not_found()
+
+        try:
+            query = json.loads(request.form.get('query'))
+            options = json.loads(request.form.get('options'))
+        except Exception:
+            return bad_request()
+
+        if 'fileformat' not in options:
+            return bad_request()
+
+        file_format = options['fileformat']
+        if file_format not in RESPONDERS:
+            return bad_request()
+
+        gzip_output = options['gzip'] if ('gzip' in options) else False
+
+        if gzip_output:
+            mime_type = MIME_TYPES['gzip']
+        else:
+            mime_type = MIME_TYPES[file_format]
+
+        # TODO: Validate query before starting response
+
+        file_path = dataset.query(query, file_format, gzip_output, DOWNLOAD_LOCATION)
+        file_path = file_path.split('/')[-1]
+        # extension = re.search(r'\..*', file_path).group(0)
+        if file_path:
+            return jsonify({'download_path': file_path})
+            # return send_file(file_path, mimetype=mime_type, as_attachment=True,
+            #                  attachment_filename="{}{}".format(dataset_id, extension))
+        else:
+            return bad_request()
 
 @app.route('/api/datasets/<string:dataset_id>/link/<string:query_hash>', strict_slashes=False, methods=['GET'])
 def use_link(dataset_id, query_hash):

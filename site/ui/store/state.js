@@ -15,4 +15,5 @@ export default {
   cachedMeta: {},
   lastMetaType: null,
   downloadRadios: {},
+  downloadPath: null,
 };

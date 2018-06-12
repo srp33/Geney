@@ -111,79 +111,6 @@ class GeneyDataset:
 				if option and search_str in option:
 					options.append(option)
 			return options[:100]
-	# def get_filtered_data(self, filters, illegal_chars=[]):
-	# 	query = Query(filters, self.__description)
-	# 	sample_ids = self.query_samples(query)
-	# 	meta_names = self.get_query_metatype_names(query)
-	#
-	# 	if SAMPLE_ID in meta_names:
-	# 		meta_names.remove(SAMPLE_ID)
-	#
-	# 	# TODO figure out the max number of items for files we can build
-	# 	feature_slices, num_features_requested = self.get_query_feature_slices(query)
-	#
-	# 	# TODO generate feature names rather than loading them all into memory at once
-	# 	yield [SAMPLE_ID] + meta_names
-	# 	yield self.get_query_feature_names(query)
-	# 	yield None
-	#
-	# 	sqlite_dao = SQLiteDao(self.__dir)
-	# 	hdf5_dao = Hdf5Dao(self.__dir)
-	#
-	# 	for sample_id in sample_ids:
-	# 		sample_name = sqlite_dao.get_sample_name(sample_id)
-	# 		sample_metadata = sqlite_dao.get_sample_metadata(sample_id, meta_names)
-	# 		yield sample_name
-	# 		for meta_name in meta_names:
-	# 			if meta_name in sample_metadata:
-	# 				if any(illegal_char in sample_metadata[meta_name] for illegal_char in illegal_chars) :
-	# 					yield "\"" + sample_metadata[meta_name] + "\""
-	# 				else :
-	# 					yield sample_metadata[meta_name]
-	# 			else:
-	# 				yield ''
-	#
-	# 		for data_slice in hdf5_dao.get_row(sample_id, feature_slices):
-	# 			yield data_slice
-	# 		yield None
-	#
-	# 	sqlite_dao.close()
-	# 	hdf5_dao.close()
-
-	# def get_query_metatype_names(self, query: Query) -> List[str]:
-	# 	if len(query.meta_filter_names):
-	# 		return query.meta_filter_names
-	# 	else:
-	# 		with SQLiteDao(self.__dir) as dao:
-	# 			return dao.get_all_variable_names()
-
-	# returns a list of tuple pairs, where each pair represents 
-	# a start and end to the slice of features to grab from the HDF5 file
-	# as well as the total number of features requested
-	# Example, if features 1,2,3,6,7,9 are requested, this will return ([(1,4),(6,8),(9,10)], 6)
-	# def get_query_feature_slices(self, query: Query) -> Iterable[int]:
-	# 	if query.feature_filters is None:
-	# 		return [(0,self.num_features)], self.num_features
-	# 	else:
-	# 		with SQLiteDao(self.__dir) as dao:
-	# 			feature_ids = sorted(dao.get_feature_ids(query.feature_filters))
-	# 			feature_slices = list()
-	# 			current_start = feature_ids[0]
-	# 			next_number = current_start + 1
-	# 			for index in range(1, len(feature_ids)):
-	# 				if feature_ids[index] != next_number:
-	# 					feature_slices.append((current_start, next_number))
-	# 					current_start = feature_ids[index]
-	# 				next_number = feature_ids[index] + 1
-	# 			feature_slices.append((current_start, next_number))
-	# 		return feature_slices, len(feature_ids)
-	#
-	# def get_query_feature_names(self, query: Query) -> str:
-	# 	if query.feature_filters is None:
-	# 		with SQLiteDao(self.__dir) as dao:
-	# 			return dao.get_all_feature_names()
-	# 	else:
-	# 		return query.feature_filters
 
 	def get_num_samples_matching_filters(self, filters) -> int:
 		try:
@@ -205,8 +132,14 @@ class GeneyDataset:
 
 	def query(self, query_json, file_format, gzip_output, download_location):
 		query = Query(query_json, self.description)
+		features = []
+		if query.groups:
+			with open(self.groups_path) as fp:
+				groups = json.load(fp)
+				for group in query.groups:
+					features.extend(groups[group])
 		with ParquetDao(self.__dir) as dao:
-			file_path = dao.get_file_from_query(query, file_format, self.dataset_id, download_location)
+			file_path = dao.get_file_from_query(query, set(features), file_format, self.dataset_id, download_location)
 			if gzip_output:
 				check_call(['gzip', file_path])
 				file_path += ".gz"

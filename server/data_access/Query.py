@@ -21,6 +21,10 @@ class Query:
 	def filters(self) -> Iterator[Filter]:
 		return FilterIter(self.__def['filters'])
 
+	@property
+	def groups(self) -> List[str]:
+		return self.__def['groups'] if len(self.__def['groups']) > 0 else None
+
 	# @property
 	# def sample_filter_names(self) -> List[str]:
 	# 	return self.__def['filterTypes']

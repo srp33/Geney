@@ -1,110 +1,117 @@
 <template>
+  <div>
+    <div v-if="downloadPath === 'creating'">
+      <h1 class="waiting">Please wait while Geney grants your data wishes...</h1>
+      <div class="loader"></div>
+    </div>
+    <div v-else>
+      <div class="download top row justify-content-center" v-if="filters">
+        <div class="col-12">
+          <h1>Download</h1>
+          <div v-if="numSamples != null">
+            <h3 v-if="numSamples > 0" id="num-samples-selected">You have selected {{ numSamples }} samples.</h3>
+            <span v-else-if="numSamples === 0" id="num-samples-selected">
+              <h3>Uh oh. Your filters didn't match any samples!</h3>
+              <h4>Click <router-link :to="'/dataset/' + dataset.id + '/filter'">here</router-link> to edit your filters</h4>
+            </span>
+            <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
+          </div>
 
-  <div class="download top row justify-content-center" v-if="filters">
-    <div class="col-12">
-      <h1>Download</h1>
-      <div v-if="numSamples != null">
-        <h3 v-if="numSamples > 0" id="num-samples-selected">You have selected {{ numSamples }} samples.</h3>
-        <span v-else-if="numSamples === 0" id="num-samples-selected">
-          <h3>Uh oh. Your filters didn't match any samples!</h3>
-          <h4>Click <router-link :to="'/dataset/' + dataset.id + '/filter'">here</router-link> to edit your filters</h4>
-        </span>
-        <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
-      </div>
+          <div class="col-sm-6 offset-sm-3 column-selection" id="features" v-for="group in Object.keys(groups)" :key="group">
+            <!-- <h4>Select {{ dataset.featureDescriptionPlural | capitalize }}</h4> -->
+            <h4>Select Features: {{group}}</h4>
 
-      <div class="col-sm-6 offset-sm-3 column-selection" id="features" v-for="group in Object.keys(groups)">
-        <!-- <h4>Select {{ dataset.featureDescriptionPlural | capitalize }}</h4> -->
-        <h4>Select Features: {{group}}</h4>
+            <b-form-radio-group @change="x => setRadioValue(group, x)" v-model="downloadRadios[group]" stacked class="left-align">
+              <b-form-radio value="all">Download All ({{group}})</b-form-radio>
+              <b-form-radio value="selected">Download Selected  ({{group}})</b-form-radio>
+            </b-form-radio-group>
 
-        <b-form-radio-group @change="x => setRadioValue(group, x)" v-model="downloadRadios[group]" stacked class="left-align">
-          <b-form-radio value="all">Download All ({{group}})</b-form-radio>
-          <b-form-radio value="selected">Download Selected  ({{group}})</b-form-radio>
-        </b-form-radio-group>
+            <div v-show="downloadRadios[group] === 'selected'">
+              <selectize class="top-cushion"
+                :options="groups[group]"
+                :value="selectedFeatures[group]"
+                @updated="x => updateFeatures(group, x)"
+                :placeholder="'Begin typing to see more results'"
+                :settings="getSelectizeSettings(group)"
+                :errorMessage="'Please select some features or click \'Download all (' + group +')\''"
+                :id="group + '-feature-select'"></selectize>
+              <!-- <div v-if="geneSets !== null && Object.keys(geneSets).length > 0">
+                <selectize
+                  :options="geneSets"
+                  :value="selectedSets"
+                  @updated="updateSets"
+                  :placeholder="$options.filters.capitalize(dataset.featureDescription) + ' Sets - begin typing to see more results'"
+                  :settings="{}"
+                  id="feature-select"></selectize>
+                  *Information about gene sets can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
+                  <h5>Total Number of {{ dataset.featureDescriptionPlural | capitalize }} Selected: {{ numFeatures }}</h5>
+              </div> -->
+            </div>
+          </div>
 
-        <div v-show="downloadRadios[group] === 'selected'">
-          <selectize class="top-cushion"
-            :options="groups[group]"
-            :value="selectedFeatures[group]"
-            @updated="x => updateFeatures(group, x)"
-            :placeholder="'Begin typing to see more results'"
-            :settings="{}"
-            :errorMessage="'Please select some features or click \'Download all (' + group +')\''"
-            :id="group + '-feature-select'"></selectize>
-          <!-- <div v-if="geneSets !== null && Object.keys(geneSets).length > 0">
-            <selectize
-              :options="geneSets"
-              :value="selectedSets"
-              @updated="updateSets"
-              :placeholder="$options.filters.capitalize(dataset.featureDescription) + ' Sets - begin typing to see more results'"
-              :settings="{}"
-              id="feature-select"></selectize>
-              *Information about gene sets can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
-              <h5>Total Number of {{ dataset.featureDescriptionPlural | capitalize }} Selected: {{ numFeatures }}</h5>
+          <!-- <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
+            <h4>Select Metadata Variables</h4>
+
+            <b-form-radio-group v-model="variablesRadioValue" stacked class="left-align">
+              <b-form-radio value="all"><span class="radio-label">Download All Metadata Variables</span></b-form-radio>
+              <b-form-radio value="selected">Download Selected Metadata Variables</b-form-radio>
+            </b-form-radio-group>
+
+            <div v-show="variablesRadioValue === 'selected'">
+              <selectize
+                :options="metaTypes"
+                :value="selectedVariables"
+                placeholder="Metadata Variables - begin typing to see more results"
+                @updated="updateVariables"
+                :settings="metaTypeSettings"
+                errorMessage="Please select from variables or click 'Download All Metadata Variables'"
+                id="variable-select"></selectize>
+            </div>
           </div> -->
+
         </div>
-      </div>
 
-      <!-- <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
-        <h4>Select Metadata Variables</h4>
 
-        <b-form-radio-group v-model="variablesRadioValue" stacked class="left-align">
-          <b-form-radio value="all"><span class="radio-label">Download All Metadata Variables</span></b-form-radio>
-          <b-form-radio value="selected">Download Selected Metadata Variables</b-form-radio>
-        </b-form-radio-group>
+        <div class="col-sm-4">
+          <h2>Options</h2>
 
-        <div v-show="variablesRadioValue === 'selected'">
-          <selectize
-            :options="metaTypes"
-            :value="selectedVariables"
-            placeholder="Metadata Variables - begin typing to see more results"
-            @updated="updateVariables"
-            :settings="metaTypeSettings"
-            errorMessage="Please select from variables or click 'Download All Metadata Variables'"
-            id="variable-select"></selectize>
+          <div class="form-group">
+            <label>File Format</label>
+            <selectize
+              :options="fileformats.options"
+              :value="options.fileformat"
+              @updated="x => options.fileformat = x"
+              :settings="fileformats.settings" ></selectize>
+          </div>
+          <div class="col-12">
+            <b-form-checkbox id="checkbox1"
+                          v-model="options.gzip">
+              Gzip Downloaded File
+            </b-form-checkbox>
+          </div>
+
+          <div class="col-12">
+            <button class="btn btn-primary btn-lg" @click="download" id="download-btn" :disabled="formErrors">
+              Download
+              <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
+            </button>
+          </div>
+
+          <div class="col-12" id="plot-container">
+            <button class="btn btn-primary btn-lg" @click="plot" id="plot-btn" :disabled="plotlyErrors">
+              Visualize with plot.ly
+              <span v-if="plotlyErrors" v-b-tooltip="plotlyTooltipSettings"></span>
+            </button>
+          </div>
+
+          <div class="col-12">
+            <router-link class="btn btn-secondary" :to="`/dataset/${dataset.id}/filter`">Back</router-link>
+          </div>
+
         </div>
-      </div> -->
 
+      </div>
     </div>
-
-
-    <div class="col-sm-4">
-      <h2>Options</h2>
-
-      <div class="form-group">
-        <label>File Format</label>
-        <selectize
-          :options="fileformats.options"
-          :value="options.fileformat"
-          @updated="x => options.fileformat = x"
-          :settings="fileformats.settings" ></selectize>
-      </div>
-      <div class="col-12">
-        <b-form-checkbox id="checkbox1"
-                      v-model="options.gzip">
-          Gzip Downloaded File
-        </b-form-checkbox>
-      </div>
-
-      <div class="col-12">
-        <button class="btn btn-primary btn-lg" @click="download" id="download-btn">
-          Download
-          <!-- <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span> -->
-        </button>
-      </div>
-
-      <div class="col-12" id="plot-container">
-        <button class="btn btn-primary btn-lg" @click="plot" id="plot-btn" :disabled="plotlyErrors">
-          Visualize with plot.ly
-          <!-- <span v-if="plotlyErrors" v-b-tooltip="plotlyTooltipSettings"></span> -->
-        </button>
-      </div>
-
-      <div class="col-12">
-        <router-link class="btn btn-secondary" :to="`/dataset/${dataset.id}/filter`">Back</router-link>
-      </div>
-
-    </div>
-
   </div>
 </template>
 
@@ -112,7 +119,8 @@
 import router from '../../router';
 import selectize from '../shared/Selectize';
 import $ from 'jquery';
-import { mapGetters } from 'vuex';
+// import Vue from 'vue';
+// import { mapGetters } from 'vuex';
 
 // based on some rough napkin math
 // 20 characters per item, with a limit of 5MB is about 25000, and we'll give ourselves some wiggleroom
@@ -142,13 +150,21 @@ export default {
         gzip: false,
       },
       numSamples: null,
+      // downloadErrors: false,
+      formErrors: false,
       // downloadRadios: {},
     };
   },
   computed: {
-    ...mapGetters({
-      downloadRadios: 'getDownloadRadios',
-    }),
+    // ...mapGetters({
+    //   downloadRadios: 'getDownloadRadios',
+    // }),
+    downloadRadios () {
+      return this.$store.state.downloadRadios;
+    },
+    downloadPath () {
+      return this.$store.state.downloadPath;
+    },
     groups () {
       return this.$store.state.groups;
     },
@@ -261,27 +277,6 @@ export default {
       }
       return settings;
     },
-    formErrors () {
-      let valid = true;
-      let errors = {};
-      if (this.getFilteredFeatures().length === 0) {
-        valid = false;
-        errors.features = true;
-      }
-      // if (this.featuresRadioValue === 'selected' && this.selectedFeatures.length === 0 && this.selectedSets.length === 0) {
-      //   valid = false;
-      //   errors.features = true;
-      // }
-      // if (this.variablesRadioValue === 'selected' && this.selectedVariables.length === 0) {
-      //   valid = false;
-      //   errors.variables = true;
-      // }
-      if (this.numSamples === 0) {
-        valid = false;
-        errors.numSamples = true;
-      }
-      return valid ? null : errors;
-    },
     plotlyErrors () {
       let valid = this.formErrors === null;
       let errors = valid ? {} : this.formErrors;
@@ -344,7 +339,7 @@ export default {
       const newPath = this.$route.fullPath.replace(/\/download.*/, '');
       router.replace(newPath);
     } else {
-      const query = {filters: filters, features: []};
+      const query = {filters: filters, features: [], groups: []};
       this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, query).then(response => {
         this.$set(this, 'numSamples', response.body);
       }, response => {
@@ -352,26 +347,65 @@ export default {
       });
     }
   },
-  mounted () {
-  },
   methods: {
+    getFormErrors () {
+      let valid = false;
+      let errors = {};
+      errors.features = true;
+      const filteredFeatures = this.getFilteredFeatures();
+      if (filteredFeatures.groups.length > 0 || filteredFeatures.features.length > 0) {
+        valid = true;
+        errors = {};
+      }
+      if (this.numSamples === 0) {
+        valid = false;
+        errors.numSamples = true;
+      }
+      return valid ? null : errors;
+    },
+    getSelectizeSettings (group) {
+      const baseSettings = {};
+      if (this.groups && this.groups[group] === null) {
+        const loadfn = function (query, callback) {
+          this.$http.get(
+            `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
+          ).then(response => {
+            const items = response.data.map(item => {
+              return {name: item};
+            });
+            callback(items);
+          }, failedResponse => {
+            callback();
+          });
+        };
+        baseSettings.load = loadfn.bind(this);
+        return baseSettings;
+      } else {
+        return baseSettings;
+      }
+    },
     getFilteredFeatures () {
       var features = [];
+      var groups = [];
       for (var group in this.groups) {
         if (this.downloadRadios[group] === 'all') {
-          var values = [];
-          this.groups[group].forEach(element => {
-            values.push(element.name);
-          });
-          features = features.concat(values);
+          groups = groups.concat(group);
+          // var values = [];
+          // this.groups[group].forEach(element => {
+          //   values.push(element.name);
+          // });
+          // features = features.concat(values);
         } else {
-          features = features.concat(this.selectedFeatures[group]);
+          if (this.selectedFeatures[group]) {
+            features = features.concat(this.selectedFeatures[group]);
+          }
         }
       }
-      return features;
+      return {groups: groups, features: features};
     },
     setRadioValue (group, value) {
       this.$store.commit('downloadRadios', {group: group, value: value});
+      this.formErrors = this.getFormErrors();
       this.$forceUpdate();
     },
     updateFeatures (group, features) {
@@ -379,6 +413,8 @@ export default {
         features = [];
       }
       this.$store.commit('selectedFeatures', {group: group, value: features});
+      this.formErrors = this.getFormErrors();
+      this.$forceUpdate();
     },
     updateSets (sets) {
       if (!sets) {
@@ -394,26 +430,26 @@ export default {
     },
     // this is a copy and paste from Filter.vue
     // TODO: move this function to it's own module so it's not duplicated
-    getSelectizeSettings (metaType, metaData) {
-      const settings = {};
-      if (metaData.options === null) {
-        const loadfn = function (query, callback) {
-          this.$http.get(
-            `/api/datasets/${this.$route.params.dataset}/meta/${metaType}/search/${query}`
-          ).then(response => {
-            const items = response.data.map(item => {
-              return {name: item};
-            });
-            callback(items);
-          }, failedResponse => {
-            console.log(failedResponse);
-            callback();
-          });
-        };
-        settings.load = loadfn.bind(this);
-      }
-      return settings;
-    },
+    // getSelectizeSettings (metaType, metaData) {
+    //   const settings = {};
+    //   if (metaData.options === null) {
+    //     const loadfn = function (query, callback) {
+    //       this.$http.get(
+    //         `/api/datasets/${this.$route.params.dataset}/meta/${metaType}/search/${query}`
+    //       ).then(response => {
+    //         const items = response.data.map(item => {
+    //           return {name: item};
+    //         });
+    //         callback(items);
+    //       }, failedResponse => {
+    //         console.log(failedResponse);
+    //         callback();
+    //       });
+    //     };
+    //     settings.load = loadfn.bind(this);
+    //   }
+    //   return settings;
+    // },
     triggerErrorState () {
       if (!this.formErrors) {
         return;
@@ -427,33 +463,54 @@ export default {
       }
     },
     download () {
+      this.$store.commit('downloadPath', 'creating');
       // if (this.formErrors !== null) {
       //   this.triggerErrorState();
       //   return;
       // }
       const query = this.getQuery();
 
-      const form = document.createElement('form');
-      form.setAttribute('method', 'post');
-      form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download`);
-      form.setAttribute('target', '_blank');
+      var params = {query: JSON.stringify(query), options: JSON.stringify(this.options)};
 
-      const queryField = document.createElement('input');
-      queryField.setAttribute('type', 'hidden');
-      queryField.setAttribute('name', 'query');
-      queryField.setAttribute('value', JSON.stringify(query));
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/download`, params, {emulateJSON: true}).then(response => {
+        this.$store.commit('downloadPath', response.data['download_path']);
+        const form = document.createElement('form');
+        form.setAttribute('method', 'post');
+        form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download/${this.downloadPath}`);
+        form.setAttribute('target', '_blank');
 
-      const optionsField = document.createElement('input');
-      optionsField.setAttribute('type', 'hidden');
-      optionsField.setAttribute('name', 'options');
-      optionsField.setAttribute('value', JSON.stringify(this.options));
+        const optionsField = document.createElement('input');
+        optionsField.setAttribute('type', 'hidden');
+        optionsField.setAttribute('name', 'options');
+        optionsField.setAttribute('value', JSON.stringify(this.options));
+        form.appendChild(optionsField);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+      }, response => {
+        console.log('error');
+      });
+      // const form = document.createElement('form');
+      // form.setAttribute('method', 'post');
+      // form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download`);
+      // form.setAttribute('target', '_blank');
 
-      form.appendChild(queryField);
-      form.appendChild(optionsField);
+      // const queryField = document.createElement('input');
+      // queryField.setAttribute('type', 'hidden');
+      // queryField.setAttribute('name', 'query');
+      // queryField.setAttribute('value', JSON.stringify(query));
 
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
+      // const optionsField = document.createElement('input');
+      // optionsField.setAttribute('type', 'hidden');
+      // optionsField.setAttribute('name', 'options');
+      // optionsField.setAttribute('value', JSON.stringify(this.options));
+
+      // form.appendChild(queryField);
+      // form.appendChild(optionsField);
+
+      // document.body.appendChild(form);
+      // form.submit();
+      // document.body.removeChild(form);
     },
     plot () {
       if (this.formErrors !== null) {
@@ -488,9 +545,11 @@ export default {
       });
     },
     getQuery () {
+      const filteredFeatures = this.getFilteredFeatures();
       return {
         filters: this.filters,
-        features: this.getFilteredFeatures(),
+        features: filteredFeatures.features,
+        groups: filteredFeatures.groups,
       };
     },
     getFeatures () {
@@ -509,6 +568,16 @@ export default {
       }
       return setA;
     },
+    // watch: {
+    //   downloadRadios: function (val) {
+    //     for (let radio in val) {
+    //       console.log(radio);
+    //       if (radio === 'all') {
+    //         this.formErrors = true;
+    //       }
+    //     }
+    //   },
+    // },
   },
 };
 </script>
@@ -524,6 +593,9 @@ h5 {
   label {
     font-size: 1.25em;
   }
+}
+.waiting {
+  margin-top: 7rem;
 }
 #download-btn, #plot-btn {
   margin-top: 25px;

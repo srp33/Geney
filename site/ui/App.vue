@@ -75,6 +75,27 @@ h1, h2, h3 {
       top: 25px;
       width: 100%;
     }
+
+    .loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #28a745; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    margin: -75px 0 0 -75px;
+    animation: spin 2s linear infinite;
+    position: absolute;
+    margin-top: 5rem;
+    left: 50%;
+    }
+
+  }
+
+  
+  
+  @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
   }
 
 }
