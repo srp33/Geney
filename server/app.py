@@ -11,7 +11,7 @@ import uuid
 from psutil import Process as ProcessManager
 from psutil._exceptions import NoSuchProcess
 
-from flask import Flask, make_response, Response, jsonify, request, send_file
+from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory
 from responders.CsvResponse import CsvResponse
 from responders.TsvResponse import TsvResponse
 from responders.JsonResponse import JsonResponse
@@ -209,13 +209,9 @@ def download(path):
     file_type = path.split('.')[-1]
     if file_type == 'gz':
         file_type = path.split('.')[-2]
-    mime_type = MIME_TYPES[file_type]
-    extension = re.search(r'\..*', path).group(0)
     path = os.path.join(DOWNLOAD_LOCATION, path)
     if os.path.exists(path):
         return jsonify({'url': '/api/data/download/{}'.format(path.split('/')[-1])})
-        # return send_file(os.path.join(DOWNLOAD_LOCATION, path), mimetype=mime_type, as_attachment=True,
-        #                  attachment_filename="{}{}".format(dataset_id, extension))
     else:
         return jsonify({'status': 'incomplete'})
 
@@ -225,14 +221,16 @@ def get(path):
     if file_type == 'gz':
         file_type = path.split('.')[-2]
     mime_type = MIME_TYPES[file_type]
-    print(mime_type, flush=True)
     extension = re.search(r'\..*', path).group(0)
-    path = os.path.join(DOWNLOAD_LOCATION, path)
-    if os.path.exists(path):
-        return send_file(os.path.join(DOWNLOAD_LOCATION, path), mimetype=mime_type, as_attachment=True,
-                         attachment_filename="{}{}".format(path.split('/')[-1].split('-')[0], extension))
+    full_path = os.path.join(DOWNLOAD_LOCATION, path)
+    if os.path.exists(full_path):
+        # return send_file(full_path, mimetype=mime_type, as_attachment=True,
+        #                  attachment_filename="{}{}".format(path.split('-')[0], extension))
+        return send_from_directory(DOWNLOAD_LOCATION, path, mimetype=mime_type, as_attachment=True,
+                          attachment_filename="{}{}".format(path.split('-')[0], extension))
     else:
         return not_found()
+
 
 @app.route('/api/data/cancel/<string:path>', strict_slashes=False, methods=['GET'])
 def cancel_download(path):

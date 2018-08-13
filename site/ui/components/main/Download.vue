@@ -213,7 +213,7 @@ export default {
       // downloadErrors: false,
       formErrors: false,
       // downloadRadios: {},
-      maxQueries: 2,
+      maxQueries: 10,
       secondsBetweenQueries: 2,
       numQueries: 0,
       emailForm: {
