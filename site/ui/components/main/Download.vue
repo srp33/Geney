@@ -455,7 +455,7 @@ export default {
             `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
-              return {name: item};
+              return {name: item.replace(group + '_', '')};
             });
             callback(items);
           }, failedResponse => {
@@ -481,7 +481,10 @@ export default {
           // features = features.concat(values);
         } else {
           if (this.selectedFeatures[group]) {
-            features = features.concat(this.selectedFeatures[group]);
+            for (var feature in this.selectedFeatures[group]) {
+              features.push(group + '_' + this.selectedFeatures[group][feature]);
+            }
+            // features = features.concat(this.selectedFeatures[group]);
           }
         }
       }
