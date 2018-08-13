@@ -124,6 +124,16 @@ class GeneyDataset:
 		except RequestError:
 			return None
 
+	def get_num_data_points(self, num_samples, selected_groups, selected_features):
+		num_data_points = len(selected_features)
+		with open(self.groups_path) as fp:
+			groups = json.load(fp)
+			for group in selected_groups:
+				num_data_points += len(groups[group])
+		num_data_points *= num_samples
+		return int(num_data_points)
+
+
 	# returns set of sample ids that match filters
 	def query_samples(self, query: Query):
 		with ParquetDao(self.__dir) as dao:

@@ -204,6 +204,17 @@ def count_samples(dataset_id):
 
     return jsonify(count)
 
+@app.route('/api/datasets/<string:dataset_id>/num_points', strict_slashes=False, methods=['POST'])
+def num_points(dataset_id):
+    dataset = get_dataset(dataset_id)
+    if dataset is None:
+        return not_found()
+    params = request.get_json()
+    groups = params['groups']
+    features = params['features']
+    samples = params['num_samples']
+    return jsonify({'num_data_points': dataset.get_num_data_points(samples, groups, features)})
+
 @app.route('/api/data/status/<string:path>', strict_slashes=False, methods=['GET'])
 def download(path):
     file_type = path.split('.')[-1]

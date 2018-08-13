@@ -126,21 +126,21 @@
           </div>
 
           <div class="col-12">
-            <button class="btn btn-primary btn-lg" @click="download" id="download-btn" :disabled="formErrors">
+            <button class="btn btn-primary btn-lg" @click="getNumDataPoints" id="download-btn" :disabled="formErrors">
               Download
               <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
             </button>
           </div>
 
-          <div class="col-12" id="plot-container">
+          <!-- <div class="col-12" id="plot-container">
             <button class="btn btn-primary btn-lg" @click="plot" id="plot-btn" :disabled="plotlyErrors">
               Visualize with plot.ly
               <span v-if="plotlyErrors" v-b-tooltip="plotlyTooltipSettings"></span>
             </button>
-          </div>
+          </div> -->
 
           <div class="col-12">
-            <router-link class="btn btn-secondary" :to="`/dataset/${dataset.id}/filter`">Back</router-link>
+            <router-link class="btn btn-secondary" style="margin-top: 10px;" :to="`/dataset/${dataset.id}/filter`">Back</router-link>
           </div>
 
         </div>
@@ -210,6 +210,7 @@ export default {
         gzip: false,
       },
       numSamples: null,
+      numDataPoints: 0,
       // downloadErrors: false,
       formErrors: false,
       // downloadRadios: {},
@@ -419,6 +420,17 @@ export default {
     }
   },
   methods: {
+    getNumDataPoints () {
+      var filteredFeatures = this.getFilteredFeatures();
+      filteredFeatures.num_samples = this.numSamples;
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/num_points`, filteredFeatures).then(response => {
+        this.numDataPoints = response.data['num_data_points'];
+        this.download();
+      }, response => {
+        console.log('error getting num data points');
+        return null;
+      });
+    },
     cancelDownload (evt) {
       if (evt) {
         evt.preventDefault();
@@ -540,55 +552,30 @@ export default {
       }
     },
     download () {
-      this.$store.commit('downloadStatus', 'creating');
-      // if (this.formErrors !== null) {
-      //   this.triggerErrorState();
-      //   return;
-      // }
-      const query = this.getQuery();
-
-      var params = {query: JSON.stringify(query), options: JSON.stringify(this.options)};
-
-      this.$http.post(`/api/datasets/${this.$route.params.dataset}/query`, params, {emulateJSON: true}).then(response => {
-        this.$store.commit('downloadPath', response.data['download_path']);
-        this.getDownload(response.data['download_path']);
-        // const form = document.createElement('form');
-        // form.setAttribute('method', 'post');
-        // form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download/${this.downloadPath}`);
-        // form.setAttribute('target', '_blank');
-
-        // const optionsField = document.createElement('input');
-        // optionsField.setAttribute('type', 'hidden');
-        // optionsField.setAttribute('name', 'options');
-        // optionsField.setAttribute('value', JSON.stringify(this.options));
-        // form.appendChild(optionsField);
-        // document.body.appendChild(form);
-        // form.submit();
-        // document.body.removeChild(form);
-      }, response => {
-        console.log('error');
-      });
-      // const form = document.createElement('form');
-      // form.setAttribute('method', 'post');
-      // form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download`);
-      // form.setAttribute('target', '_blank');
-
-      // const queryField = document.createElement('input');
-      // queryField.setAttribute('type', 'hidden');
-      // queryField.setAttribute('name', 'query');
-      // queryField.setAttribute('value', JSON.stringify(query));
-
-      // const optionsField = document.createElement('input');
-      // optionsField.setAttribute('type', 'hidden');
-      // optionsField.setAttribute('name', 'options');
-      // optionsField.setAttribute('value', JSON.stringify(this.options));
-
-      // form.appendChild(queryField);
-      // form.appendChild(optionsField);
-
-      // document.body.appendChild(form);
-      // form.submit();
-      // document.body.removeChild(form);
+      if (this.numDataPoints <= this.$store.state.maxDataPoints) {
+        this.$store.commit('downloadStatus', 'creating');
+        // if (this.formErrors !== null) {
+        //   this.triggerErrorState();
+        //   return;
+        // }
+        const query = this.getQuery();
+        var params = {query: JSON.stringify(query), options: JSON.stringify(this.options)};
+        this.$http.post(`/api/datasets/${this.$route.params.dataset}/query`, params, {emulateJSON: true}).then(response => {
+          this.$store.commit('downloadPath', response.data['download_path']);
+          this.getDownload(response.data['download_path']);
+        }, response => {
+          console.log('error');
+        });
+      } else {
+        this.$store.commit('downloadStatus', 'datapointError');
+        this.$store.commit('addAlert', {
+          variant: 'danger',
+          message: 'Too many datapoints selected.\nPlease add more filters or remove features\nto fit your data within ' +
+          this.$store.state.maxDataPoints + ' data points (currently requesting ' + this.numDataPoints +
+          ' data points).',
+          show: 15,
+        });
+      }
     },
     getDownload (downloadPath) {
       // const dataset = this.$route.params.dataset;

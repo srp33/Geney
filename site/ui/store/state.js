@@ -17,4 +17,5 @@ export default {
   downloadRadios: {},
   downloadPath: null,
   downloadStatus: '',
+  maxDataPoints: 100000000,
 };
