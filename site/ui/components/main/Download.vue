@@ -1,8 +1,43 @@
 <template>
   <div>
-    <div v-if="downloadPath === 'creating'">
+    <div v-if="downloadStatus === 'creating'">
+    <!-- <div v-if="true"> -->
       <h1 class="waiting">Please wait while Geney grants your data wishes...</h1>
       <div class="loader"></div>
+      <button @click="cancelDownload" class="btn btn-danger btn-lg cancel-btn">Cancel</button>
+    </div>
+    <div v-else-if="downloadStatus === 'timeout'" class="download top justify-content-center">
+      <h1>Tired of waiting?</h1>
+      <p>Geney is working extra hard to get your data, but is taking a little bit longer than usual.<br>
+          Enter your email here and we'll send you a download link as soon as it's ready!
+      </p>
+      <div class="row justify-content-center">
+        <b-form @submit="submitEmailForm" @reset="cancelDownload">
+          <b-form-group id="emailInputGroup"
+                        label="Email address:"
+                        label-for="emailInput"
+                        description="We'll never share your email with anyone else.">
+            <b-form-input id="emailInput"
+                          type="email"
+                          v-model="emailForm.email"
+                          required
+                          placeholder="Enter email">
+            </b-form-input>
+          </b-form-group>
+          <b-form-group id="nameInputGroup"
+                        label="Your Name:"
+                        label-for="nameInput">
+            <b-form-input id="nameInput"
+                          type="text"
+                          v-model="emailForm.name"
+                          required
+                          placeholder="Enter name">
+            </b-form-input>
+          </b-form-group>
+          <b-button type="submit" variant="primary">Submit</b-button>
+          <b-button type="reset" variant="danger">Cancel Download</b-button>
+        </b-form>
+      </div>
     </div>
     <div v-else>
       <div class="download top row justify-content-center" v-if="filters">
@@ -155,6 +190,21 @@ export default {
           valueField: 'value',
         },
       },
+      mimeTypes: {
+        'csv': 'text/csv',
+        'json': 'application/json',
+        'tsv': 'text/tsv',
+        'html': 'text/html',
+        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'pq': 'application/parquet',
+        'feather': 'application/feather',
+        'pkl': 'application/pickle',
+        'msgpack': 'application/msgpack',
+        'dta': 'application/stata',
+        'arff': 'application/arff',
+        'sql': 'application/sqlite',
+        'h5': 'application/hdf5',
+      },
       options: {
         fileformat: 'tsv',
         gzip: false,
@@ -163,6 +213,14 @@ export default {
       // downloadErrors: false,
       formErrors: false,
       // downloadRadios: {},
+      maxQueries: 2,
+      secondsBetweenQueries: 2,
+      numQueries: 0,
+      emailForm: {
+        email: '',
+        name: '',
+        checked: [],
+      },
     };
   },
   computed: {
@@ -171,6 +229,9 @@ export default {
     // }),
     downloadRadios () {
       return this.$store.state.downloadRadios;
+    },
+    downloadStatus () {
+      return this.$store.state.downloadStatus;
     },
     downloadPath () {
       return this.$store.state.downloadPath;
@@ -358,6 +419,19 @@ export default {
     }
   },
   methods: {
+    cancelDownload (evt) {
+      if (evt) {
+        evt.preventDefault();
+      }
+      this.$http.get(`/api/data/cancel/${this.downloadPath}`).then(response => {
+        this.$store.commit('downloadPath', '');
+      }, response => {
+        console.log('error');
+      });
+      // console.log('finished canceling');
+      this.$store.commit('downloadStatus', '');
+      this.numQueries = 0;
+    },
     getFormErrors () {
       let valid = false;
       let errors = {};
@@ -438,28 +512,18 @@ export default {
       }
       this.$store.commit('selectedVariables', variables);
     },
-    // this is a copy and paste from Filter.vue
-    // TODO: move this function to it's own module so it's not duplicated
-    // getSelectizeSettings (metaType, metaData) {
-    //   const settings = {};
-    //   if (metaData.options === null) {
-    //     const loadfn = function (query, callback) {
-    //       this.$http.get(
-    //         `/api/datasets/${this.$route.params.dataset}/meta/${metaType}/search/${query}`
-    //       ).then(response => {
-    //         const items = response.data.map(item => {
-    //           return {name: item};
-    //         });
-    //         callback(items);
-    //       }, failedResponse => {
-    //         console.log(failedResponse);
-    //         callback();
-    //       });
-    //     };
-    //     settings.load = loadfn.bind(this);
-    //   }
-    //   return settings;
-    // },
+    submitEmailForm (evt) {
+      evt.preventDefault();
+      var params = {email: this.emailForm.email, name: this.emailForm.name};
+
+      this.$http.post(`/api/data/notify/${this.downloadPath}`, params, {emulateJSON: true}).then(response => {
+        console.log('sent notification information');
+      }, response => {
+        console.log('error');
+      });
+
+      this.$store.commit('downloadStatus', '');
+    },
     triggerErrorState () {
       if (!this.formErrors) {
         return;
@@ -473,7 +537,7 @@ export default {
       }
     },
     download () {
-      this.$store.commit('downloadPath', 'creating');
+      this.$store.commit('downloadStatus', 'creating');
       // if (this.formErrors !== null) {
       //   this.triggerErrorState();
       //   return;
@@ -482,21 +546,22 @@ export default {
 
       var params = {query: JSON.stringify(query), options: JSON.stringify(this.options)};
 
-      this.$http.post(`/api/datasets/${this.$route.params.dataset}/download`, params, {emulateJSON: true}).then(response => {
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/query`, params, {emulateJSON: true}).then(response => {
         this.$store.commit('downloadPath', response.data['download_path']);
-        const form = document.createElement('form');
-        form.setAttribute('method', 'post');
-        form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download/${this.downloadPath}`);
-        form.setAttribute('target', '_blank');
+        this.getDownload(response.data['download_path']);
+        // const form = document.createElement('form');
+        // form.setAttribute('method', 'post');
+        // form.setAttribute('action', `/api/datasets/${this.$route.params.dataset}/download/${this.downloadPath}`);
+        // form.setAttribute('target', '_blank');
 
-        const optionsField = document.createElement('input');
-        optionsField.setAttribute('type', 'hidden');
-        optionsField.setAttribute('name', 'options');
-        optionsField.setAttribute('value', JSON.stringify(this.options));
-        form.appendChild(optionsField);
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
+        // const optionsField = document.createElement('input');
+        // optionsField.setAttribute('type', 'hidden');
+        // optionsField.setAttribute('name', 'options');
+        // optionsField.setAttribute('value', JSON.stringify(this.options));
+        // form.appendChild(optionsField);
+        // document.body.appendChild(form);
+        // form.submit();
+        // document.body.removeChild(form);
       }, response => {
         console.log('error');
       });
@@ -521,6 +586,41 @@ export default {
       // document.body.appendChild(form);
       // form.submit();
       // document.body.removeChild(form);
+    },
+    getDownload (downloadPath) {
+      // const dataset = this.$route.params.dataset;
+      this.$http.get(`/api/data/status/${downloadPath}`).then(response => {
+        if (response.data['status']) {
+          var sleep = new Promise((resolve, reject) => {
+            setTimeout(() => {
+              if (this.downloadStatus === 'creating') {
+                if (this.numQueries > this.maxQueries) {
+                  this.numQueries = 0;
+                  console.log('timeout!');
+                  this.$store.commit('downloadStatus', 'timeout');
+                } else {
+                  // console.log('not ready yet');
+                  this.getDownload(downloadPath);
+                }
+              }
+              resolve();
+            }, 2000);
+          });
+
+          Promise.all([sleep]).then(() => {
+            this.numQueries += 1;
+            // console.log('trying again...');
+          });
+        } else {
+          const url = window.location.origin + response.data['url'];
+          this.$store.commit('downloadStatus', '');
+          var link = document.createElement('a');
+          link.href = url;
+          link.click();
+        }
+      }, response => {
+        console.log('error');
+      });
     },
     plot () {
       if (this.formErrors !== null) {
@@ -593,7 +693,7 @@ export default {
 </script>
 
 <style lang="scss">
-h1, h2, h3 {
+h1, h2, h3, h4 {
   font-weight: normal;
 }
 h5 {

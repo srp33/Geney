@@ -1,4 +1,7 @@
 export default {
+  downloadStatus (state, value) {
+    state.downloadStatus = value;
+  },
   downloadPath (state, value) {
     state.downloadPath = value;
   },

@@ -16,4 +16,5 @@ export default {
   lastMetaType: null,
   downloadRadios: {},
   downloadPath: null,
+  downloadStatus: '',
 };

@@ -32,7 +32,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       api: {
-        filter: '/api/datasets',
+        filter: '/api',
         target: 'http://localhost:9998',
         changeOrigin: true,
       },

@@ -82,11 +82,8 @@ h1, h2, h3 {
     border-radius: 50%;
     width: 120px;
     height: 120px;
-    margin: -75px 0 0 -75px;
+    margin: 5rem auto;
     animation: spin 2s linear infinite;
-    position: absolute;
-    margin-top: 5rem;
-    left: 50%;
     }
 
   }

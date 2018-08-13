@@ -7,6 +7,8 @@ from .Dao import ParquetDao
 from .Exceptions import RequestError, ServerError
 from .Constants import *
 from subprocess import check_call
+import gzip
+from shutil import copyfileobj
 import pickle
 
 import sys
@@ -130,7 +132,7 @@ class GeneyDataset:
 			else: # they added no filters so all sample ids "match"
 				return set(dao.get_all_sample_ids())
 
-	def query(self, query_json, file_format, gzip_output, download_location):
+	def query(self, query_json, file_format, gzip_output, download_location, filename=None):
 		query = Query(query_json, self.description)
 		features = []
 		if query.groups:
@@ -139,11 +141,17 @@ class GeneyDataset:
 				for group in query.groups:
 					features.extend(groups[group])
 		with ParquetDao(self.__dir) as dao:
-			file_path = dao.get_file_from_query(query, set(features), file_format, self.dataset_id, download_location)
-			if gzip_output:
-				check_call(['gzip', file_path])
-				file_path += ".gz"
-			return file_path
+			file_path = dao.get_file_from_query(query, set(features), file_format, self.dataset_id, download_location, filename)
+			with open(file_path, 'rb') as f_in:
+				if gzip_output:
+					with gzip.open(file_path.rstrip('incomplete'), 'wb') as f_out:
+						copyfileobj(f_in, f_out)
+				else:
+					with open(file_path.rstrip('incomplete'), 'wb') as f_out:
+						copyfileobj(f_in, f_out)
+				os.remove(file_path)
+			print('Done!', flush=True)
+			return file_path.rstrip('incomplete')
 
 
 	# def search(self, meta_type, search_val):
