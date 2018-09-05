@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
-import os, json, sqlite3
-from pprint import pprint
-from typing import Set, List, Any, Iterable
+import os
+import json
 from .Query import Query
 from .Dao import ParquetDao
-from .Exceptions import RequestError, ServerError
+from .Exceptions import RequestError
 from .Constants import *
-from subprocess import check_call
 import gzip
 from shutil import copyfileobj
 import pickle
 
-import sys
-
 METADATA_PKL = 'metadata.pkl'
 
-class GeneyDataset:
 
+class GeneyDataset:
 	def __init__(self, directory: str):
 		# make sure directory has a '/' at the end
 		if directory[-1] is not '/':
@@ -34,7 +30,6 @@ class GeneyDataset:
 		with open(self.__dir + DESCRIPTION_FILE, 'r') as in_file:
 			self.__description = json.load(in_file)
 
-
 	@property
 	def dataset_id(self) -> str:
 		return self.__id
@@ -46,15 +41,15 @@ class GeneyDataset:
 	@property
 	def num_meta_types(self) -> int:
 		return self.__description['numMetaTypes']
-	
+
 	@property
 	def num_features(self) -> int:
 		return self.__description['numFeatures']
-	
+
 	@property
 	def num_samples(self) -> int:
 		return self.__description['numSamples']
-	
+
 	@property
 	def description(self):
 		return self.__description
@@ -74,7 +69,8 @@ class GeneyDataset:
 	def get_variable(self, variable_name):
 		with open(self.metadata_path, 'rb') as fp:
 			metadata = pickle.load(fp)
-			if type(metadata['meta'][variable_name]['options']) is list and len(metadata['meta'][variable_name]['options']) > 100:
+			if type(metadata['meta'][variable_name]['options']) is list and len(
+					metadata['meta'][variable_name]['options']) > 100:
 				metadata['meta'][variable_name]['options'] = None
 			return metadata['meta'][variable_name]
 
@@ -133,13 +129,12 @@ class GeneyDataset:
 		num_data_points *= num_samples
 		return int(num_data_points)
 
-
 	# returns set of sample ids that match filters
 	def query_samples(self, query: Query):
 		with ParquetDao(self.__dir) as dao:
-			if query.num_filters > 0: # if they added any filters
+			if query.num_filters > 0:  # if they added any filters
 				return set(dao.get_samples_from_query(query))
-			else: # they added no filters so all sample ids "match"
+			else:  # they added no filters so all sample ids "match"
 				return set(dao.get_all_sample_ids())
 
 	def query(self, query_json, file_format, gzip_output, download_location, filename=None):
@@ -151,7 +146,8 @@ class GeneyDataset:
 				for group in query.groups:
 					features.extend(groups[group])
 		with ParquetDao(self.__dir) as dao:
-			file_path = dao.get_file_from_query(query, set(features), file_format, self.dataset_id, download_location, filename)
+			file_path = dao.get_file_from_query(query, set(features), file_format, self.dataset_id, download_location,
+												filename)
 			with open(file_path, 'rb') as f_in:
 				if gzip_output:
 					with gzip.open(file_path.rstrip('incomplete'), 'wb') as f_out:
@@ -163,20 +159,6 @@ class GeneyDataset:
 			print('Done!', flush=True)
 			return file_path.rstrip('incomplete')
 
-
-	# def search(self, meta_type, search_val):
-	# 	with SQLiteDao(self.__dir) as dao:
-	# 		if meta_type == '':
-	# 			meta_types = dao.search_meta_types(search_val)
-	# 			if search_val == '' or search_val in 'sampleID':
-	# 				meta_types.insert(0, 'sampleID')
-	# 			return meta_types
-	# 		elif meta_type == 'features':
-	# 			return dao.search_features(search_val)
-	# 		elif meta_type == SAMPLE_ID:
-	# 			return dao.search_sample_id(search_val)
-	# 		else:
-	# 			return dao.search_meta_type(meta_type, search_val)
 
 if __name__ == '__main__':
 	dset = GeneyDataset("/Volumes/KIMBALLUSB/ParquetData/LINCS_PhaseII_Level3/")

@@ -4,7 +4,6 @@ import json
 import os
 import pickle
 import sys
-import time
 import redis
 import re
 import uuid
@@ -16,7 +15,6 @@ from responders.CsvResponse import CsvResponse
 from responders.TsvResponse import TsvResponse
 from responders.JsonResponse import JsonResponse
 from data_access.Dataset import GeneyDataset
-from data_access.Query import Query
 from multiprocessing import Process
 from data_access import GeneyJob
 import smtplib
