@@ -1,7 +1,7 @@
 import json, hashlib
 from typing import List, Tuple, Any, Iterator
 from jsonschema import validate, ValidationError
-from .Filter import MetaFilter, MetaFilterIter
+from .Filter import Filter, FilterIter
 from .Exceptions import RequestError
 
 with open('schemas/query.json', 'r') as schema_file:
@@ -18,12 +18,16 @@ class Query:
 			raise RequestError('Could not validate query definition')
 
 	@property
-	def meta_filters(self) -> Iterator[MetaFilter]:
-		return MetaFilterIter(self.__def['filters'])
+	def filters(self) -> Iterator[Filter]:
+		return FilterIter(self.__def['filters'])
 
 	@property
-	def meta_filter_names(self) -> List[str]:
-		return self.__def['metaTypes']
+	def groups(self) -> List[str]:
+		return self.__def['groups'] if len(self.__def['groups']) > 0 else None
+
+	# @property
+	# def sample_filter_names(self) -> List[str]:
+	# 	return self.__def['filterTypes']
 
 	@property
 	def feature_filters(self) -> List[str]:

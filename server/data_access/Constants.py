@@ -1,12 +1,14 @@
 import re
 # Filename constants
 DESCRIPTION_FILE = 'description.json'
-DATA_FILE = 'data.h5'
+DATA_FILE = 'data.pq'
 METADATA_DB = 'metadata.sqlite'
 METADATA_JSON = 'metadata.json'
-REQUIRED_FILES = [DESCRIPTION_FILE, METADATA_DB, DATA_FILE, METADATA_JSON]
-
+GROUPS_JSON = 'groups.json'
+OPTIONS_JSON = 'options.json'
+REQUIRED_FILES = [DESCRIPTION_FILE, DATA_FILE, GROUPS_JSON]
 HDF5_DATA_PATH = 'data/'
+
 
 # Meta Type constants
 TEXT = 'text'
@@ -19,7 +21,7 @@ MAX_ITEMS_IN_OUTPUT_FILE = 500000
 SEARCH_LIMIT = 100
 
 # Others
-SAMPLE_ID = "sampleID"
+SAMPLE_ID = "Sample"
 
 # SQL queries
 GET_VARIABLE = 'SELECT variableID, variableType FROM variableTable WHERE variableName = ?;'

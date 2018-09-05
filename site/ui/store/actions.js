@@ -77,10 +77,59 @@ export default {
       });
     }
   },
+  getDatasetGroups (context) {
+    if (context.state.dataset) {
+      // check if current metaData is the one we need right now
+      if (context.state.metaData && context.state.metaData.dataset === context.state.dataset.id) {
+        return;
+      }
+      // see if there is a dataset
+      if (!context.state.dataset.id) {
+        return;
+      }
+      context.commit('metaData', false);
+      context.commit('initializeMetaCache');
+      // check if localStorage is available on the browser
+      if (window.localStorage) {
+        let data;
+        // try to get the meta out of local storage
+        try {
+          data = JSON.parse(window.localStorage.getItem(context.state.dataset.id + '_data'));
+        } catch (e) {
+          console.error('Error retrieving local storage:', e);
+          // if it fails (for whatever reason) clear local storage so we can
+          // make the http request and set it again
+          window.localStorage.clear();
+        }
+        // if we were able to get the stored data, return a promise that
+        // immediately resolves with the data we found
+        if (data) {
+          context.commit('metaData', data);
+          return;
+        }
+      }
+      Vue.http.get(`/api/datasets/${context.state.dataset.id}/groups`).then(response => {
+        const groups = response.data;
+        for (let key in groups) {
+          context.commit('downloadRadios', {group: key, value: 'selected'});
+          context.commit('selectedFeatures', {group: key, value: []});
+          if (Array.isArray(groups[key])) {
+            groups[key] = groups[key].map(x => ({
+              'name': x.replace(key + '_', ''),
+            }));
+          }
+        }
+        context.commit('groups', groups);
+      }, response => {
+        console.log('FAILED', response);
+        router.replace('/404');
+      });
+    }
+  },
   setDataset (context, payload) {
     context.commit('dataset', payload);
     if (payload.id) {
-      context.dispatch('getDatasetMetadata');
+      context.dispatch('getDatasetGroups');
     } else {
       if (router.currentRoute.params.dataset) {
         router.replace('/404');

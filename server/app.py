@@ -4,15 +4,22 @@ import json
 import os
 import pickle
 import sys
-import time
 import redis
+import re
+import uuid
+from psutil import Process as ProcessManager
+from psutil._exceptions import NoSuchProcess
 
-from flask import Flask, make_response, Response, jsonify, request, send_file
+from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory
 from responders.CsvResponse import CsvResponse
 from responders.TsvResponse import TsvResponse
 from responders.JsonResponse import JsonResponse
 from data_access.Dataset import GeneyDataset
-from data_access.Query import Query
+from multiprocessing import Process
+from data_access import GeneyJob
+import smtplib
+from private import EMAIL_PASS, EMAIL_USER
+from email.message import EmailMessage
 
 DATA_PATH = os.getenv('GENEY_DATA_PATH', '')
 if not DATA_PATH:
@@ -24,10 +31,37 @@ if not URL:
     print('"GENEY_URL" environment variable not set!', flush=True)
     sys.exit(1)
 
+DOWNLOAD_LOCATION = os.getenv('DOWNLOAD_LOCATION', '')
+if not DOWNLOAD_LOCATION:
+    print('"DOWNLOAD_LOCATION" environment variable not set!', flush=True)
+    sys.exit(1)
+else:
+    DOWNLOAD_HISTORY = os.path.join(DOWNLOAD_LOCATION, 'download_history.pkl')
+    with open(DOWNLOAD_HISTORY, 'wb') as fp:
+        pickle.dump({}, fp)
+
 RESPONDERS = {
     'tsv': TsvResponse,
     'csv': CsvResponse,
     'json': JsonResponse,
+}
+
+MIME_TYPES = {
+    'csv': 'text/csv',
+    'json': 'application/json',
+    'tsv': 'text/tsv',
+    'gz': 'application/gzip',
+    'html': 'text/html',
+    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'pq': 'application/parquet',
+    'feather': 'application/feather',
+    'pkl': 'application/pickle',
+    'msgpack': 'application/msgpack',
+    'dta': 'application/stata',
+    'arff': 'application/arff',
+    'sql': 'application/sqlite',
+    'h5': 'application/hdf5',
+    'gzip': 'application/gzip',
 }
 
 # dictionary of commands and their respective handlers
@@ -42,7 +76,7 @@ DATASETS = {}
 
 app = Flask(__name__)
 
-redis_con = redis.StrictRedis(host='redis')
+redis_con = redis.StrictRedis(host='localhost')
 redis_con.flushdb()
 
 def load_datasets() -> None:
@@ -118,37 +152,43 @@ def get_datasets():
     else:
         return not_found()
 
-@app.route('/api/datasets/<string:dataset_id>/meta', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/meta/<string:variable_name>', strict_slashes=False)
-def meta(dataset_id, variable_name=None):
+@app.route('/api/datasets/<string:dataset_id>/groups', strict_slashes=False)
+def get_groups(dataset_id):
     dataset = get_dataset(dataset_id)
     if dataset is None:
         return not_found()
+    return jsonify(dataset.get_groups())
 
-    if variable_name is None: # they're requesting all of the metadata
-        return send_file(dataset.metadata_path)
-    else: # they want the metadata for a specific variable
+@app.route('/api/datasets/<string:dataset_id>/groups/<string:group_name>/search', strict_slashes=False)
+@app.route('/api/datasets/<string:dataset_id>/groups/<string:group_name>/search/<string:search_str>',
+           strict_slashes=False)
+def search_group(dataset_id, group_name, search_str=None):
+    dataset = get_dataset(dataset_id)
+    if dataset is None:
+        return not_found()
+    return jsonify(dataset.search_group(group_name, search_str))
+
+@app.route('/api/datasets/<string:dataset_id>/options', strict_slashes=False)
+@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>', strict_slashes=False)
+def get_options(dataset_id, variable_name=None):
+    dataset = get_dataset(dataset_id)
+    if dataset is None:
+        return not_found()
+    if variable_name:
         results = dataset.get_variable(variable_name)
-
-        if results is None:
-            return not_found()
-
         return jsonify(results)
+    else:
+        return send_file(dataset.options_path)
 
-@app.route('/api/datasets/<string:dataset_id>/meta/<string:meta_type>/search/<string:search_str>', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/meta/<string:meta_type>/search', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/meta/search/<string:search_str>', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/meta/search', strict_slashes=False)
-def search(dataset_id, meta_type='', search_str=''):
+@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>/search', strict_slashes=False)
+@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>/search/<string:search_str>',
+           strict_slashes=False)
+def search_options(dataset_id, variable_name, search_str=None):
     dataset = get_dataset(dataset_id)
     if dataset is None:
         return not_found()
-
-    search_results = dataset.search(meta_type, search_str)
-    if search_results is None:
-        return not_found()
-
-    return jsonify(search_results)
+    else:
+        return jsonify(dataset.search_options(variable_name, search_str))
 
 @app.route('/api/datasets/<string:dataset_id>/samples', strict_slashes=False, methods=['POST'])
 def count_samples(dataset_id):
@@ -162,8 +202,88 @@ def count_samples(dataset_id):
 
     return jsonify(count)
 
-@app.route('/api/datasets/<string:dataset_id>/download', strict_slashes=False, methods=['POST'])
-def download(dataset_id):
+@app.route('/api/datasets/<string:dataset_id>/num_points', strict_slashes=False, methods=['POST'])
+def num_points(dataset_id):
+    dataset = get_dataset(dataset_id)
+    if dataset is None:
+        return not_found()
+    params = request.get_json()
+    groups = params['groups']
+    features = params['features']
+    samples = params['num_samples']
+    return jsonify({'num_data_points': dataset.get_num_data_points(samples, groups, features)})
+
+@app.route('/api/data/status/<string:path>', strict_slashes=False, methods=['GET'])
+def download(path):
+    file_type = path.split('.')[-1]
+    if file_type == 'gz':
+        file_type = path.split('.')[-2]
+    path = os.path.join(DOWNLOAD_LOCATION, path)
+    if os.path.exists(path):
+        return jsonify({'url': '/api/data/download/{}'.format(path.split('/')[-1])})
+    else:
+        return jsonify({'status': 'incomplete'})
+
+@app.route('/api/data/download/<string:path>', strict_slashes=False, methods=['GET'])
+def get(path):
+    file_type = path.split('.')[-1]
+    if file_type == 'gz':
+        file_type = path.split('.')[-2]
+    mime_type = MIME_TYPES[file_type]
+    extension = re.search(r'\..*', path).group(0)
+    full_path = os.path.join(DOWNLOAD_LOCATION, path)
+    if os.path.exists(full_path):
+        # return send_file(full_path, mimetype=mime_type, as_attachment=True,
+        #                  attachment_filename="{}{}".format(path.split('-')[0], extension))
+        return send_from_directory(DOWNLOAD_LOCATION, path, mimetype=mime_type, as_attachment=True,
+                          attachment_filename="{}{}".format(path.split('-')[0], extension))
+    else:
+        return not_found()
+
+
+@app.route('/api/data/cancel/<string:path>', strict_slashes=False, methods=['GET'])
+def cancel_download(path):
+    if os.path.exists(DOWNLOAD_HISTORY):
+        with open(DOWNLOAD_HISTORY, 'rb') as fp:
+            download_history = pickle.load(fp)
+    else:
+        print('Problem managing processes...')
+    if path in download_history.keys():
+        pid = download_history[path].pid
+        try:
+            p = ProcessManager(pid)
+            if p.is_running():
+                p.kill()
+                print('Killed PID {}'.format(pid))
+        except NoSuchProcess as e:
+            print(e)
+    if os.path.exists(os.path.join(DOWNLOAD_LOCATION, '{}incomplete'.format(path))):
+        os.remove(os.path.join(DOWNLOAD_LOCATION, '{}incomplete'.format(path)))
+    if os.path.exists(os.path.join(DOWNLOAD_LOCATION, path)):
+        os.remove(os.path.join(DOWNLOAD_LOCATION, path))
+    return jsonify({'status': 'success'})
+
+@app.route('/api/data/notify/<string:path>', strict_slashes=False, methods=['POST'])
+def notify(path):
+    email = request.form.get('email')
+    name = request.form.get('name')
+    if os.path.exists(DOWNLOAD_HISTORY):
+        with open(DOWNLOAD_HISTORY, 'rb') as fp:
+            download_history = pickle.load(fp)
+    if path not in download_history.keys():
+        return not_found('No job found')
+    else:
+        download_history[path].email = email
+        download_history[path].name = name
+        print(request.form.get('email'), request.form.get('name'))
+        with open(DOWNLOAD_HISTORY, 'wb') as fp:
+            pickle.dump(download_history, fp)
+    if os.path.exists(os.path.join(DOWNLOAD_LOCATION, path)):
+        send_email(path, email, name)
+    return jsonify({'status': 'success'})
+
+@app.route('/api/datasets/<string:dataset_id>/query/', strict_slashes=False, methods=['POST'])
+def query(dataset_id):
     dataset = get_dataset(dataset_id)
     if dataset is None:
         return not_found()
@@ -179,31 +299,59 @@ def download(dataset_id):
 
     file_format = options['fileformat']
 
-    if file_format not in RESPONDERS:
-        return bad_request()
-
     gzip_output = options['gzip'] if ('gzip' in options) else False
 
+    if gzip_output:
+        mime_type = MIME_TYPES['gzip']
+    else:
+        mime_type = MIME_TYPES[file_format]
+
     # TODO: Validate query before starting response
+    filename = '{}-{}'.format(dataset_id, uuid.uuid4().hex[:8])
+    if file_format == 'csv':
+        filename += ".csv"
+    elif file_format == 'json':
+        filename += ".json"
+    elif file_format == 'pickle':
+        filename += '.pkl'
+    elif file_format == 'tsv':
+        filename += '.tsv'
+    elif file_format == 'hdf5':
+        filename += '.h5'
+    elif file_format == 'arff':
+        filename += '.arff'
+    elif file_format == 'excel':
+        filename += '.xlsx'
+    elif file_format == 'feather':
+        filename += '.feather'
+    elif file_format == 'msgpack':
+        filename += '.msgpack'
+    elif file_format == 'parquet':
+        filename += '.pq'
+    elif file_format == 'stata':
+        filename += '.dta'
+    elif file_format == 'sqlite':
+        filename += '.sql'
+    elif file_format == 'html':
+        filename += '.html'
+    else:
+        filename += ".csv"
+    if gzip_output:
+        filename += '.gz'
 
-    responder = RESPONDERS[file_format]
+    p = Process(target=create_dataset, args=(dataset, query, file_format, gzip_output, DOWNLOAD_LOCATION, filename))
+    p.start()
+    print('started PID {}'.format(p.pid))
+    if os.path.exists(DOWNLOAD_HISTORY):
+        with open(DOWNLOAD_HISTORY, 'rb') as fp:
+            download_history = pickle.load(fp)
+    else:
+        download_history = {}
+    with open(DOWNLOAD_HISTORY, 'wb') as fp:
+        download_history[filename] = GeneyJob(p.pid, filename)
+        pickle.dump(download_history, fp)
+    return jsonify({'download_path': filename})
 
-    return responder(dataset, query, gzip_output)
-
-@app.route('/api/datasets/<string:dataset_id>/link', strict_slashes=False, methods=['POST'])
-def generate_link(dataset_id):
-    dataset = get_dataset(dataset_id)
-    if dataset is None:
-        return not_found()
-    try:
-        query_str = request.get_json()
-        query = Query(query_str, dataset.description)
-        redis_con.set('{}_{}'.format(dataset_id, query.md5), json.dumps(query_str))
-        return jsonify({
-            'link': '{base}/api/datasets/{dataset}/link/{hash}'.format(base=URL, dataset=dataset_id, hash=query.md5)
-        })
-    except Exception:
-        return bad_request()
 
 @app.route('/api/datasets/<string:dataset_id>/link/<string:query_hash>', strict_slashes=False, methods=['GET'])
 def use_link(dataset_id, query_hash):
@@ -235,6 +383,34 @@ def reload_datasets(params):
         return make_response('success', 200)
     except Exception:
         return make_response('error', 500)
+
+
+def create_dataset(dataset: GeneyDataset, query, file_format, gzip_output, download_location, filename):
+    dataset.query(query, file_format, gzip_output, download_location, filename)
+    if os.path.exists(DOWNLOAD_HISTORY):
+        with open(DOWNLOAD_HISTORY, 'rb') as fp:
+            download_history = pickle.load(fp)
+    if filename in download_history.keys():
+        if download_history[filename].email is not None:
+            send_email(filename, download_history[filename].email, download_history[filename].name)
+    else:
+        print('problem with history')
+
+
+def send_email(path, email, name):
+    s = smtplib.SMTP(host='smtp.gmail.com', port=587)
+    s.starttls()
+    s.login(EMAIL_USER, EMAIL_PASS)
+    subject = 'Geney Data Complete'
+    path = 'http://{}/api/data/download/{}'.format(URL, path)
+
+    message = EmailMessage()
+    message['From'] = 'Geney'
+    message['To'] = email
+    message['Subject'] = subject
+    message.set_content('{},\nThank you for your patience! Here is your data: {}'.format(name, path))
+
+    s.send_message(message)
 
 COMMANDS['reload'] = reload_datasets
 

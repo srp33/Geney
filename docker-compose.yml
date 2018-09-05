@@ -13,6 +13,15 @@ services:
     environment:
       - GENEY_DATA_PATH=/root/data
       - GENEY_URL=localhost
+      - DOWNLOAD_LOCATION=/root/downloads
+      - PYTHONPATH=/root/ShapeShifter/ShapeShifter
   
   redis:
     image: "redis:alpine"
+
+  site:
+    image: "kimballer/geney"
+    ports:
+      - 8080:8080
+    volumes:
+      - "../:/app"

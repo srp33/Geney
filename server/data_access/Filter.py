@@ -1,7 +1,8 @@
 import json, hashlib
 from typing import Dict, List, Any
 
-class MetaFilter:
+
+class Filter:
 	def __init__(self, name, values):
 		self.__name = name
 		self.__values = values
@@ -22,14 +23,15 @@ class MetaFilter:
 			).encode('utf-8')
 		).hexdigest()
 
-class MetaFilterIter:
-	def __init__(self, meta_def: Dict[str, List[Any]]):
-		self.__meta_def = meta_def
-		self.__names = iter(meta_def.keys())
+
+class FilterIter:
+	def __init__(self, filter_def: Dict[str, List[Any]]):
+		self.__def = filter_def
+		self.__names = iter(filter_def.keys())
 
 	def __iter__(self):
 		return self
- 
+
 	def __next__(self):
 		self.__current_name = next(self.__names)
-		return MetaFilter(self.__current_name, self.__meta_def[self.__current_name])
+		return Filter(self.__current_name, self.__def[self.__current_name])
