@@ -9,7 +9,6 @@ import uuid
 
 
 class Hdf5Dao:
-
 	def __init__(self, directory):
 		self.__hdf5 = h5py.File(directory + DATA_FILE, 'r')
 		self.__data = self.__hdf5[HDF5_DATA_PATH]
@@ -21,8 +20,8 @@ class Hdf5Dao:
 	def close(self):
 		self.__hdf5.close()
 
-class ParquetDao:
 
+class ParquetDao:
 	def __init__(self, directory):
 		# self.__file = directory
 		self.__file = "{}{}".format(directory, DATA_FILE)
@@ -129,8 +128,6 @@ class ParquetDao:
 		ss.exportQueryResults(self.__file, location, file_type, list(features), continuous_filters, discrete_filters,
 							  includeAllColumns=include_all_columns)
 		return location
-
-
 
 	def get_sample_id_options(self) -> List:
 		sample_info = ss.getColumnInfo(self.__file, SAMPLE_ID)

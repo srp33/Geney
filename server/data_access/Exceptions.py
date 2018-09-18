@@ -13,6 +13,7 @@ class ServerError(Exception):
     def message(self):
         return self.__message
 
+
 class RequestError(Exception):
     def __init__(self, message, code=400):
         super().__init__(message)

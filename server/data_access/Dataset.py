@@ -9,8 +9,6 @@ import gzip
 from shutil import copyfileobj
 import pickle
 
-METADATA_PKL = 'metadata.pkl'
-
 
 class GeneyDataset:
 	def __init__(self, directory: str):
@@ -156,7 +154,6 @@ class GeneyDataset:
 					with open(file_path.rstrip('incomplete'), 'wb') as f_out:
 						copyfileobj(f_in, f_out)
 				os.remove(file_path)
-			print('Done!', flush=True)
 			return file_path.rstrip('incomplete')
 
 

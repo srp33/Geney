@@ -1,11 +1,13 @@
-import json, hashlib
-from typing import List, Tuple, Any, Iterator
+import json
+import hashlib
+from typing import List, Iterator
 from jsonschema import validate, ValidationError
 from .Filter import Filter, FilterIter
 from .Exceptions import RequestError
 
 with open('schemas/query.json', 'r') as schema_file:
 	QUERY_SCHEMA = json.load(schema_file)
+
 
 class Query:
 	def __init__(self, query_def, dataset_description):
@@ -24,10 +26,6 @@ class Query:
 	@property
 	def groups(self) -> List[str]:
 		return self.__def['groups'] if len(self.__def['groups']) > 0 else None
-
-	# @property
-	# def sample_filter_names(self) -> List[str]:
-	# 	return self.__def['filterTypes']
 
 	@property
 	def feature_filters(self) -> List[str]:
