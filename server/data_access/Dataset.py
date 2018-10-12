@@ -1,13 +1,25 @@
 #!/usr/bin/env python3
 import os
 import json
-from .Query import Query
-from .Dao import ParquetDao
 from .Exceptions import RequestError
 from .Constants import *
-import gzip
-from shutil import copyfileobj
+import pandas as pd
 import pickle
+
+
+class GeneyFileObject(object):
+	def __init__(self, *args):
+		self.__dict__.update(locals())
+
+class GeneyQuery(object):
+	def __init__(self, file_object: GeneyFileObject, json_filter):
+		self.file_object = file_object
+
+	def filter_data(self) -> pd.DataFrame:
+		return pd.DataFrame()
+
+	def export_data(self, *args):
+		return 'filename'
 
 
 class GeneyDataset:
@@ -25,6 +37,10 @@ class GeneyDataset:
 			if not os.path.isfile(self.__dir + requiredFile):
 				raise Exception('No file ' + self.__dir + requiredFile)
 
+		for dir in [DATA_MP, TRANSPOSED_MP]:
+			if not os.path.isdir(self.__dir + dir):
+				raise Exception('No message pack directory {}'.format(dir))
+
 		with open(self.__dir + DESCRIPTION_FILE, 'r') as in_file:
 			self.__description = json.load(in_file)
 
@@ -35,10 +51,6 @@ class GeneyDataset:
 	@property
 	def directory(self) -> str:
 		return self.__dir
-
-	@property
-	def num_meta_types(self) -> int:
-		return self.__description['numMetaTypes']
 
 	@property
 	def num_features(self) -> int:
@@ -59,10 +71,6 @@ class GeneyDataset:
 	@property
 	def groups_path(self):
 		return self.__dir + GROUPS_JSON
-
-	@property
-	def options_path(self):
-		return self.__dir + OPTIONS_JSON
 
 	def get_variable(self, variable_name):
 		with open(self.metadata_path, 'rb') as fp:
@@ -108,11 +116,11 @@ class GeneyDataset:
 					options.append(option)
 			return options[:100]
 
-	def get_num_samples_matching_filters(self, filters) -> int:
+	def get_num_samples_matching_filters(self, query_json) -> int:
 		try:
-			query = Query(filters, self.__description)
-			if query.num_filters > 0:
-				return len(self.query_samples(query))
+			query_dict = json.loads(query_json)
+			if query_dict['filters'] != {}:
+				return len(self.query_samples(query_json))
 			else:
 				return self.num_samples
 		except RequestError:
@@ -128,33 +136,24 @@ class GeneyDataset:
 		return int(num_data_points)
 
 	# returns set of sample ids that match filters
-	def query_samples(self, query: Query):
-		with ParquetDao(self.__dir) as dao:
-			if query.num_filters > 0:  # if they added any filters
-				return set(dao.get_samples_from_query(query))
-			else:  # they added no filters so all sample ids "match"
-				return set(dao.get_all_sample_ids())
+	def query_samples(self, query_json):
+		file_object = self.get_file_object(query_json)
+		query_object = GeneyQuery(file_object, query_json)
+		df = query_object.filter_data()
+		return set(df.index.values)
 
 	def query(self, query_json, file_format, gzip_output, download_location, filename=None):
-		query = Query(query_json, self.description)
-		features = []
-		if query.groups:
-			with open(self.groups_path) as fp:
-				groups = json.load(fp)
-				for group in query.groups:
-					features.extend(groups[group])
-		with ParquetDao(self.__dir) as dao:
-			file_path = dao.get_file_from_query(query, set(features), file_format, self.dataset_id, download_location,
-												filename)
-			with open(file_path, 'rb') as f_in:
-				if gzip_output:
-					with gzip.open(file_path.rstrip('incomplete'), 'wb') as f_out:
-						copyfileobj(f_in, f_out)
-				else:
-					with open(file_path.rstrip('incomplete'), 'wb') as f_out:
-						copyfileobj(f_in, f_out)
-				os.remove(file_path)
-			return file_path.rstrip('incomplete')
+		file_object = self.get_file_object(query_json)
+		query_object = GeneyQuery(file_object, query_json)
+		file_path = query_object.export_data(file_format, gzip_output, download_location, '{}incomplete'.format(filename))
+		return file_path.rstrip('incomplete')
+
+	def get_file_object(self, query_str):
+		data_file = self.__dir + DATA_FILE
+		transposed_data_file = self.__dir + TRANSPOSED_DATA_FILE
+		data_mp = self.__dir + DATA_MP
+		transposed_mp = self.__dir + TRANSPOSED_MP
+		return GeneyFileObject(data_file, data_mp, transposed_data_file, transposed_mp, query_str)
 
 
 if __name__ == '__main__':

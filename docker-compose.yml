@@ -20,8 +20,10 @@ services:
     image: "redis:alpine"
 
   site:
-    image: "kimballer/geney"
+    build:
+      context: site
+      dockerfile: docker/dev.dockerfile
     ports:
       - 8080:8080
     volumes:
-      - "../:/app"
+      - "./site:/root"
