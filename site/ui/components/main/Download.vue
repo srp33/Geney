@@ -497,7 +497,7 @@ export default {
         } else {
           if (this.selectedFeatures[group]) {
             for (var feature in this.selectedFeatures[group]) {
-              features.push(group + '_' + this.selectedFeatures[group][feature]);
+              features.push(group + this.sep + this.selectedFeatures[group][feature]);
             }
             // features = features.concat(this.selectedFeatures[group]);
           }
