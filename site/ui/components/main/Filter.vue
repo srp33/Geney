@@ -30,7 +30,7 @@
                   @click="removeFilter(variable)">
                   <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
-                {{variable.replace('_', ': ')}}
+                {{variable.replace(sep, ': ')}}
               </h4>
               <selectize
               :options="options[variable].options"
@@ -69,7 +69,7 @@
                     :min="variableMin(variable)"
                     :max="variableMax(variable)"
                     :name="variable + '_' + index + '_value'"
-                    v-validate="`required|min_value:${variableMin(variable)}|max_value:${variableMax(variable)}`"
+                    
                     @input="x => updateSelectedFilters(variable, Number(x.target.value), index, 'value')"
                     :class="{'form-control-danger': errors.has(variable + '_' + index + '_value')}">
               </div>
