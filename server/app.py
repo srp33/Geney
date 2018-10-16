@@ -395,9 +395,9 @@ def create_dataset(dataset: GeneyDataset, query, file_format, gzip_output, downl
 	if os.path.exists(DOWNLOAD_HISTORY):
 		with open(DOWNLOAD_HISTORY, 'rb') as fp:
 			download_history = pickle.load(fp)
-	if filename in download_history.keys():
-		if download_history[filename].email is not None:
-			send_email(filename, download_history[filename].email, download_history[filename].name)
+		if filename in download_history.keys():
+			if download_history[filename].email is not None:
+				send_email(filename, download_history[filename].email, download_history[filename].name)
 	else:
 		print('problem with history')
 
