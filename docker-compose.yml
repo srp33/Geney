@@ -14,7 +14,6 @@ services:
       - GENEY_DATA_PATH=/root/data
       - GENEY_URL=localhost
       - DOWNLOAD_LOCATION=/root/downloads
-      - PYTHONPATH=/root/ShapeShifter/ShapeShifter
   
   redis:
     image: "redis:alpine"
