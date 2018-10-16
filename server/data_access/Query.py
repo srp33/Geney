@@ -114,8 +114,8 @@ class GeneyQuery:
 
 		columns_from_group = []
 		for group in self.groups:
-			temp_columns = [sample for sample in self.geney_file_collection.samples if
-							(sample.decode("UTF-8").startswith(group + "__"))]
+			temp_columns = [feature for feature in self.geney_file_collection.features if
+							(feature.decode("UTF-8").startswith(group + "__"))]
 			columns_from_group += temp_columns
 
 		# get indexes of the columns
