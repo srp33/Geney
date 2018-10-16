@@ -6,7 +6,7 @@ services:
       context: server
       dockerfile: docker/dev.dockerfile
     ports:
-      - 9998:9998
+      - 8889:8889
     volumes:
       - "./server:/root"
       - "${GENEY_DATA_PATH}:/root/data"

@@ -47,7 +47,7 @@
                   @click="removeFilter(variable)">
                 <i class="fa fa-minus" aria-hidden="true"></i>
               </button>
-                {{variable.replace('_', ': ')}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
+                {{variable.replace(sep, ': ')}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
             </h4>
               <!-- {{selectVariable[variable]}} -->
               <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable]" :key="logicSet.randomKey">
@@ -182,6 +182,9 @@ export default {
     cachedMeta () {
       return this.$store.state.cachedMeta[this.dataset.id];
     },
+    sep () {
+      return this.$store.state.sep;
+    },
   },
   methods: {
     variableSettings (group) {
@@ -192,7 +195,7 @@ export default {
             `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
-              return {name: item.replace(group + '_', '')};
+              return {name: item.replace(group + this.sep, '')};
             });
             callback(items);
           }, failedResponse => {
@@ -264,7 +267,7 @@ export default {
     selectVariable (variable, group = null) {
       if (variable && variable !== undefined && variable !== '' && this.selectedVariables.indexOf(variable) === -1) {
         if (group) {
-          variable = group + '_' + variable;
+          variable = group + this.sep + variable;
         }
         this.getOptions(variable).then(options => {
           if (options) {

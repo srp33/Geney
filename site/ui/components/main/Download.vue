@@ -404,6 +404,9 @@ export default {
         this.$store.commit('featuresRadioValue', value);
       },
     },
+    sep () {
+      return this.$store.state.sep;
+    },
   },
   created () {
     const filters = this.$store.state.filters;
@@ -467,7 +470,7 @@ export default {
             `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
-              return {name: item.replace(group + '_', '')};
+              return {name: item.replace(group + this.sep, '')};
             });
             callback(items);
           }, failedResponse => {

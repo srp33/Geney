@@ -18,4 +18,5 @@ export default {
   downloadPath: null,
   downloadStatus: '',
   maxDataPoints: 100000000,
+  sep: '__',
 };

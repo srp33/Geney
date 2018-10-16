@@ -1,25 +1,12 @@
 #!/usr/bin/env python3
 import os
-import json
 from .Exceptions import RequestError
 from .Constants import *
-import pandas as pd
+from .Query import *
 import pickle
+import uuid
 
 
-class GeneyFileObject(object):
-	def __init__(self, *args):
-		self.__dict__.update(locals())
-
-class GeneyQuery(object):
-	def __init__(self, file_object: GeneyFileObject, json_filter):
-		self.file_object = file_object
-
-	def filter_data(self) -> pd.DataFrame:
-		return pd.DataFrame()
-
-	def export_data(self, *args):
-		return 'filename'
 
 
 class GeneyDataset:
@@ -73,6 +60,7 @@ class GeneyDataset:
 		return self.__dir + GROUPS_JSON
 
 	def get_variable(self, variable_name):
+		variable_name = bytes(variable_name, encoding='ascii')
 		with open(self.metadata_path, 'rb') as fp:
 			metadata = pickle.load(fp)
 			if type(metadata['meta'][variable_name]['options']) is list and len(
@@ -137,26 +125,24 @@ class GeneyDataset:
 
 	# returns set of sample ids that match filters
 	def query_samples(self, query_json):
-		file_object = self.get_file_object(query_json)
-		query_object = GeneyQuery(file_object, query_json)
+		query_object = GeneyQuery(self.get_file_collection(), query_json)
 		df = query_object.filter_data()
 		return set(df.index.values)
 
 	def query(self, query_json, file_format, gzip_output, download_location, filename=None):
-		file_object = self.get_file_object(query_json)
-		query_object = GeneyQuery(file_object, query_json)
-		file_path = query_object.export_data(file_format, gzip_output, download_location, '{}incomplete'.format(filename))
+		if not filename:
+			filename = '{}{}.{}'.format(self.__id, uuid.uuid4().hex[:8], file_format)
+		filename += 'incomplete'
+		out_file_path = os.path.join(download_location, filename)
+		query_object = GeneyQuery(self.get_file_collection(), query_json)
+		data = query_object.filter_data()
+		file_path = query_object.write_to_file(data, out_file_path, file_format, gzip_results=gzip_output)
+		os.rename(file_path, file_path.rstrip('incomplete'))
 		return file_path.rstrip('incomplete')
 
-	def get_file_object(self, query_str):
+	def get_file_collection(self):
 		data_file = self.__dir + DATA_FILE
 		transposed_data_file = self.__dir + TRANSPOSED_DATA_FILE
 		data_mp = self.__dir + DATA_MP
 		transposed_mp = self.__dir + TRANSPOSED_MP
-		return GeneyFileObject(data_file, data_mp, transposed_data_file, transposed_mp, query_str)
-
-
-if __name__ == '__main__':
-	dset = GeneyDataset("/Volumes/KIMBALLUSB/ParquetData/LINCS_PhaseII_Level3/")
-	results = dset.get_variable("1-Mar")
-	print(results)
+		return GeneyFileCollection(data_file, data_mp, transposed_data_file, transposed_mp)
