@@ -4,9 +4,7 @@
     <div class="col-sm-6">
       <h1>Filter Samples</h1>
       <div v-for="key in Object.keys(groups)" class="spacer" :key="key">
-        <b-row>
-          <b-col cols="3"><h4 class="variables">{{key}}:</h4></b-col>
-          <b-col cols="9">
+          <h4 class="variables">{{key.replace(/_/g, ' ')}}:</h4>
             <selectize
             :options="groups[key]"
             :value="option"
@@ -14,77 +12,80 @@
             @updated="x => selectVariable(x, key)"
             :settings="variableSettings(key)"
             id="meta-types"></selectize>
-          </b-col>
-          </b-row>
-      </div>
-        <div v-if="currentVariables.length> 0">
-          <div class="spacer"></div>
-          <div class="line"></div>
-          <div class="spacer"></div>
-          <div v-for="variable in currentVariables" :key="variable">
+          <div v-if="currentVariablesByGroup[key].length > 0">
             <div class="spacer"></div>
-            <div v-if="options[variable].options !== 'continuous'">
+            <div class="line"></div>
+            <div class="spacer"></div>
+            <div v-for="variable in currentVariablesByGroup[key]" :key="variable">
+              <div class="spacer"></div>
+              <div v-if="options[variable].options !== 'continuous'">
+                <b-row style="margin-left: 10px;">
+                  <b-col col lg="1">
+                    <button
+                      class="btn btn-sm btn-danger"
+                      @click="removeFilter(variable)">
+                      <i class="fa fa-minus" aria-hidden="true"></i>
+                    </button>
+                  </b-col>
+                  <b-col cols="1" md="auto">
+                    <h5>{{variable.split(sep)[1]}}:</h5>
+                  </b-col>
+                  <b-col col>
+                    <selectize
+                    :options="options[variable].options"
+                    :value="getValues(variable)"
+                    @updated="x => updateSelectedFilters(variable, x)"
+                    placeholder="Select value(s) to include - begin typing to see more results"
+                    :settings="getSelectizeSettings(variable)"
+                    :id="variable"></selectize>
+                  </b-col>
+                </b-row>
+              </div>
+            <div v-else>
               <h4>
                 <button
-                  class="btn btn-sm btn-danger"
-                  @click="removeFilter(variable)">
-                  <i class="fa fa-minus" aria-hidden="true"></i>
-                </button>
-                {{variable.replace(sep, ': ')}}
-              </h4>
-              <selectize
-              :options="options[variable].options"
-              :value="getValues(variable)"
-              @updated="x => updateSelectedFilters(variable, x)"
-              placeholder="Select value(s) to include - begin typing to see more results"
-              :settings="getSelectizeSettings(variable)"
-              :id="variable"></selectize>
-            </div>
-          <div v-else>
-            <h4>
-              <button
-                class=" btn btn-sm btn-danger"
-                  @click="removeFilter(variable)">
-                <i class="fa fa-minus" aria-hidden="true"></i>
-              </button>
-                {{variable.replace(sep, ': ')}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
-            </h4>
-              <!-- {{selectVariable[variable]}} -->
-              <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable]" :key="logicSet.randomKey">
-
-                <div class="form-group col" :class="{'has-danger': errors.has(variable + '_' + index + '_operator')}">
-                <selectize
-                  :options="operatorList"
-                  :value="logicSet.operator"
-                  placeholder="Select Operator"
-                    @updated="x => updateSelectedFilters(variable, x, index, 'operator')"
-                  :settings="settings.logicOperators"></selectize>
-              </div>
-
-                <div class="form-group col" :class="{'has-danger': errors.has(variable + '_' + index + '_value')}">
-                <input
-                  type="number"
-                  class="form-control"
-                  :value="logicSet.value"
-                    :min="variableMin(variable)"
-                    :max="variableMax(variable)"
-                    :name="variable + '_' + index + '_value'"
-                    
-                    @input="x => updateSelectedFilters(variable, Number(x.target.value), index, 'value')"
-                    :class="{'form-control-danger': errors.has(variable + '_' + index + '_value')}">
-              </div>
-              <div class="pull-right">
-                <button
                   class=" btn btn-sm btn-danger"
-                  style="margin-top:5.5px"
-                    @click="removeLogicSet(variable, index)">
+                    @click="removeFilter(variable)">
                   <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
+                  {{variable.split(sep)[1]}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
+              </h4>
+                <!-- {{selectVariable[variable]}} -->
+                <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable]" :key="logicSet.randomKey">
+
+                  <div class="form-group col" :class="{'has-danger': errors.has(variable + '_' + index + '_operator')}">
+                  <selectize
+                    :options="operatorList"
+                    :value="logicSet.operator"
+                    placeholder="Select Operator"
+                      @updated="x => updateSelectedFilters(variable, x, index, 'operator')"
+                    :settings="settings.logicOperators"></selectize>
+                </div>
+
+                  <div class="form-group col" :class="{'has-danger': errors.has(variable + '_' + index + '_value')}">
+                  <input
+                    type="number"
+                    class="form-control"
+                    :value="logicSet.value"
+                      :min="variableMin(variable)"
+                      :max="variableMax(variable)"
+                      :name="variable + '_' + index + '_value'"
+                      @input="x => updateSelectedFilters(variable, Number(x.target.value), index, 'value')"
+                      :class="{'form-control-danger': errors.has(variable + '_' + index + '_value')}">
+                </div>
+                <div class="pull-right">
+                  <button
+                    class=" btn btn-sm btn-danger"
+                    style="margin-top:5.5px"
+                      @click="removeLogicSet(variable, index)">
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
+                <button class="right-side btn btn-sm btn-success" @click="addLogicSet(variable)">
+                <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
+                </button>
             </div>
-              <button class="right-side btn btn-sm btn-success" @click="addLogicSet(variable)">
-              <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
-              </button>
           </div>
         </div>
       </div>
@@ -158,6 +159,17 @@ export default {
         }
       }
       return list.sort();
+    },
+    currentVariablesByGroup () {
+      const vars = {};
+      for (var i in Object.keys(this.groups)) {
+        vars[Object.keys(this.groups)[i]] = [];
+      }
+      for (var j in this.currentVariables) {
+        var group = this.currentVariables[j].split(this.sep)[0];
+        vars[group] = vars[group].concat(this.currentVariables[j]);
+      }
+      return vars;
     },
     metaData () {
       return this.$store.state.metaData;
@@ -446,6 +458,10 @@ h1, h2, h3 {
 
 h4 {
   text-align: left;
+}
+
+h5 {
+  margin-top: 2px;
 }
 
 h6 {
