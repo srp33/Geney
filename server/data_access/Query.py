@@ -6,7 +6,6 @@ import pandas as pd
 from shapeshifter.files import SSFile
 
 
-
 class GeneyQuery:
 	"""
 	Represents and handles queries stored by Geney as JSON file
@@ -29,7 +28,8 @@ class GeneyQuery:
 		self.groups = data["groups"]
 		self.geney_file_collection = geney_file_collection
 
-	def write_to_file(self, df, out_file_path, out_file_type=None, gzip_results=False, include_index=False, null='NA',
+	@staticmethod
+	def write_to_file(df, out_file_path, out_file_type=None, gzip_results=False, include_index=False, null='NA',
 					  index_col="Sample", transpose=False):
 		output_file = SSFile.factory(out_file_path, out_file_type)
 		output_file.write_to_file(df, gzipResults=gzip_results, includeIndex=include_index, null=null,
@@ -205,4 +205,3 @@ class GeneyFileCollection:
 		self.transposed_tsv_file = open(transposed_tsv_file_path, "rb")
 		features_file = open(messagepack_tsv_path + "/features.msgpack", "rb")
 		self.features = msgpack.unpack(features_file)
-		# self.json_file = json_file

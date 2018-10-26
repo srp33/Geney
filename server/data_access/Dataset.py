@@ -7,8 +7,6 @@ import pickle
 import uuid
 
 
-
-
 class GeneyDataset:
 	def __init__(self, directory: str):
 		# make sure directory has a '/' at the end
