@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  backend-server:
+    build:
+      context: server
+      dockerfile: docker/dev.dockerfile
+    ports:
+      - 8888:8888
+    volumes:
+      - "./server:/app"
+      - "${GENEY_DATA_PATH}:/app/data"
+      - "./server/downloads:/app/downloads"
+
+  redis:
+    image: "redis:alpine"
+
+#  site:
+#    build:
+#      context: site
+#      dockerfile: docker/dev.dockerfile
+#    ports:
+#      - 8080:8080
+#    volumes:
+#      - "./site:/root"
