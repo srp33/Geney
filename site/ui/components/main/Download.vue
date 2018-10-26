@@ -51,25 +51,33 @@
             </span>
             <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
           </div>
-
-          <div class="col-sm-6 offset-sm-3 column-selection" id="features" v-for="group in Object.keys(groups)" :key="group">
+          <h2>Select Features:</h2>
+          <div class="col-lg-6 offset-sm-3 column-selection" id="features" v-for="group in Object.keys(groups)" :key="group">
             <!-- <h4>Select {{ dataset.featureDescriptionPlural | capitalize }}</h4> -->
-            <h4>Select Features: {{group}}</h4>
+            <b-row align-h="end">
+              <b-col align-self="center" cols="auto">
+                <h5>{{group.replace(/_/g, ' ')}}:</h5>
+              </b-col>
 
-            <b-form-radio-group @change="x => setRadioValue(group, x)" v-model="downloadRadios[group]" stacked class="left-align">
-              <b-form-radio value="all">Download All ({{group}})</b-form-radio>
-              <b-form-radio value="selected">Download Selected  ({{group}})</b-form-radio>
-            </b-form-radio-group>
+              <b-col cols="6">
+                <b-form-radio-group @change="x => setRadioValue(group, x)" v-model="downloadRadios[group]" stacked class="left-align">
+                  <b-form-radio value="all">Download All</b-form-radio>
+                  <b-form-radio value="selected">Download Selected</b-form-radio>
+                </b-form-radio-group>
+              </b-col>
+            </b-row>
 
-            <div v-show="downloadRadios[group] === 'selected'">
-              <selectize class="top-cushion"
-                :options="groups[group]"
-                :value="selectedFeatures[group]"
-                @updated="x => updateFeatures(group, x)"
-                :placeholder="'Begin typing to see more results'"
-                :settings="getSelectizeSettings(group)"
-                :errorMessage="'Please select some features or click \'Download all (' + group +')\''"
-                :id="group + '-feature-select'"></selectize>
+            <b-row v-show="downloadRadios[group] === 'selected'" align-h="center">
+              <b-col cols="8">
+                <selectize class="top-cushion"
+                  :options="groups[group]"
+                  :value="selectedFeatures[group]"
+                  @updated="x => updateFeatures(group, x)"
+                  :placeholder="'Begin typing to see more results or leave blank for none'"
+                  :settings="getSelectizeSettings(group)"
+                  :errorMessage="'Please select some features or click \'Download all (' + group +')\''"
+                  :id="group + '-feature-select'"></selectize>
+              </b-col>
               <!-- <div v-if="geneSets !== null && Object.keys(geneSets).length > 0">
                 <selectize
                   :options="geneSets"
@@ -81,7 +89,7 @@
                   *Information about gene sets can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
                   <h5>Total Number of {{ dataset.featureDescriptionPlural | capitalize }} Selected: {{ numFeatures }}</h5>
               </div> -->
-            </div>
+            </b-row>
           </div>
 
           <!-- <div class="col-sm-6 offset-sm-3 column-selection" id="metatypes">
@@ -404,6 +412,9 @@ export default {
         this.$store.commit('featuresRadioValue', value);
       },
     },
+    sep () {
+      return this.$store.state.sep;
+    },
   },
   created () {
     const filters = this.$store.state.filters;
@@ -467,7 +478,7 @@ export default {
             `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
-              return {name: item.replace(group + '_', '')};
+              return {name: item.replace(group + this.sep, '')};
             });
             callback(items);
           }, failedResponse => {
@@ -494,7 +505,7 @@ export default {
         } else {
           if (this.selectedFeatures[group]) {
             for (var feature in this.selectedFeatures[group]) {
-              features.push(group + '_' + this.selectedFeatures[group][feature]);
+              features.push(group + this.sep + this.selectedFeatures[group][feature]);
             }
             // features = features.concat(this.selectedFeatures[group]);
           }

@@ -6,7 +6,7 @@ services:
       context: server
       dockerfile: docker/dev.dockerfile
     ports:
-      - 9998:9998
+      - 8889:8889
     volumes:
       - "./server:/root"
       - "${GENEY_DATA_PATH}:/root/data"
@@ -14,14 +14,15 @@ services:
       - GENEY_DATA_PATH=/root/data
       - GENEY_URL=localhost
       - DOWNLOAD_LOCATION=/root/downloads
-      - PYTHONPATH=/root/ShapeShifter/ShapeShifter
   
   redis:
     image: "redis:alpine"
 
   site:
-    image: "kimballer/geney"
+    build:
+      context: site
+      dockerfile: docker/dev.dockerfile
     ports:
       - 8080:8080
     volumes:
-      - "../:/app"
+      - "./site:/root"

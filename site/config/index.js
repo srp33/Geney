@@ -33,7 +33,7 @@ module.exports = {
     proxyTable: {
       api: {
         filter: '/api',
-        target: 'http://localhost:9998',
+        target: 'http://localhost:8889',
         changeOrigin: true,
       },
       // auth: {

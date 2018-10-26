@@ -66,7 +66,7 @@ DATASETS = {}
 
 app = Flask(__name__)
 
-redis_con = redis.StrictRedis(host='localhost')
+redis_con = redis.StrictRedis(host='redis')
 redis_con.flushdb()
 
 
@@ -86,7 +86,8 @@ def load_datasets() -> None:
 				DATASETS[dataset.dataset_id] = dataset
 				descriptions[dataset.dataset_id] = dataset.description
 				redis_con.set('dataset_' + directory, pickle.dumps(dataset))
-			except Exception:
+			except Exception as e:
+				sys.stderr.write(str(e))
 				sys.stderr.write('UNABLE TO LOAD DATASET "{}"'.format(directory))
 	# set the descriptions in the redis, so we don't calculate it everytime
 	descriptions_str = json.dumps(descriptions)
@@ -193,7 +194,7 @@ def count_samples(dataset_id):
 	if dataset is None:
 		return not_found()
 
-	count = dataset.get_num_samples_matching_filters(request.get_json())
+	count = dataset.get_num_samples_matching_filters(request.data)
 	if count is None:
 		return bad_request()
 
@@ -290,7 +291,7 @@ def query(dataset_id):
 		return not_found()
 
 	try:
-		query = json.loads(request.form.get('query'))
+		query = request.form.get('query')
 		options = json.loads(request.form.get('options'))
 	except Exception:
 		return bad_request()
@@ -394,9 +395,9 @@ def create_dataset(dataset: GeneyDataset, query, file_format, gzip_output, downl
 	if os.path.exists(DOWNLOAD_HISTORY):
 		with open(DOWNLOAD_HISTORY, 'rb') as fp:
 			download_history = pickle.load(fp)
-	if filename in download_history.keys():
-		if download_history[filename].email is not None:
-			send_email(filename, download_history[filename].email, download_history[filename].name)
+		if filename in download_history.keys():
+			if download_history[filename].email is not None:
+				send_email(filename, download_history[filename].email, download_history[filename].name)
 	else:
 		print('problem with history')
 
@@ -422,4 +423,4 @@ COMMANDS['reload'] = reload_datasets
 app.register_error_handler(404, not_found)
 
 if __name__ == '__main__':
-	app.run(debug=True, host='0.0.0.0', port=9998)
+	app.run(debug=True, host='0.0.0.0', port=8889)

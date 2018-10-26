@@ -3,7 +3,8 @@ FROM python:3.6-jessie
 RUN apt-get update && \
     apt-get install -y gcc
 
-RUN pip install Flask==0.12.2 flask_failsafe fastnumbers h5py gunicorn jsonschema greenlet eventlet redis pyarrow==0.8.0 pandas==0.23.0 psutil
+RUN pip install Flask==0.12.2 flask_failsafe fastnumbers h5py gunicorn jsonschema greenlet eventlet redis pyarrow==0.8.0 pandas==0.23.0 psutil msgpack
+RUN pip install git+https://github.com/srp33/ShapeShifter.git#egg=shapeshifter
 
 WORKDIR /root/
 
