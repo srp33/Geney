@@ -8,5 +8,4 @@ RUN pip install git+https://github.com/srp33/ShapeShifter.git#egg=shapeshifter
 
 WORKDIR /root/
 
-
 CMD [ "python3", "failsafe-app.py"]

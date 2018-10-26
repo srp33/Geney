@@ -423,4 +423,4 @@ COMMANDS['reload'] = reload_datasets
 app.register_error_handler(404, not_found)
 
 if __name__ == '__main__':
-	app.run(debug=True, host='0.0.0.0', port=8889)
+	app.run(debug=True, host='0.0.0.0', port=8888)
