@@ -407,7 +407,7 @@ def send_email(path, email, name):
 	s.starttls()
 	s.login(EMAIL_USER, EMAIL_PASS)
 	subject = 'Geney Data Complete'
-	path = 'http://{}/api/data/download/{}'.format(URL, path)
+	path = '{}/api/data/download/{}'.format(URL, path)
 
 	message = EmailMessage()
 	message['From'] = 'Geney'
