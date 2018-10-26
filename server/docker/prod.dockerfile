@@ -15,6 +15,9 @@ ENV GENEY_DATA_PATH=/app/data
 ENV GUNICORN_CMD_ARGS="--workers=4 --bind=:8888 --worker-class=eventlet --worker-connections 100"
 ENV GENEY_URL=http://kumiko.byu.edu
 
+RUN mkdir /app/downloads/
+ENV DOWNLOAD_LOCATION=/app/downloads/
+
 WORKDIR /app/
 
 CMD [ "gunicorn", "app:app" ]
