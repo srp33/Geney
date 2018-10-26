@@ -90,6 +90,7 @@ class GeneyDataset:
 			return options[:100]
 
 	def search_options(self, variable_name, search_str):
+		variable_name = bytes(variable_name, encoding='ascii')
 		with open(self.metadata_path, 'rb') as fp:
 			metadata = pickle.load(fp)
 			options = []

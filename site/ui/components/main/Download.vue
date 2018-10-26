@@ -222,7 +222,7 @@ export default {
       // downloadErrors: false,
       formErrors: false,
       // downloadRadios: {},
-      maxQueries: 10,
+      maxQueries: 30,
       secondsBetweenQueries: 2,
       numQueries: 0,
       emailForm: {
