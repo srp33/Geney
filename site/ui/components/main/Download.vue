@@ -73,7 +73,7 @@
                   :options="groups[group]"
                   :value="selectedFeatures[group]"
                   @updated="x => updateFeatures(group, x)"
-                  :placeholder="'Begin typing to see more results'"
+                  :placeholder="'Begin typing to see more results or leave blank for none'"
                   :settings="getSelectizeSettings(group)"
                   :errorMessage="'Please select some features or click \'Download all (' + group +')\''"
                   :id="group + '-feature-select'"></selectize>

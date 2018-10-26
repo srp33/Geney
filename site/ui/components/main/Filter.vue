@@ -30,7 +30,7 @@
                   <b-col cols="1" md="auto">
                     <h5>{{variable.split(sep)[1]}}:</h5>
                   </b-col>
-                  <b-col col>
+                  <b-col cols="8">
                     <selectize
                     :options="options[variable].options"
                     :value="getValues(variable)"
