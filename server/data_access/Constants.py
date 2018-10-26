@@ -1,5 +1,5 @@
 # Filename constants
-DESCRIPTION_FILE = 'description.json'
+DESCRIPTION_FILE = 'description.md'
 DATA_FILE = 'data.tsv'
 TRANSPOSED_DATA_FILE = 'transposed.tsv'
 DATA_MP = 'data.mp'
