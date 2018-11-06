@@ -4,6 +4,7 @@ import csv
 import msgpack
 import pandas as pd
 from shapeshifter.files import SSFile
+import time
 
 
 class GeneyQuery:
@@ -31,9 +32,12 @@ class GeneyQuery:
 	@staticmethod
 	def write_to_file(df, out_file_path, out_file_type=None, gzip_results=False, include_index=False, null='NA',
 					  index_col="Sample", transpose=False):
+		start = time.time()
 		output_file = SSFile.factory(out_file_path, out_file_type)
 		output_file.write_to_file(df, gzipResults=gzip_results, includeIndex=include_index, null=null,
 								  indexCol=index_col, transpose=transpose)
+		end = time.time()
+		print('Time to write to file: {:.2}s'.format(end-start), flush=True)
 		return out_file_path
 
 	def filter_data(self):
@@ -71,7 +75,10 @@ class GeneyQuery:
 			reduced_row = (b"\t".join(reduced_row)).decode('UTF-8')
 			reduced_row = reduced_row.split("\t")
 			output_rows.append(reduced_row)
+		start = time.time()
 		df = self.__build_pandas_dataframe(output_rows)
+		end = time.time()
+		print('Time to build pandas dataframe: {:.2f}s'.format(end-start), flush=True)
 		return df
 
 	def __build_pandas_dataframe(self, output_rows):
