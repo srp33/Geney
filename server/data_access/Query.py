@@ -41,7 +41,7 @@ class GeneyQuery:
 		return out_file_path
 
 	def filter_data(self):
-
+		start = time.time()
 		indexes_sets = []
 		for single_filter in self.filters:
 			if self.__determine_filter_type(self.filters[single_filter]) == "discrete":
@@ -50,6 +50,9 @@ class GeneyQuery:
 				indexes_sets.append(self.__perform_continuous_filter(single_filter, self.filters[single_filter]))
 			else:
 				raise Exception("Error: JSON query is malformed")
+		end = time.time()
+		print('T1: {:.2f}s'.format(end - start), flush=True)
+		start = time.time()
 
 		# Find intersection of all sets produced by filters
 		result_row_indexes = set.intersection(*indexes_sets)
@@ -58,6 +61,9 @@ class GeneyQuery:
 		matching_samples = []
 		for index in result_row_indexes:
 			matching_samples.append(self.geney_file_collection.samples[index])
+		end = time.time()
+		print('T2: {:.2f}s'.format(end - start), flush=True)
+		start = time.time()
 
 		# Determine which columns (specifically the indexes) to grab for all the matching samples
 		desired_column_indexes = self.__determine_additional_columns()
@@ -66,6 +72,10 @@ class GeneyQuery:
 		header_row = [self.geney_file_collection.features[i].decode('UTF-8') for i in desired_column_indexes]
 		output_rows.append(header_row)
 		del (desired_column_indexes[0])
+		end = time.time()
+		print('T3: {:.2f}s'.format(end - start), flush=True)
+		start = time.time()
+
 		# TODO: add an option for grabbing all items in the row, not just the desired columns?
 		for sample in matching_samples:
 			self.geney_file_collection.tsv_file.seek(self.geney_file_collection.tsv_map[sample][0])
@@ -75,6 +85,9 @@ class GeneyQuery:
 			reduced_row = (b"\t".join(reduced_row)).decode('UTF-8')
 			reduced_row = reduced_row.split("\t")
 			output_rows.append(reduced_row)
+
+		end = time.time()
+		print('T4: {:.2f}s'.format(end - start), flush=True)
 		start = time.time()
 		df = self.__build_pandas_dataframe(output_rows)
 		end = time.time()
