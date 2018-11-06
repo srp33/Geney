@@ -40,7 +40,7 @@ class GeneyQuery:
 		print('Time to write to file: {:.2}s'.format(end-start), flush=True)
 		return out_file_path
 
-	def filter_data(self):
+	def filter_data(self, samples_only=False):
 		start = time.time()
 		indexes_sets = []
 		for single_filter in self.filters:
@@ -61,6 +61,8 @@ class GeneyQuery:
 		matching_samples = []
 		for index in result_row_indexes:
 			matching_samples.append(self.geney_file_collection.samples[index])
+		if samples_only:
+			return matching_samples
 		end = time.time()
 		print('T2: {:.2f}s'.format(end - start), flush=True)
 		start = time.time()
