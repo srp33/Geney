@@ -7,6 +7,7 @@ import sys
 import redis
 import re
 import uuid
+import time
 from psutil import Process as ProcessManager
 from psutil._exceptions import NoSuchProcess
 from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory
@@ -193,8 +194,10 @@ def count_samples(dataset_id):
 	dataset = get_dataset(dataset_id)
 	if dataset is None:
 		return not_found()
-
+	start = time.time()
 	count = dataset.get_num_samples_matching_filters(request.data)
+	end = time.time()
+	print('total time - num samples: {:.2f}s'.format(end-start))
 	if count is None:
 		return bad_request()
 
@@ -423,4 +426,4 @@ COMMANDS['reload'] = reload_datasets
 app.register_error_handler(404, not_found)
 
 if __name__ == '__main__':
-	app.run(debug=True, host='0.0.0.0', port=8888)
+	app.run(debug=True, host='0.0.0.0', port=8889)
