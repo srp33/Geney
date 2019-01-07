@@ -7,7 +7,6 @@ import sys
 import redis
 import re
 import uuid
-import time
 from psutil import Process as ProcessManager
 from psutil._exceptions import NoSuchProcess
 from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory

@@ -4,7 +4,6 @@ import csv
 import msgpack
 import pandas as pd
 from shapeshifter.files import SSFile
-import time
 
 
 class GeneyQuery:
@@ -32,16 +31,12 @@ class GeneyQuery:
 	@staticmethod
 	def write_to_file(df, out_file_path, out_file_type=None, gzip_results=False, include_index=False, null='NA',
 					  index_col="Sample", transpose=False):
-		start = time.time()
 		output_file = SSFile.factory(out_file_path, out_file_type)
 		output_file.write_to_file(df, gzipResults=gzip_results, includeIndex=include_index, null=null,
 								  indexCol=index_col, transpose=transpose)
-		end = time.time()
-		print('Time to write to file: {:.2}s'.format(end-start), flush=True)
 		return out_file_path
 
 	def filter_data(self, samples_only=False):
-		start = time.time()
 		indexes_sets = []
 		for single_filter in self.filters:
 			if self.__determine_filter_type(self.filters[single_filter]) == "discrete":
@@ -50,9 +45,6 @@ class GeneyQuery:
 				indexes_sets.append(self.__perform_continuous_filter(single_filter, self.filters[single_filter]))
 			else:
 				raise Exception("Error: JSON query is malformed")
-		end = time.time()
-		print('T1: {:.2f}s'.format(end - start), flush=True)
-		start = time.time()
 
 		# Find intersection of all sets produced by filters
 		result_row_indexes = set.intersection(*indexes_sets)
@@ -63,9 +55,6 @@ class GeneyQuery:
 			matching_samples.append(self.geney_file_collection.samples[index])
 		if samples_only:
 			return matching_samples
-		end = time.time()
-		print('T2: {:.2f}s'.format(end - start), flush=True)
-		start = time.time()
 
 		# Determine which columns (specifically the indexes) to grab for all the matching samples
 		desired_column_indexes = self.__determine_additional_columns()
@@ -74,9 +63,6 @@ class GeneyQuery:
 		header_row = [self.geney_file_collection.features[i].decode('UTF-8') for i in desired_column_indexes]
 		output_rows.append(header_row)
 		del (desired_column_indexes[0])
-		end = time.time()
-		print('T3: {:.2f}s'.format(end - start), flush=True)
-		start = time.time()
 
 		# TODO: add an option for grabbing all items in the row, not just the desired columns?
 		for sample in matching_samples:
@@ -88,12 +74,7 @@ class GeneyQuery:
 			reduced_row = reduced_row.split("\t")
 			output_rows.append(reduced_row)
 
-		end = time.time()
-		print('T4: {:.2f}s'.format(end - start), flush=True)
-		start = time.time()
 		df = self.__build_pandas_dataframe(output_rows)
-		end = time.time()
-		print('Time to build pandas dataframe: {:.2f}s'.format(end-start), flush=True)
 		return df
 
 	def __build_pandas_dataframe(self, output_rows):
