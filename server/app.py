@@ -194,10 +194,7 @@ def count_samples(dataset_id):
 	dataset = get_dataset(dataset_id)
 	if dataset is None:
 		return not_found()
-	start = time.time()
 	count = dataset.get_num_samples_matching_filters(request.data)
-	end = time.time()
-	print('total time - num samples: {:.2f}s'.format(end-start))
 	if count is None:
 		return bad_request()
 
