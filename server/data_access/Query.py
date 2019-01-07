@@ -36,8 +36,7 @@ class GeneyQuery:
 								  indexCol=index_col, transpose=transpose)
 		return out_file_path
 
-	def filter_data(self):
-
+	def filter_data(self, samples_only=False):
 		indexes_sets = []
 		for single_filter in self.filters:
 			if self.__determine_filter_type(self.filters[single_filter]) == "discrete":
@@ -54,6 +53,8 @@ class GeneyQuery:
 		matching_samples = []
 		for index in result_row_indexes:
 			matching_samples.append(self.geney_file_collection.samples[index])
+		if samples_only:
+			return matching_samples
 
 		# Determine which columns (specifically the indexes) to grab for all the matching samples
 		desired_column_indexes = self.__determine_additional_columns()
@@ -62,6 +63,7 @@ class GeneyQuery:
 		header_row = [self.geney_file_collection.features[i].decode('UTF-8') for i in desired_column_indexes]
 		output_rows.append(header_row)
 		del (desired_column_indexes[0])
+
 		# TODO: add an option for grabbing all items in the row, not just the desired columns?
 		for sample in matching_samples:
 			self.geney_file_collection.tsv_file.seek(self.geney_file_collection.tsv_map[sample][0])
@@ -71,6 +73,7 @@ class GeneyQuery:
 			reduced_row = (b"\t".join(reduced_row)).decode('UTF-8')
 			reduced_row = reduced_row.split("\t")
 			output_rows.append(reduced_row)
+
 		df = self.__build_pandas_dataframe(output_rows)
 		return df
 

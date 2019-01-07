@@ -193,7 +193,6 @@ def count_samples(dataset_id):
 	dataset = get_dataset(dataset_id)
 	if dataset is None:
 		return not_found()
-
 	count = dataset.get_num_samples_matching_filters(request.data)
 	if count is None:
 		return bad_request()
@@ -423,4 +422,4 @@ COMMANDS['reload'] = reload_datasets
 app.register_error_handler(404, not_found)
 
 if __name__ == '__main__':
-	app.run(debug=True, host='0.0.0.0', port=8888)
+	app.run(debug=True, host='0.0.0.0', port=8889)

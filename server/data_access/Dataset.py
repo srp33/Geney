@@ -125,8 +125,7 @@ class GeneyDataset:
 	# returns set of sample ids that match filters
 	def query_samples(self, query_json):
 		query_object = GeneyQuery(self.get_file_collection(), query_json)
-		df = query_object.filter_data()
-		return set(df.index.values)
+		return query_object.filter_data(samples_only=True)
 
 	def query(self, query_json, file_format, gzip_output, download_location, filename=None):
 		if not filename:
