@@ -4,11 +4,10 @@ import json
 import os
 import pickle
 import sys
-import redis
 import re
 import uuid
 from psutil import Process as ProcessManager
-from psutil._exceptions import NoSuchProcess
+from psutil import NoSuchProcess
 from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory
 from data_access.Dataset import GeneyDataset
 from multiprocessing import Process
@@ -63,62 +62,40 @@ COMMANDS = {}
 # if you make a change to a dataset and want it to reload, you'll need to restart the server
 # we do not assume this is a comprehansive list of all datasets, for that we rely on redis
 DATASETS = {}
+DESCRIPTIONS = None
+DATASETS_LOADED: bool = False
 
 app = Flask(__name__)
 
-redis_con = redis.StrictRedis(host='redis')
-redis_con.flushdb()
-
 
 def load_datasets() -> None:
-	# do not load datasets if they're already loaded!
-	if redis_con.get('datasets_loaded') is not None:
-		return
-	if redis_con.get('datasets_loading') is not None:
-		return
-	# set lock so no other workers try to load datasets at the same time
-	redis_con.set('datasets_loading', True)
-	descriptions = {}
+	global DATASETS_LOADED
+	global DESCRIPTIONS
+	DESCRIPTIONS = {}
 	for directory in os.listdir(DATA_PATH):
 		if os.path.isdir(os.path.join(DATA_PATH, directory)):
 			try:
 				dataset = GeneyDataset(os.path.join(DATA_PATH, directory))
 				DATASETS[dataset.dataset_id] = dataset
-				descriptions[dataset.dataset_id] = dataset.description
-				redis_con.set('dataset_' + directory, pickle.dumps(dataset))
+				DESCRIPTIONS[dataset.dataset_id] = dataset.description
+				# redis_con.set('dataset_' + directory, pickle.dumps(dataset))
 			except Exception as e:
 				sys.stderr.write(str(e))
 				sys.stderr.write('UNABLE TO LOAD DATASET "{}"'.format(directory))
-	# set the descriptions in the redis, so we don't calculate it everytime
-	descriptions_str = json.dumps(descriptions)
-	redis_con.set('dataset_descriptions', descriptions_str)
-	# set datasets_loaded key so we don't try to load them again
-	redis_con.set('datasets_loaded', True)
-	# unlock
-	redis_con.delete('datasets_loading')
+	DATASETS_LOADED = True
 
 
 def get_dataset(dataset_id: str) -> GeneyDataset:
 	try:
-		if dataset_id in DATASETS:
-			return DATASETS[dataset_id]
-		if not datasets_loaded():
+		if not DATASETS_LOADED:
 			load_datasets()
 			return get_dataset(dataset_id)
-		dataset_def = redis_con.get('dataset_' + dataset_id)
-		if dataset_def is None:
+		if dataset_id in DATASETS:
+			return DATASETS[dataset_id]
+		else:
 			return None
-		dataset = pickle.loads(dataset_def)
-		DATASETS[dataset_id] = dataset
-		return dataset
 	except Exception:
 		return None
-
-
-def datasets_loaded() -> bool:
-	loaded = redis_con.get('datasets_loaded')
-	print('Checking if datasets loaded', loaded, loaded is not None)
-	return loaded is not None
 
 
 @app.route('/api', strict_slashes=False, methods=['POST'])
@@ -137,11 +114,10 @@ def geney_command():
 
 @app.route('/api/datasets', strict_slashes=False, methods=['GET'])
 def get_datasets():
-	if not datasets_loaded():
+	if not DATASETS_LOADED:
 		load_datasets()
-	descriptions = redis_con.get('dataset_descriptions')
-	if descriptions is not None:
-		return Response(descriptions, mimetype='application/json')
+	if DESCRIPTIONS is not None:
+		return Response(json.dumps(DESCRIPTIONS), mimetype='application/json')
 	else:
 		return not_found()
 
@@ -275,7 +251,6 @@ def notify(path):
 	else:
 		download_history[path].email = email
 		download_history[path].name = name
-		# print(request.form.get('email'), request.form.get('name'))
 		with open(DOWNLOAD_HISTORY, 'wb') as fp:
 			pickle.dump(download_history, fp)
 	if os.path.exists(os.path.join(DOWNLOAD_LOCATION, path)):
@@ -353,25 +328,6 @@ def query(dataset_id):
 	return jsonify({'download_path': filename})
 
 
-@app.route('/api/datasets/<string:dataset_id>/link/<string:query_hash>', strict_slashes=False, methods=['GET'])
-def use_link(dataset_id, query_hash):
-	# TODO: create hash of queries
-	return bad_request()
-	# dataset = get_dataset(dataset_id)
-	# if dataset is None:
-	# 	return not_found()
-	#
-	# try:
-	# 	key = '{}_{}'.format(dataset_id, query_hash)
-	# 	query = redis_con.get(key)
-	# 	if not query:
-	# 		return not_found()
-	# 	query = json.loads(query.decode("utf-8"))
-	# 	return CsvResponse(dataset, query, False)
-	# except Exception:
-	# 	return bad_request()
-
-
 def not_found(error='not found'):
 	return make_response(jsonify({'error': error}), 404)
 
@@ -380,9 +336,10 @@ def bad_request(error='bad request'):
 	return make_response(jsonify({'error': error}), 400)
 
 
-def reload_datasets(params):
+def reload_datasets():
+	global DATASETS_LOADED
 	try:
-		redis_con.delete('datasets_loaded')
+		DATASETS_LOADED = False
 		load_datasets()
 		return make_response('success', 200)
 	except Exception:

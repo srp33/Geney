@@ -11,9 +11,6 @@ services:
       - "${GENEY_DATA_PATH}:/app/data"
       - "./server/downloads:/app/downloads"
 
-  redis:
-    image: "redis:alpine"
-
   site:
     build:
       context: site

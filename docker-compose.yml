@@ -14,9 +14,6 @@ services:
       - GENEY_DATA_PATH=/root/data
       - GENEY_URL=localhost
       - DOWNLOAD_LOCATION=/root/downloads
-  
-  redis:
-    image: "redis:alpine"
 
   site:
     build:
