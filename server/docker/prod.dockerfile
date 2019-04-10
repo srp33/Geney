@@ -8,8 +8,7 @@ COPY schemas/*.json /app/schemas/
 RUN apt-get update && \
     apt-get install -y gcc
 
-RUN pip install Flask==0.12.2 fastnumbers h5py gunicorn jsonschema greenlet eventlet redis pyarrow==0.8.0 pandas==0.23.0 psutil msgpack
-RUN pip install git+https://github.com/srp33/ShapeShifter.git#egg=shapeshifter
+RUN pip install Flask==0.12.2 fastnumbers h5py gunicorn jsonschema greenlet eventlet redis pyarrow==0.8.0 pandas==0.23.0 psutil msgpack shapeshifter
 
 ENV GENEY_DATA_PATH=/app/data
 ENV GUNICORN_CMD_ARGS="--workers=4 --bind=:8888 --worker-class=eventlet --worker-connections 100"
