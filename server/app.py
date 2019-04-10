@@ -7,7 +7,7 @@ import sys
 import re
 import uuid
 from psutil import Process as ProcessManager
-from psutil._exceptions import NoSuchProcess
+from psutil import NoSuchProcess
 from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory
 from data_access.Dataset import GeneyDataset
 from multiprocessing import Process
