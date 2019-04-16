@@ -28,7 +28,7 @@
                     </button>
                   </b-col>
                   <b-col cols="1" md="auto">
-                    <h5>{{variable.split(sep)[1]}}:</h5>
+                    <h5>{{variable}}:</h5>
                   </b-col>
                   <b-col cols="8">
                     <selectize
@@ -166,8 +166,8 @@ export default {
         vars[Object.keys(this.groups)[i]] = [];
       }
       for (var j in this.currentVariables) {
-        var group = this.currentVariables[j].split(this.sep)[0];
-        vars[group] = vars[group].concat(this.currentVariables[j]);
+        var group = this.currentVariables[j].group;
+        vars[group] = vars[group].concat(this.currentVariables[j].variable);
       }
       return vars;
     },
@@ -200,14 +200,17 @@ export default {
   },
   methods: {
     variableSettings (group) {
-      const baseSettings = { maxItems: 1, clearValue: false };
+      const baseSettings = { maxItems: 1, clearValue: false, valueField: 'value' };
       if (this.groups && this.groups[group] === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
             `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
-              return {name: item.replace(group + this.sep, '')};
+              return {
+                name: item[1],
+                value: item,
+              };
             });
             callback(items);
           }, failedResponse => {
@@ -277,18 +280,20 @@ export default {
       }
     },
     selectVariable (variable, group = null) {
-      if (variable && variable !== undefined && variable !== '' && this.selectedVariables.indexOf(variable) === -1) {
-        if (group) {
-          variable = group + this.sep + variable;
+      if (variable && variable !== undefined && variable !== '') {
+        variable = variable.split(',');
+        variable = {group: group, index: variable[0], name: variable[1]};
+        console.log(variable);
+        if (this.selectedVariables.indexOf(variable) === -1) {
+          this.getOptions(variable.index).then(options => {
+            if (options) {
+              this.$store.commit('options', {'variable': variable.index, 'options': options});
+              this.selectedVariables.push(variable);
+              this.initializeContinuousType(variable.index);
+            }
+          });
+          this.option = null;
         }
-        this.getOptions(variable).then(options => {
-          if (options) {
-            this.$store.commit('options', {'variable': variable, 'options': options});
-            this.selectedVariables.push(variable);
-            this.initializeContinuousType(variable);
-          }
-        });
-        this.option = null;
       }
     },
     updateSelectedMeta (metaType, value, index, key = false) {
@@ -426,6 +431,7 @@ export default {
       return this.metaData.meta ? this.metaData.meta[metaType] : this.cachedMeta[metaType];
     },
     initializeContinuousType (variable) {
+      console.log(variable);
       const options = this.options[variable];
       if (options && options.options === 'continuous') {
         if (!this.selectedFilters[variable] || this.selectedFilters[variable].length === 0) {

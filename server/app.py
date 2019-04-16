@@ -10,6 +10,7 @@ from psutil import Process as ProcessManager
 from psutil import NoSuchProcess
 from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory
 from data_access.Dataset import GeneyDataset
+from DataSetParser import DataSetParser
 from multiprocessing import Process
 from data_access import GeneyJob
 import smtplib
@@ -75,9 +76,9 @@ def load_datasets() -> None:
 	for directory in os.listdir(DATA_PATH):
 		if os.path.isdir(os.path.join(DATA_PATH, directory)):
 			try:
-				dataset = GeneyDataset(os.path.join(DATA_PATH, directory))
-				DATASETS[dataset.dataset_id] = dataset
-				DESCRIPTIONS[dataset.dataset_id] = dataset.description
+				dataset = DataSetParser(os.path.join(DATA_PATH, directory, 'data.fwf'))
+				DATASETS[dataset.id] = dataset
+				DESCRIPTIONS[dataset.id] = dataset.info
 				# redis_con.set('dataset_' + directory, pickle.dumps(dataset))
 			except Exception as e:
 				sys.stderr.write(str(e))
@@ -85,7 +86,7 @@ def load_datasets() -> None:
 	DATASETS_LOADED = True
 
 
-def get_dataset(dataset_id: str) -> GeneyDataset:
+def get_dataset(dataset_id: str) -> DataSetParser:
 	try:
 		if not DATASETS_LOADED:
 			load_datasets()
@@ -141,27 +142,27 @@ def search_group(dataset_id, group_name, search_str=None):
 
 
 @app.route('/api/datasets/<string:dataset_id>/options', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>', strict_slashes=False)
-def get_options(dataset_id, variable_name=None):
+@app.route('/api/datasets/<string:dataset_id>/options/<int:column_index>', strict_slashes=False)
+def get_options(dataset_id, column_index=None):
 	dataset = get_dataset(dataset_id)
 	if dataset is None:
 		return not_found()
-	if variable_name:
-		results = dataset.get_variable(variable_name)
+	if column_index:
+		results = dataset.get_variable_meta(column_index)
 		return jsonify(results)
 	else:
-		return send_file(dataset.options_path)
+		# return send_file(dataset.options_path)
+		return not_found()
 
-
-@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>/search', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>/search/<string:search_str>',
+@app.route('/api/datasets/<string:dataset_id>/options/<int:column_index>/search', strict_slashes=False)
+@app.route('/api/datasets/<string:dataset_id>/options/<int:column_index>/search/<string:search_str>',
 		   strict_slashes=False)
-def search_options(dataset_id, variable_name, search_str=None):
+def search_options(dataset_id, column_index, search_str=None):
 	dataset = get_dataset(dataset_id)
 	if dataset is None:
 		return not_found()
 	else:
-		return jsonify(dataset.search_options(variable_name, search_str))
+		return jsonify(dataset.search_variable_options(column_index, search_str))
 
 
 @app.route('/api/datasets/<string:dataset_id>/samples', strict_slashes=False, methods=['POST'])
@@ -329,7 +330,7 @@ def query(dataset_id):
 
 
 def not_found(error='not found'):
-	return make_response(jsonify({'error': error}), 404)
+	return make_response(jsonify({'error': str(error)}), 404)
 
 
 def bad_request(error='bad request'):

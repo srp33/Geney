@@ -115,7 +115,8 @@ export default {
           context.commit('selectedFeatures', {group: key, value: []});
           if (Array.isArray(groups[key])) {
             groups[key] = groups[key].map(x => ({
-              'name': x.replace(key + context.state.sep, ''),
+              name: x[1],
+              value: x,
             }));
           }
         }
