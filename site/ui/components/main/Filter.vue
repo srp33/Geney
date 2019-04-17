@@ -16,9 +16,9 @@
             <div class="spacer"></div>
             <div class="line"></div>
             <div class="spacer"></div>
-            <div v-for="variable in currentVariablesByGroup[key]" :key="variable">
+            <div v-for="(variable, index) in currentVariablesByGroup[key]" :key="index">
               <div class="spacer"></div>
-              <div v-if="options[variable].options !== 'continuous'">
+              <div v-if="options[variable.index].options !== 'continuous'">
                 <b-row style="margin-left: 10px;">
                   <b-col col lg="1">
                     <button
@@ -28,11 +28,11 @@
                     </button>
                   </b-col>
                   <b-col cols="1" md="auto">
-                    <h5>{{variable}}:</h5>
+                    <h5>{{variable.name}}:</h5>
                   </b-col>
                   <b-col cols="8">
                     <selectize
-                    :options="options[variable].options"
+                    :options="options[variable.index].options"
                     :value="getValues(variable)"
                     @updated="x => updateSelectedFilters(variable, x)"
                     placeholder="Select value(s) to include - begin typing to see more results"
@@ -50,7 +50,6 @@
                 </button>
                   {{variable.split(sep)[1]}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
               </h4>
-                <!-- {{selectVariable[variable]}} -->
                 <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable]" :key="logicSet.randomKey">
 
                   <div class="form-group col" :class="{'has-danger': errors.has(variable + '_' + index + '_operator')}">
@@ -151,7 +150,8 @@ export default {
     currentVariables () {
       const list = [];
       for (var variable in this.query) {
-        list.push(variable);
+        console.log(variable);
+        list.push(variable.variable);
       }
       for (var i in this.selectedVariables) {
         if (list.indexOf(this.selectedVariables[i]) === -1) {
@@ -167,7 +167,7 @@ export default {
       }
       for (var j in this.currentVariables) {
         var group = this.currentVariables[j].group;
-        vars[group] = vars[group].concat(this.currentVariables[j].variable);
+        vars[group] = vars[group].concat(this.currentVariables[j]);
       }
       return vars;
     },
@@ -236,7 +236,7 @@ export default {
       return 0;
     },
     getValues (variable) {
-      return this.query[variable];
+      return this.query[variable.index];
     },
     removeFilter (variable) {
       delete this.selectedFilters[variable];
@@ -246,7 +246,7 @@ export default {
       this.$forceUpdate();
     },
     getOptions (variable) {
-      return Vue.http.get(`/api/datasets/${this.$route.params.dataset}/options/${variable}`).then(response => {
+      return Vue.http.get(`/api/datasets/${this.$route.params.dataset}/options/${variable.index}`).then(response => {
         const data = response.body;
         if (Array.isArray(data.options)) {
           data.options = data.options.map(val => ({ name: val }));
@@ -285,11 +285,11 @@ export default {
         variable = {group: group, index: variable[0], name: variable[1]};
         console.log(variable);
         if (this.selectedVariables.indexOf(variable) === -1) {
-          this.getOptions(variable.index).then(options => {
+          this.getOptions(variable).then(options => {
             if (options) {
               this.$store.commit('options', {'variable': variable.index, 'options': options});
               this.selectedVariables.push(variable);
-              this.initializeContinuousType(variable.index);
+              this.initializeContinuousType(variable);
             }
           });
           this.option = null;
@@ -311,9 +311,9 @@ export default {
       if (value && value !== undefined && variable !== undefined) {
         // this.$store.commit('lastMetaType', variable);
         if (key === false) {
-          this.$set(this.selectedFilters, variable, value);
+          this.$set(this.selectedFilters, variable.index, {value: value, variable: variable});
         } else {
-          this.$set(this.selectedFilters[variable][index], key, value);
+          this.$set(this.selectedFilters[variable.index][index], key, {value: value, variable: variable});
         }
         this.updateQuery();
       }
@@ -349,7 +349,7 @@ export default {
       router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
     },
     addLogicSet (variable) {
-      const list = this.selectedFilters[variable].slice();
+      const list = this.selectedFilters[variable.index].slice();
       list.push({
         operator: null,
         value: null,
@@ -399,10 +399,10 @@ export default {
     },
     getSelectizeSettings (variable) {
       const settings = {};
-      if (this.options[variable].options === null) {
+      if (this.options[variable.index].options === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
-            `/api/datasets/${this.$route.params.dataset}/options/${variable}/search/${query}`
+            `/api/datasets/${this.$route.params.dataset}/options/${variable.index}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
               return {name: item};
@@ -434,9 +434,9 @@ export default {
       console.log(variable);
       const options = this.options[variable];
       if (options && options.options === 'continuous') {
-        if (!this.selectedFilters[variable] || this.selectedFilters[variable].length === 0) {
-          this.selectedFilters[variable] = [];
-          this.addLogicSet(variable);
+        if (!this.selectedFilters[variable.index] || this.selectedFilters[variable.index].length === 0) {
+          this.selectedFilters[variable.index] = [];
+          this.addLogicSet(variable.index);
         }
       }
     },
