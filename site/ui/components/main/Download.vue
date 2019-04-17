@@ -134,7 +134,7 @@
           </div>
 
           <div class="col-12">
-            <button class="btn btn-primary btn-lg" @click="getNumDataPoints" id="download-btn" :disabled="formErrors">
+            <button class="btn btn-primary btn-lg" @click="filterColumns" id="download-btn" :disabled="formErrors">
               Download
               <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
             </button>
@@ -217,7 +217,11 @@ export default {
         fileformat: 'tsv',
         gzip: false,
       },
+      sampleFile: null,
+      columnIndicesFile: null,
+      columnNamesFile: null,
       numSamples: null,
+      numColumns: null,
       numDataPoints: 0,
       // downloadErrors: false,
       formErrors: false,
@@ -370,29 +374,29 @@ export default {
       }
       return valid ? null : errors;
     },
-    numColumns () {
-      let numFeatures, numVariables;
+    // numColumns () {
+    //   let numFeatures, numVariables;
 
-      switch (this.featuresRadioValue) {
-        case 'all':
-          numFeatures = this.dataset.numFeatures;
-          break;
-        case 'selected':
-          numFeatures = this.selectedVariables.length;
-          break;
-      }
+    //   switch (this.featuresRadioValue) {
+    //     case 'all':
+    //       numFeatures = this.dataset.numFeatures;
+    //       break;
+    //     case 'selected':
+    //       numFeatures = this.selectedVariables.length;
+    //       break;
+    //   }
 
-      switch (this.variablesRadioValue) {
-        case 'all':
-          numVariables = this.dataset.numMetaTypes;
-          break;
-        case 'selected':
-          numVariables = this.selectedFeatures.length;
-          break;
-      }
+    //   switch (this.variablesRadioValue) {
+    //     case 'all':
+    //       numVariables = this.dataset.numMetaTypes;
+    //       break;
+    //     case 'selected':
+    //       numVariables = this.selectedFeatures.length;
+    //       break;
+    //   }
 
-      return numFeatures + numVariables;
-    },
+    //   return numFeatures + numVariables;
+    // },
     numFeatures () {
       return this.getFeatures().length;
     },
@@ -422,9 +426,9 @@ export default {
       const newPath = this.$route.fullPath.replace(/\/download.*/, '');
       router.replace(newPath);
     } else {
-      const query = {filters: filters, features: [], groups: []};
-      this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, query).then(response => {
-        this.$set(this, 'numSamples', response.body);
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, filters).then(response => {
+        this.$set(this, 'numSamples', response.body.count);
+        this.$set(this, 'sampleFile', response.body.sampleFile);
       }, response => {
         this.$set(this, 'numSamples', -1);
       });
@@ -471,14 +475,14 @@ export default {
       return valid ? null : errors;
     },
     getSelectizeSettings (group) {
-      const baseSettings = {};
+      const baseSettings = {valueField: 'value'};
       if (this.groups && this.groups[group] === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
             `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
-              return {name: item.replace(group + this.sep, '')};
+              return {name: item[1], value: item};
             });
             callback(items);
           }, failedResponse => {
@@ -504,8 +508,8 @@ export default {
           // features = features.concat(values);
         } else {
           if (this.selectedFeatures[group]) {
-            for (var feature in this.selectedFeatures[group]) {
-              features.push(group + this.sep + this.selectedFeatures[group][feature]);
+            for (var i in this.selectedFeatures[group]) {
+              features.push(this.selectedFeatures[group][i]);
             }
             // features = features.concat(this.selectedFeatures[group]);
           }
@@ -519,10 +523,14 @@ export default {
       this.$forceUpdate();
     },
     updateFeatures (group, features) {
+      var featureIndices = [];
       if (!features) {
         features = [];
       }
-      this.$store.commit('selectedFeatures', {group: group, value: features});
+      for (let i in features) {
+        featureIndices = featureIndices.concat(features[i].split(',')[0]);
+      }
+      this.$store.commit('selectedFeatures', {group: group, value: featureIndices});
       this.formErrors = this.getFormErrors();
       this.$forceUpdate();
     },
@@ -562,18 +570,55 @@ export default {
         $(this.$el).find('#variable-select').find('.selectize-input').trigger('focusout');
       }
     },
+    filterColumns () {
+      // if (this.numDataPoints <= this.$store.state.maxDataPoints) {
+      // this.$store.commit('downloadStatus', 'creating');
+      // if (this.formErrors !== null) {
+      //   this.triggerErrorState();
+      //   return;
+      // }
+      const query = this.getQuery();
+      console.log(query);
+      this.$http.post(`/api/datasets/${this.$route.params.dataset}/columns`, query).then(response => {
+        this.columnIndicesFile = response.data.columnIndicesFile;
+        this.columnNamesFile = response.data.columnNamesFile;
+        this.numColumns = response.data.numColumns;
+        // this.$set(this, 'columnIndicesFile', response.data.columnIndicesFile);
+        // this.$set(this, 'columnNamesFile', response.data.columnNamesFile);
+        // this.$set(this, 'numColumns', response.data.numColumns);
+        this.numDataPoints = this.numSamples * this.numColumns;
+        this.download();
+      }, response => {
+        console.log('error');
+      });
+      // } else {
+      //   this.$store.commit('downloadStatus', 'datapointError');
+      //   this.$store.commit('addAlert', {
+      //     variant: 'danger',
+      //     message: 'Too many datapoints selected.\nPlease add more filters or remove features\nto fit your data within ' +
+      //     this.$store.state.maxDataPoints + ' data points (currently requesting ' + this.numDataPoints +
+      //     ' data points).',
+      //     show: 15,
+      //   });
+      // }
+    },
     download () {
       if (this.numDataPoints <= this.$store.state.maxDataPoints) {
         this.$store.commit('downloadStatus', 'creating');
-        // if (this.formErrors !== null) {
-        //   this.triggerErrorState();
-        //   return;
-        // }
-        const query = this.getQuery();
-        var params = {query: JSON.stringify(query), options: JSON.stringify(this.options)};
-        this.$http.post(`/api/datasets/${this.$route.params.dataset}/query`, params, {emulateJSON: true}).then(response => {
-          this.$store.commit('downloadPath', response.data['download_path']);
-          this.getDownload(response.data['download_path']);
+        if (this.formErrors !== null) {
+          this.triggerErrorState();
+          return;
+        }
+        const query = {
+          sampleFile: this.sampleFile,
+          columnIndicesFile: this.columnIndicesFile,
+          columnNamesFile: this.columnNamesFile,
+        };
+        console.log(query);
+        this.$http.post(`/api/datasets/${this.$route.params.dataset}/download`, query).then(response => {
+          const downloadPath = response.data.downloadPath;
+          console.log(downloadPath);
+          this.getDownload(downloadPath);
         }, response => {
           console.log('error');
         });
@@ -658,7 +703,7 @@ export default {
     getQuery () {
       const filteredFeatures = this.getFilteredFeatures();
       return {
-        filters: this.filters,
+        sampleFile: this.sampleFile,
         features: filteredFeatures.features,
         groups: filteredFeatures.groups,
       };

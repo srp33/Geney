@@ -48,9 +48,9 @@
                     @click="removeFilter(variable)">
                   <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
-                  {{variable.split(sep)[1]}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
+                  {{variable.name}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
               </h4>
-                <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable]" :key="logicSet.randomKey">
+                <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable.index].value" :key="logicSet.randomKey">
 
                   <div class="form-group col" :class="{'has-danger': errors.has(variable + '_' + index + '_operator')}">
                   <selectize
@@ -150,11 +150,10 @@ export default {
     currentVariables () {
       const list = [];
       for (var variable in this.query) {
-        console.log(variable);
-        list.push(variable.variable);
+        list.push(this.query[variable].variable);
       }
       for (var i in this.selectedVariables) {
-        if (list.indexOf(this.selectedVariables[i]) === -1) {
+        if (!this.containsVariable(this.selectedVariables[i], list)) {
           list.push(this.selectedVariables[i]);
         }
       }
@@ -224,14 +223,14 @@ export default {
       }
     },
     variableMin (variable) {
-      if (this.options[variable].options === 'continuous') {
-        return this.options[variable].min;
+      if (this.options[variable.index].options === 'continuous') {
+        return this.options[variable.index].min;
       }
       return 0;
     },
     variableMax (variable) {
-      if (this.options[variable].options === 'continuous') {
-        return this.options[variable].max;
+      if (this.options[variable.index].options === 'continuous') {
+        return this.options[variable.index].max;
       }
       return 0;
     },
@@ -257,7 +256,6 @@ export default {
       });
     },
     selectMetaType (metaType) {
-      console.log('selected ' + metaType);
       if (metaType && metaType !== undefined && this.selectedMetaTypes.indexOf(metaType) === -1) {
         this.selectedMetaTypes.push(metaType);
       }
@@ -283,7 +281,6 @@ export default {
       if (variable && variable !== undefined && variable !== '') {
         variable = variable.split(',');
         variable = {group: group, index: variable[0], name: variable[1]};
-        console.log(variable);
         if (this.selectedVariables.indexOf(variable) === -1) {
           this.getOptions(variable).then(options => {
             if (options) {
@@ -313,7 +310,7 @@ export default {
         if (key === false) {
           this.$set(this.selectedFilters, variable.index, {value: value, variable: variable});
         } else {
-          this.$set(this.selectedFilters[variable.index][index], key, {value: value, variable: variable});
+          this.$set(this.selectedFilters[variable.index].value[index], key, value);
         }
         this.updateQuery();
       }
@@ -327,7 +324,7 @@ export default {
           delete filters[variable];
         } else if (this.options[variable].options === 'continuous') {
           const list = [];
-          for (let item of filters[variable]) {
+          for (let item of filters[variable].value) {
             if (this.validLogicSet(variable, item)) {
               list.push({
                 operator: item.operator,
@@ -338,7 +335,7 @@ export default {
           if (list.length === 0) {
             delete filters[variable];
           } else {
-            filters[variable] = list;
+            filters[variable].value = list;
           }
         }
       }
@@ -349,7 +346,7 @@ export default {
       router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
     },
     addLogicSet (variable) {
-      const list = this.selectedFilters[variable.index].slice();
+      const list = this.selectedFilters[variable.index].value.slice();
       list.push({
         operator: null,
         value: null,
@@ -431,14 +428,25 @@ export default {
       return this.metaData.meta ? this.metaData.meta[metaType] : this.cachedMeta[metaType];
     },
     initializeContinuousType (variable) {
-      console.log(variable);
-      const options = this.options[variable];
+      const options = this.options[variable.index];
       if (options && options.options === 'continuous') {
         if (!this.selectedFilters[variable.index] || this.selectedFilters[variable.index].length === 0) {
-          this.selectedFilters[variable.index] = [];
-          this.addLogicSet(variable.index);
+          this.selectedFilters[variable.index] = {
+            value: [],
+            variable: variable,
+          };
+          this.addLogicSet(variable);
         }
       }
+    },
+    containsVariable (obj, list) {
+      var i;
+      for (i = 0; i < list.length; i++) {
+        if (list[i].index === obj.index) {
+          return true;
+        }
+      }
+      return false;
     },
   },
   created () {

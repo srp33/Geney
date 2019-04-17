@@ -402,15 +402,15 @@ class DataSetParser:
         indices = set()
 
         if os.path.exists(self.data_file_path + file_extension):
-            my_file = openReadFile(self.data_file_path, file_extension)
-
+            # my_file = openReadFile(self.data_file_path, file_extension)
             for group_name in group_names:
+                my_file = openReadFile(self.data_file_path, file_extension)
                 pattern = b"^" + re.escape(group_name).encode() + re.escape(b"\t")
                 for line in iter(my_file.readline, b""):
                     if re.search(pattern, line):
                         indices = indices | set([int(x) for x in line.rstrip(b"\n").split(b"\t")[1].split(b",")])
 
-            my_file.close()
+                my_file.close()
 
         return indices
 
