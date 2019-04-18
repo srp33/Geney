@@ -11,7 +11,7 @@ from psutil import NoSuchProcess
 from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory
 from data_access.Dataset import GeneyDataset
 from data_access.filters import DiscreteFilter, NumericFilter
-from DataSetParser import DataSetParser
+from data_access.DataSetParser import DataSetParser
 from multiprocessing import Process
 from data_access import GeneyJob
 import smtplib
@@ -182,7 +182,7 @@ def get_samples(dataset_id):
 		else:
 			discrete_filters.append(DiscreteFilter(int(column_index), column_values))
 	count, file = dataset.save_sample_indices_matching_filters(discrete_filters, numeric_filters)
-	return jsonify({'count': count, 'sampleFile': file})
+	return jsonify({'numSamples': count, 'sampleFile': file})
 
 
 @app.route('/api/datasets/<string:dataset_id>/columns', strict_slashes=False, methods=['POST'])

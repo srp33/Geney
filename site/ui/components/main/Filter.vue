@@ -343,7 +343,7 @@ export default {
     },
     commit () {
       this.$store.commit('filters', this.query);
-      router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
+      router.push('/dataset/' + this.$route.params.dataset + '/filter/columns');
     },
     addLogicSet (variable) {
       const list = this.selectedFilters[variable.index].value.slice();

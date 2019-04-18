@@ -5,8 +5,8 @@ import mmap
 import operator
 import os
 import sys
-from DataSetHelper import *
-from filters import DiscreteFilter, NumericFilter
+from data_access.DataSetHelper import *
+from data_access.filters import DiscreteFilter, NumericFilter
 
 
 class DataSetParser:

@@ -53,6 +53,24 @@ export default {
   selectedFeatures (state, payload) {
     state.selectedFeatures[payload.group] = payload.value;
   },
+  columnData (state, payload) {
+    state.columnNamesFile = payload.columnNamesFile;
+    state.columnIndicesFile = payload.columnIndicesFile;
+    state.numColumns = payload.numColumns;
+  },
+  sampleData (state, payload) {
+    state.sampleFile = payload.sampleFile;
+    state.numSamples = payload.numSamples;
+  },
+  sampleFile (state, value) {
+    state.sampleFile = value;
+  },
+  numSamples (state, value) {
+    state.numSamples = value;
+  },
+  numColumns (state, value) {
+    state.numColumns = value;
+  },
   selectedSets (state, payload) {
     state.selectedSets = payload;
   },

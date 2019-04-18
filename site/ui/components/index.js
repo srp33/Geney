@@ -2,6 +2,7 @@ module.exports = {
   Home: require('./main/Home'),
   Description: require('./main/Description'),
   Filter: require('./main/Filter'),
+  FilterColumns: require('./main/FilterColumns'),
   Download: require('./main/Download'),
   Error404: require('./main/Error404'),
   About: require('./main/About'),
