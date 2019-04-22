@@ -71,8 +71,8 @@ export default {
   numColumns (state, value) {
     state.numColumns = value;
   },
-  selectedSets (state, payload) {
-    state.selectedSets = payload;
+  selectedPathways (state, payload) {
+    state.selectedPathways = payload;
   },
   selectedVariables (state, payload) {
     state.selectedVariables = payload;

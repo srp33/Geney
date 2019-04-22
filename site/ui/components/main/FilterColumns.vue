@@ -12,6 +12,27 @@
           <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
         </div>
         <h2>Select Features:</h2>
+        <div class="col-lg-6 offset-sm-3 column-selection" id="gene-sets" v-if="pathways">
+          <b-row align-h="end">
+            <b-col align-self="center" cols="auto">
+              <h5>Pathways:</h5>
+            </b-col>
+
+            <b-col cols="6">
+              <selectize class="top-cushion"
+                :options="pathways"
+                :value="selectedPathways"
+                @updated="x => updatePathways(x)"
+                :placeholder="'Begin typing to see more results or leave blank for none'"
+                :settings="pathwaySettings"
+                errorMessage="Please select some pathways or leave blank for none"
+                id="pathways-select"></selectize>
+            </b-col>
+          </b-row>
+          *Information about gene sets can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
+                  <h5>Total Number of Features Selected: 5</h5>
+
+        </div>
         <div class="col-lg-6 offset-sm-3 column-selection" id="features" v-for="group in Object.keys(groups)" :key="group">
           <!-- <h4>Select {{ dataset.featureDescriptionPlural | capitalize }}</h4> -->
           <b-row align-h="end">
@@ -51,25 +72,6 @@
           </button>
         </div>
 
-        <!-- <div class="col-12" id="plot-container">
-          <button class="btn btn-primary btn-lg" @click="plot" id="plot-btn" :disabled="plotlyErrors">
-            Visualize with plot.ly
-            <span v-if="plotlyErrors" v-b-tooltip="plotlyTooltipSettings"></span>
-          </button>
-        </div> -->
-
-        <!-- <div v-if="geneSets !== null && Object.keys(geneSets).length > 0">
-                <selectize
-                  :options="geneSets"
-                  :value="selectedSets"
-                  @updated="updateSets"
-                  :placeholder="$options.filters.capitalize(dataset.featureDescription) + ' Sets - begin typing to see more results'"
-                  :settings="{}"
-                  id="feature-select"></selectize>
-                  *Information about gene sets can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
-                  <h5>Total Number of {{ dataset.featureDescriptionPlural | capitalize }} Selected: {{ numFeatures }}</h5>
-              </div> -->
-
         <div class="col-12">
           <router-link class="btn btn-secondary" style="margin-top: 10px;" :to="`/dataset/${dataset.id}/filter`">Back</router-link>
         </div>
@@ -94,6 +96,11 @@ export default {
       maxQueries: 30,
       secondsBetweenQueries: 2,
       numQueries: 0,
+      pathways: null,
+      pathwaySettings: {
+        labelField: 'name',
+        valueField: 'name',
+      },
       emailForm: {
         email: '',
         name: '',
@@ -135,8 +142,8 @@ export default {
     selectedFeatures () {
       return this.$store.state.selectedFeatures;
     },
-    selectedSets () {
-      return this.$store.state.selectedSets;
+    selectedPathways () {
+      return this.$store.state.selectedPathways;
     },
     selectedVariables () {
       return this.$store.state.selectedVariables;
@@ -213,6 +220,7 @@ export default {
       const newPath = this.$route.fullPath.replace(/\/columns.*/, '');
       router.replace(newPath);
     } else {
+      this.getPathways();
       this.$http.post(`/api/datasets/${this.$route.params.dataset}/samples`, filters).then(response => {
         this.$store.commit('sampleData', response.data);
       }, response => {
@@ -296,11 +304,11 @@ export default {
       this.formErrors = this.getFormErrors();
       this.$forceUpdate();
     },
-    updateSets (sets) {
-      if (!sets) {
-        sets = [];
+    updatePathways (pathways) {
+      if (!pathways) {
+        pathways = [];
       }
-      this.$store.commit('selectedSets', sets);
+      this.$store.commit('selectedPathways', pathways);
     },
     updateVariables (variables) {
       if (!variables) {
@@ -353,6 +361,7 @@ export default {
         sampleFile: this.sampleFile,
         features: filteredFeatures.features,
         groups: filteredFeatures.groups,
+        pathways: this.selectedPathways,
       };
     },
     getFeatures () {
@@ -370,6 +379,16 @@ export default {
         setA.add(elem);
       }
       return setA;
+    },
+    getPathways () {
+      this.$http.get(`/api/datasets/${this.$route.params.dataset}/pathways`).then(response => {
+        const items = response.data.map(item => {
+          return {name: item[0], numGenes: item[1]};
+        });
+        this.pathways = items;
+      }, response => {
+        console.error('Could not retrieve pathways');
+      });
     },
   },
 };

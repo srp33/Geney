@@ -193,7 +193,8 @@ def get_columns(dataset_id):
 	query = json.loads(request.data)
 	groups = query['groups']
 	features = [int(x) for x in query['features']]
-	num_columns, col_indices_file, col_names_file = dataset.save_column_indices_to_select(features, groups, [])
+	pathways = query['pathways']
+	num_columns, col_indices_file, col_names_file = dataset.save_column_indices_to_select(features, groups, pathways)
 	return jsonify(
 		{'numColumns': num_columns, 'columnIndicesFile': col_indices_file, 'columnNamesFile': col_names_file})
 
@@ -211,6 +212,15 @@ def create_download(dataset_id):
 	file_path = os.path.join(DOWNLOAD_LOCATION, file_name)
 	dataset.build_output_file(row_indices_file, col_indices_file, col_names_file, file_path, 'tsv')
 	return jsonify({'downloadPath': file_name})
+
+
+@app.route('/api/datasets/<string:dataset_id>/pathways', strict_slashes=False, methods=['GET'])
+def get_pathways(dataset_id):
+	dataset = get_dataset(dataset_id)
+	if dataset is None:
+		return not_found()
+	pathways = dataset.get_pathways()
+	return jsonify(pathways)
 
 
 @app.route('/api/datasets/<string:dataset_id>/num_points', strict_slashes=False, methods=['POST'])

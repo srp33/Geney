@@ -6,7 +6,7 @@ export default {
   options: {},
   filters: null,
   selectedFeatures: {},
-  selectedSets: [],
+  selectedPathways: [],
   selectedVariables: [],
   datasetName: null,
   sampleFile: null,
