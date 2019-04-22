@@ -148,9 +148,6 @@ export default {
     selectedVariables () {
       return this.$store.state.selectedVariables;
     },
-    numFeatures () {
-      return this.getFeatures().length;
-    },
     numDataPoints () {
       if (this.numColumns && this.numSamples) {
         return this.numColumns * this.numSamples;
@@ -363,22 +360,6 @@ export default {
         groups: filteredFeatures.groups,
         pathways: this.selectedPathways,
       };
-    },
-    getFeatures () {
-      var features = new Set(this.selectedFeatures);
-      if (this.metaData.geneSets && this.selectedSets.length > 0) {
-        var geneSets = this.metaData.geneSets;
-        for (var i = 0; i < this.selectedSets.length; i++) {
-          features = this.union(features, new Set(geneSets[this.selectedSets[i].replace(/( \(\d*\)$)/g, '')]['genes']));
-        }
-      }
-      return [...features];
-    },
-    union (setA, setB) {
-      for (var elem of setB) {
-        setA.add(elem);
-      }
-      return setA;
     },
     getPathways () {
       this.$http.get(`/api/datasets/${this.$route.params.dataset}/pathways`).then(response => {

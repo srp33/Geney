@@ -1,5 +1,4 @@
 export default {
-  metaData: null,
   datasets: null,
   dataset: {},
   groups: null,
@@ -17,7 +16,6 @@ export default {
   user: null,
   alerts: [],
   users: [],
-  cachedMeta: {},
   lastMetaType: null,
   downloadRadios: {},
   downloadPath: null,

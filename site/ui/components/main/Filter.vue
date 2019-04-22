@@ -115,16 +115,10 @@ export default {
   },
   data () {
     return {
-      selectedMetaTypes: [],
       selectedVariables: [],
-      selectedMeta: {},
       selectedFilters: {},
-      currentMeta: null,
       option: '',
       settings: {
-        oneItem: {
-          maxItems: 1,
-        },
         logicOperators: {
           maxItems: 1,
           labelField: 'label',
@@ -170,9 +164,6 @@ export default {
       }
       return vars;
     },
-    metaData () {
-      return this.$store.state.metaData;
-    },
     groups () {
       return this.$store.state.groups;
     },
@@ -189,12 +180,6 @@ export default {
     },
     dataset () {
       return this.$store.state.dataset;
-    },
-    cachedMeta () {
-      return this.$store.state.cachedMeta[this.dataset.id];
-    },
-    sep () {
-      return this.$store.state.sep;
     },
   },
   methods: {
@@ -255,28 +240,6 @@ export default {
         console.error(err);
       });
     },
-    selectMetaType (metaType) {
-      if (metaType && metaType !== undefined && this.selectedMetaTypes.indexOf(metaType) === -1) {
-        this.selectedMetaTypes.push(metaType);
-      }
-      this.option = null;
-      if (metaType) {
-        if (this.metaData && this.metaData.meta === null) {
-          if (!this.cachedMeta[metaType]) { // not in cache so request it from the server
-            this.getVariableMetadata(metaType).then(metaData => {
-              this.$store.commit('cachedMeta', {
-                dataset: this.dataset.id,
-                metaType: metaType,
-                value: metaData,
-              });
-              this.initializeContinuousType(metaType);
-            });
-          }
-        } else {
-          this.initializeContinuousType(metaType);
-        }
-      }
-    },
     selectVariable (variable, group = null) {
       if (variable && variable !== undefined && variable !== '') {
         variable = variable.split(',');
@@ -293,17 +256,6 @@ export default {
         }
       }
     },
-    updateSelectedMeta (metaType, value, index, key = false) {
-      if (value && value !== undefined && metaType !== undefined) {
-        this.$store.commit('lastMetaType', metaType);
-        if (key === false) {
-          this.$set(this.selectedMeta, metaType, value);
-        } else {
-          this.$set(this.selectedMeta[metaType][index], key, value);
-        }
-        this.updateQuery();
-      }
-    },
     updateSelectedFilters (variable, value, index, key = false) {
       if (value && value !== undefined && variable !== undefined) {
         // this.$store.commit('lastMetaType', variable);
@@ -316,7 +268,7 @@ export default {
       }
     },
     updateQuery () {
-      // basically just removes any null elements from the selectedMeta object
+      // basically just removes any null elements from the selectedVariables object
       // they become null when you remove all filters from a meta type
       const filters = JSON.parse(JSON.stringify(this.selectedFilters));
       for (let variable in filters) {
@@ -364,21 +316,6 @@ export default {
         this.$validator.validateAll();
       });
     },
-    optionsType (metaType) {
-      if (this.metaData && this.metaData.meta !== undefined) {
-        const meta = this.getMeta(metaType);
-        if (!meta) {
-          return;
-        }
-        if (Array.isArray(meta.options) || meta.options === null) {
-          return 'array';
-        } else if (meta.options === 'continuous') {
-          return 'continuous';
-        } else {
-          throw new Error(`Unknown options type. Given ${meta.options}`);
-        }
-      }
-    },
     validLogicSet (variable, logicSet) {
       if (!logicSet.operator) {
         return false;
@@ -412,20 +349,6 @@ export default {
         settings.load = loadfn.bind(this);
       }
       return settings;
-    },
-    getVariableMetadata (metaType) {
-      return Vue.http.get(`/api/datasets/${this.dataset.id}/meta/${metaType}`).then(response => {
-        const data = response.body;
-        if (Array.isArray(data.options)) {
-          data.options = data.options.map(val => ({ name: val }));
-        }
-        return data;
-      }).catch(err => {
-        console.error(err);
-      });
-    },
-    getMeta (metaType) {
-      return this.metaData.meta ? this.metaData.meta[metaType] : this.cachedMeta[metaType];
     },
     initializeContinuousType (variable) {
       const options = this.options[variable.index];
