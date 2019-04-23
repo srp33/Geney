@@ -145,9 +145,6 @@ export default {
     selectedPathways () {
       return this.$store.state.selectedPathways;
     },
-    selectedVariables () {
-      return this.$store.state.selectedVariables;
-    },
     numDataPoints () {
       if (this.numColumns && this.numSamples) {
         return this.numColumns * this.numSamples;
@@ -212,7 +209,7 @@ export default {
     },
   },
   created () {
-    const filters = this.$store.state.filters;
+    const filters = JSON.parse(JSON.stringify(this.$store.state.filters));
     if (!filters) {
       const newPath = this.$route.fullPath.replace(/\/columns.*/, '');
       router.replace(newPath);
@@ -306,12 +303,6 @@ export default {
         pathways = [];
       }
       this.$store.commit('selectedPathways', pathways);
-    },
-    updateVariables (variables) {
-      if (!variables) {
-        variables = [];
-      }
-      this.$store.commit('selectedVariables', variables);
     },
     triggerErrorState () {
       if (!this.formErrors) {

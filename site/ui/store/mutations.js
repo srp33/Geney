@@ -13,9 +13,17 @@ export default {
   },
   filters (state, value) {
     state.filters = value;
-    if (state.filters) {
-      state.selectedVariables = Object.keys(state.filters);
+  },
+  addFilter (state, payload) {
+    if (!payload.key || payload.key === false) {
+      console.log('added filter', payload);
+      state.filters[payload.variable.index] = {value: payload.value, variable: payload.variable};
+    } else {
+      state.filters[payload.variable.index].value[payload.index][payload.key] = payload.value;
     }
+  },
+  removeFilter (state, variable) {
+    delete state.filters[variable.index];
   },
   datasets (state, value) {
     state.datasets = value;
@@ -23,7 +31,6 @@ export default {
   dataset (state, value) {
     state.dataset = value;
     state.selectedFeatures = {};
-    state.selectedVariables = [];
     state.downloadRadios = {};
   },
   user (state, value) {
@@ -58,9 +65,6 @@ export default {
   },
   selectedPathways (state, payload) {
     state.selectedPathways = payload;
-  },
-  selectedVariables (state, payload) {
-    state.selectedVariables = payload;
   },
   lastMetaType (state, payload) {
     state.lastMetaType = payload;

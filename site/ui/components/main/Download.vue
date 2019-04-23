@@ -191,9 +191,6 @@ export default {
     selectedSets () {
       return this.$store.state.selectedSets;
     },
-    selectedVariables () {
-      return this.$store.state.selectedVariables;
-    },
     numFeatures () {
       return this.getFeatures().length;
     },

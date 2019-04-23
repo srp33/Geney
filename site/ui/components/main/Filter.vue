@@ -50,7 +50,7 @@
                 </button>
                   {{variable.name}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
               </h4>
-                <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable.index].value" :key="logicSet.randomKey">
+                <div class="logic-set row" v-for="(logicSet, index) in filters[variable.index].value" :key="logicSet.randomKey">
 
                   <div class="form-group col" :class="{'has-danger': errors.has(variable + '_' + index + '_operator')}">
                   <selectize
@@ -89,7 +89,7 @@
         </div>
       </div>
       <div id="description" class="col-12 spacer">
-        <div v-if="Object.keys(query).length > 0">
+        <div v-if="Object.keys(filters).length > 0">
           <h2>Continue with these filters?</h2>
           <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Confirm</button>
         </div>
@@ -116,7 +116,6 @@ export default {
   data () {
     return {
       selectedVariables: [],
-      selectedFilters: {},
       option: '',
       settings: {
         logicOperators: {
@@ -134,17 +133,20 @@ export default {
         '==': 'Equal To',
         '!=': 'Not Equal To',
       },
-      query: {},
+      // query: {},
     };
   },
   computed: {
     ...mapGetters({
       options: 'getOptions',
     }),
+    filters () {
+      return this.$store.state.filters;
+    },
     currentVariables () {
       const list = [];
-      for (var variable in this.query) {
-        list.push(this.query[variable].variable);
+      for (var variable in this.filters) {
+        list.push(this.filters[variable].variable);
       }
       for (var i in this.selectedVariables) {
         if (!this.containsVariable(this.selectedVariables[i], list)) {
@@ -220,11 +222,10 @@ export default {
       return 0;
     },
     getValues (variable) {
-      return this.query[variable.index];
+      return this.filters[variable.index].value;
     },
     removeFilter (variable) {
-      delete this.selectedFilters[variable];
-      delete this.query[variable];
+      this.$store.commit('removeFilter', variable);
       var index = this.selectedVariables.indexOf(variable);
       this.selectedVariables = this.selectedVariables.splice(0, index).concat(this.selectedVariables.splice(index + 1));
       this.$forceUpdate();
@@ -258,30 +259,27 @@ export default {
     },
     updateSelectedFilters (variable, value, index, key = false) {
       if (value && value !== undefined && variable !== undefined) {
-        // this.$store.commit('lastMetaType', variable);
-        if (key === false) {
-          this.$set(this.selectedFilters, variable.index, {value: value, variable: variable});
-        } else {
-          this.$set(this.selectedFilters[variable.index].value[index], key, value);
-        }
-        this.updateQuery();
+        this.$store.commit('addFilter', {
+          variable: variable,
+          value: value,
+          index: index,
+          key: key,
+        });
       }
     },
-    updateQuery () {
+    cleanFilters () {
       // basically just removes any null elements from the selectedVariables object
       // they become null when you remove all filters from a meta type
-      const filters = JSON.parse(JSON.stringify(this.selectedFilters));
+      const filters = JSON.parse(JSON.stringify(this.filters));
+      console.log('filters', filters);
       for (let variable in filters) {
-        if (!filters[variable]) {
+        if (!filters[variable].value || filters[variable].value.length < 1) {
           delete filters[variable];
         } else if (this.options[variable].options === 'continuous') {
           const list = [];
           for (let item of filters[variable].value) {
             if (this.validLogicSet(variable, item)) {
-              list.push({
-                operator: item.operator,
-                value: item.value,
-              });
+              list.push(item);
             }
           }
           if (list.length === 0) {
@@ -291,14 +289,14 @@ export default {
           }
         }
       }
-      this.$set(this, 'query', filters);
+      this.$store.commit('filters', filters);
     },
     commit () {
-      this.$store.commit('filters', this.query);
+      this.cleanFilters();
       router.push('/dataset/' + this.$route.params.dataset + '/filter/columns');
     },
     addLogicSet (variable) {
-      const list = this.selectedFilters[variable.index].value.slice();
+      const list = this.filters[variable.index].value.slice();
       list.push({
         operator: null,
         value: null,
@@ -308,13 +306,16 @@ export default {
       this.$forceUpdate();
     },
     removeLogicSet (variable, index) {
-      const list = this.selectedFilters[variable].slice();
+      const list = this.filters[variable.index].value.slice();
       list.splice(index, 1);
       this.updateSelectedFilters(variable, list);
       this.$forceUpdate();
       Vue.nextTick(() => {
         this.$validator.validateAll();
       });
+      if (this.filters[variable.index].value.length === 0) {
+        this.removeFilter(variable);
+      }
     },
     validLogicSet (variable, logicSet) {
       if (!logicSet.operator) {
@@ -353,12 +354,22 @@ export default {
     initializeContinuousType (variable) {
       const options = this.options[variable.index];
       if (options && options.options === 'continuous') {
-        if (!this.selectedFilters[variable.index] || this.selectedFilters[variable.index].length === 0) {
-          this.selectedFilters[variable.index] = {
-            value: [],
+        if (!this.filters[variable.index] || this.filters[variable.index].length === 0) {
+          this.$store.commit('addFilter', {
             variable: variable,
-          };
-          this.addLogicSet(variable);
+            value: [{
+              operator: null,
+              value: null,
+              randomKey: Math.random(),
+            }],
+          });
+        }
+      } else {
+        if (!this.filters[variable.index] || this.filters[variable.index].length === 0) {
+          this.$store.commit('addFilter', {
+            variable: variable,
+            value: [],
+          });
         }
       }
     },
@@ -371,19 +382,6 @@ export default {
       }
       return false;
     },
-  },
-  created () {
-    if (this.$store.state.filters) {
-      const filters = JSON.parse(JSON.stringify(this.$store.state.filters));
-      this.$set(this, 'selectedFilters', filters);
-      // this.$set(this, 'selectedFeatures', filters.features);
-      if (this.$store.state.lastMetaType) {
-        this.selectVariable(this.$store.state.lastMetaType);
-      } else {
-        this.selectVariable(Object.keys(filters)[0]);
-      }
-      this.updateQuery();
-    }
   },
 };
 </script>
