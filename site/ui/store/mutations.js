@@ -16,7 +16,6 @@ export default {
   },
   addFilter (state, payload) {
     if (!payload.key || payload.key === false) {
-      console.log('added filter', payload);
       state.filters[payload.variable.index] = {value: payload.value, variable: payload.variable};
     } else {
       state.filters[payload.variable.index].value[payload.index][payload.key] = payload.value;

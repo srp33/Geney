@@ -318,12 +318,11 @@ export default {
     },
     filterColumns () {
       const query = this.getQuery();
-      console.log(query);
       this.$http.post(`/api/datasets/${this.$route.params.dataset}/columns`, query).then(response => {
         this.$store.commit('columnData', response.data);
         this.download();
       }, response => {
-        console.log('error');
+        console.error('error');
       });
     },
     download () {

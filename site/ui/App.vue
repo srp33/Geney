@@ -27,7 +27,7 @@ export default {
       // check if they're changing datasets
       if (to.params.dataset !== from.params.dataset) {
         // remove any set filters
-        this.$store.commit('filters', null);
+        this.$store.commit('filters', {});
         this.$store.commit('selectedPathways', []);
         // make sure we have datasets
         if (this.$store.state.datasets) {

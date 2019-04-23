@@ -271,7 +271,6 @@ export default {
       // basically just removes any null elements from the selectedVariables object
       // they become null when you remove all filters from a meta type
       const filters = JSON.parse(JSON.stringify(this.filters));
-      console.log('filters', filters);
       for (let variable in filters) {
         if (!filters[variable].value || filters[variable].value.length < 1) {
           delete filters[variable];
