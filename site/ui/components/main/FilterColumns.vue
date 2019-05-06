@@ -2,7 +2,7 @@
   <div>
     <div class="download top row justify-content-center" v-if="filters">
       <div class="col-12">
-        <h1>Filter Columns</h1>
+        <h1>Filter Features</h1>
         <div v-if="numSamples != null">
           <h3 v-if="numSamples > 0" id="num-samples-selected">You have selected {{ numSamples }} samples.</h3>
           <span v-else-if="numSamples === 0" id="num-samples-selected">
@@ -12,13 +12,33 @@
           <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
         </div>
         <h2>Select Features:</h2>
-        <div class="col-lg-6 offset-sm-3 column-selection" id="gene-sets" v-if="pathways">
-          <b-row align-h="end">
-            <b-col align-self="center" cols="auto">
+        <div class="col-lg-6 offset-sm-3 column-selection">
+          <b-table bordered :fields="fields" :items="items" v-if="items && items !== {}">
+            <template slot="name" slot-scope="data">
+              {{data.value.replace(/_/g, ' ')}}
+            </template>
+            <template slot="Features" slot-scope="data">
+              <b-form-select v-model="selected[data.item.name].value" @change="x => selectFeatures(data.item.name, x)" :options="selectionOptions"></b-form-select>
+            </template>
+            <template slot="row-details" slot-scope="data">
+              <selectize class="top-cushion"
+                  :options="groups[data.item.name]"
+                  :value="getValues(data.item.name)"
+                  @updated="x => updateFeatures(data.item.name, x)"
+                  :placeholder="'Begin typing to see more results or leave blank for none'"
+                  :settings="getSelectizeSettings(data.item.name)"
+                  :errorMessage="'Please select some features or click \'Download all (' + data.item.name +')\''"
+                  :id="data.item.name + '-feature-select'"></selectize>
+            </template>
+          </b-table>
+        </div>
+        <div class="col-lg-6 offset-sm-3 column-selection pathways" id="gene-sets" v-if="pathways">
+          <b-row align-h="between">
+            <b-col cols="1">
               <h5>Pathways:</h5>
             </b-col>
 
-            <b-col cols="6">
+            <b-col cols="auto">
               <selectize class="top-cushion"
                 :options="pathways"
                 :value="selectedPathways"
@@ -29,37 +49,9 @@
                 id="pathways-select"></selectize>
             </b-col>
           </b-row>
-          *Information about gene sets can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
+          *Information about pathways can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
                   <h5>Total Number of Features Selected: 5</h5>
 
-        </div>
-        <div class="col-lg-6 offset-sm-3 column-selection" id="features" v-for="group in Object.keys(groups)" :key="group">
-          <!-- <h4>Select {{ dataset.featureDescriptionPlural | capitalize }}</h4> -->
-          <b-row align-h="end">
-            <b-col align-self="center" cols="auto">
-              <h5>{{group.replace(/_/g, ' ')}}:</h5>
-            </b-col>
-
-            <b-col cols="6">
-              <b-form-radio-group @change="x => setRadioValue(group, x)" v-model="downloadRadios[group]" stacked class="left-align">
-                <b-form-radio value="all">Download All</b-form-radio>
-                <b-form-radio value="selected">Download Selected</b-form-radio>
-              </b-form-radio-group>
-            </b-col>
-          </b-row>
-
-          <b-row v-show="downloadRadios[group] === 'selected'" align-h="center">
-            <b-col cols="8">
-              <selectize class="top-cushion"
-                :options="groups[group]"
-                :value="selectedFeatures[group]"
-                @updated="x => updateFeatures(group, x)"
-                :placeholder="'Begin typing to see more results or leave blank for none'"
-                :settings="getSelectizeSettings(group)"
-                :errorMessage="'Please select some features or click \'Download all (' + group +')\''"
-                :id="group + '-feature-select'"></selectize>
-            </b-col>
-          </b-row>
         </div>
       </div>
 
@@ -97,6 +89,12 @@ export default {
       secondsBetweenQueries: 2,
       numQueries: 0,
       pathways: null,
+      selected: {},
+      selectionOptions: [
+        { value: 'all', text: 'Download all columns in group' },
+        { value: 'none', text: 'Download none of the columns in group' },
+        { value: 'selected', text: 'Download select columns from group' },
+      ],
       pathwaySettings: {
         labelField: 'name',
         valueField: 'name',
@@ -106,6 +104,10 @@ export default {
         name: '',
         checked: [],
       },
+      fields: [
+        { key: 'name', label: 'Group' },
+        'Features',
+      ],
     };
   },
   computed: {
@@ -144,6 +146,21 @@ export default {
     },
     selectedPathways () {
       return this.$store.state.selectedPathways;
+    },
+    items () {
+      if (!this.selected) {
+        return [];
+      } else {
+        return Object.keys(this.selected).map(group => {
+          if (this.selected[group].value === 'all') {
+            return {name: group, _rowVariant: 'success'};
+          } else if (this.selected[group].value === 'none') {
+            return {name: group, _rowVariant: 'warning'};
+          } else {
+            return {name: group, _showDetails: true, _rowVariant: 'success'};
+          }
+        });
+      }
     },
     numDataPoints () {
       if (this.numColumns && this.numSamples) {
@@ -191,26 +208,11 @@ export default {
 
       return settings;
     },
-    variablesRadioValue: {
-      get () {
-        return this.$store.state.downloadRadios.variables;
-      },
-      set (value) {
-        this.$store.commit('variablesRadioValue', value);
-      },
-    },
-    featuresRadioValue: {
-      get () {
-        return this.$store.state.downloadRadios.features;
-      },
-      set (value) {
-        this.$store.commit('featuresRadioValue', value);
-      },
-    },
   },
   created () {
     const filters = JSON.parse(JSON.stringify(this.$store.state.filters));
-    if (!filters) {
+    this.selected = JSON.parse(JSON.stringify(this.selectedFeatures));
+    if (!filters || !this.selected) {
       const newPath = this.$route.fullPath.replace(/\/columns.*/, '');
       router.replace(newPath);
     } else {
@@ -223,6 +225,19 @@ export default {
     }
   },
   methods: {
+    getValues (group) {
+      const selected = this.selected[group].selected;
+      // var values = [];
+      // for (var i in selected) {
+      //   values = values.concat(selected[i].value);
+      // }
+      // console.log(values);
+      // return values;
+      return selected;
+    },
+    selectFeatures (group, selection) {
+      this.$store.commit('selectedFeatures', {group: group, value: selection});
+    },
     getFormErrors () {
       let valid = false;
       let errors = {};
@@ -239,7 +254,7 @@ export default {
       return valid ? null : errors;
     },
     getSelectizeSettings (group) {
-      const baseSettings = {valueField: 'value'};
+      const baseSettings = {labelField: 'name', valueField: 'value'};
       if (this.groups && this.groups[group] === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
@@ -263,19 +278,11 @@ export default {
       var features = [];
       var groups = [];
       for (var group in this.groups) {
-        if (this.downloadRadios[group] === 'all') {
+        if (this.selected[group].value === 'all') {
           groups = groups.concat(group);
-          // var values = [];
-          // this.groups[group].forEach(element => {
-          //   values.push(element.name);
-          // });
-          // features = features.concat(values);
-        } else {
-          if (this.selectedFeatures[group]) {
-            for (var i in this.selectedFeatures[group]) {
-              features.push(this.selectedFeatures[group][i]);
-            }
-            // features = features.concat(this.selectedFeatures[group]);
+        } else if (this.selected[group].value === 'selected') {
+          for (var i in this.selectedFeatures[group].selected) {
+            features.push(this.selectedFeatures[group].selected[i].value[0]);
           }
         }
       }
@@ -287,14 +294,21 @@ export default {
       this.$forceUpdate();
     },
     updateFeatures (group, features) {
-      var featureIndices = [];
+      // console.log(group, features);
+      var selected = [];
       if (!features) {
         features = [];
       }
       for (let i in features) {
-        featureIndices = featureIndices.concat(features[i].split(',')[0]);
+        if (typeof features[i] === 'string') {
+          const value = features[i].split(',');
+          selected = selected.concat({name: value[1], value: value});
+        } else {
+          selected = selected.concat(features[i]);
+        }
       }
-      this.$store.commit('selectedFeatures', {group: group, value: featureIndices});
+      this.$store.commit('selectedFeatures', {group: group, selected: selected});
+      this.$set(this.selected[group], 'selected', selected);
       this.formErrors = this.getFormErrors();
       this.$forceUpdate();
     },
@@ -329,7 +343,7 @@ export default {
       if (this.numDataPoints <= this.$store.state.maxDataPoints) {
         if (this.formErrors !== null) {
           this.triggerErrorState();
-          return;
+          // return;
         }
         router.push(`/dataset/${this.$route.params.dataset}/filter/download`);
       } else {
@@ -394,7 +408,9 @@ h5 {
 #plot-btn {
   margin-bottom: 25px;
 }
-
+.pathways {
+  text-align: left;
+}
 .top-cushion {
   margin-top: 10px;
 }

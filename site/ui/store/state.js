@@ -1,10 +1,10 @@
 export default {
   datasets: null,
   dataset: {},
-  groups: null,
+  groups: {},
   options: {},
   filters: {},
-  selectedFeatures: {},
+  selectedFeatures: null,
   selectedPathways: [],
   datasetName: null,
   sampleFile: null,

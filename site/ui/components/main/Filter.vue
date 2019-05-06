@@ -1,5 +1,4 @@
 <template>
-
   <div class="filter top row justify-content-center" v-if="groups">
     <div class="col-sm-6">
       <h1>Filter Samples</h1>

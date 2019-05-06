@@ -51,8 +51,7 @@ export default {
       Vue.http.get(`/api/datasets/${context.state.dataset.id}/groups`).then(response => {
         const groups = response.data;
         for (let key in groups) {
-          context.commit('downloadRadios', {group: key, value: 'all'});
-          context.commit('selectedFeatures', {group: key, value: []});
+          context.commit('selectedFeatures', {group: key, value: 'all'});
           if (Array.isArray(groups[key])) {
             groups[key] = groups[key].map(x => ({
               name: x[1],

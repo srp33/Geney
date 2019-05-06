@@ -29,7 +29,6 @@ export default {
   },
   dataset (state, value) {
     state.dataset = value;
-    state.selectedFeatures = {};
     state.downloadRadios = {};
   },
   user (state, value) {
@@ -42,7 +41,18 @@ export default {
     state.users = users;
   },
   selectedFeatures (state, payload) {
-    state.selectedFeatures[payload.group] = payload.value;
+    if (!state.selectedFeatures) {
+      state.selectedFeatures = {};
+    }
+    if (!state.selectedFeatures[payload.group]) {
+      state.selectedFeatures[payload.group] = {value: null, selected: null};
+    }
+    if (payload.value) {
+      state.selectedFeatures[payload.group].value = payload.value;
+    }
+    if (payload.selected) {
+      state.selectedFeatures[payload.group].selected = payload.selected;
+    }
   },
   columnData (state, payload) {
     state.columnNamesFile = payload.columnNamesFile;
