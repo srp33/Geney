@@ -41,17 +41,21 @@ export default {
     state.users = users;
   },
   selectedFeatures (state, payload) {
-    if (!state.selectedFeatures) {
-      state.selectedFeatures = {};
-    }
-    if (!state.selectedFeatures[payload.group]) {
-      state.selectedFeatures[payload.group] = {value: null, selected: null};
-    }
-    if (payload.value) {
-      state.selectedFeatures[payload.group].value = payload.value;
-    }
-    if (payload.selected) {
-      state.selectedFeatures[payload.group].selected = payload.selected;
+    if (!payload) {
+      state.selectedFeatures = null;
+    } else {
+      if (!state.selectedFeatures) {
+        state.selectedFeatures = {};
+      }
+      if (!state.selectedFeatures[payload.group]) {
+        state.selectedFeatures[payload.group] = {value: null, selected: null};
+      }
+      if (payload.value) {
+        state.selectedFeatures[payload.group].value = payload.value;
+      }
+      if (payload.selected) {
+        state.selectedFeatures[payload.group].selected = payload.selected;
+      }
     }
   },
   columnData (state, payload) {
@@ -62,6 +66,12 @@ export default {
   sampleData (state, payload) {
     state.sampleFile = payload.sampleFile;
     state.numSamples = payload.numSamples;
+  },
+  columnIndicesFile (state, value) {
+    state.columnIndicesFile = value;
+  },
+  columnNamesFile (state, value) {
+    state.columnNamesFile = value;
   },
   sampleFile (state, value) {
     state.sampleFile = value;

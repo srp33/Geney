@@ -29,25 +29,6 @@ export default {
       if (!context.state.dataset.id) {
         return;
       }
-      // check if localStorage is available on the browser
-      // if (window.localStorage) {
-      //   let data;
-      //   // try to get the meta out of local storage
-      //   try {
-      //     data = JSON.parse(window.localStorage.getItem(context.state.dataset.id + '_data'));
-      //   } catch (e) {
-      //     console.error('Error retrieving local storage:', e);
-      //     // if it fails (for whatever reason) clear local storage so we can
-      //     // make the http request and set it again
-      //     window.localStorage.clear();
-      //   }
-      //   // if we were able to get the stored data, return a promise that
-      //   // immediately resolves with the data we found
-      //   if (data) {
-      //     context.commit('metaData', data);
-      //     return;
-      //   }
-      // }
       Vue.http.get(`/api/datasets/${context.state.dataset.id}/groups`).then(response => {
         const groups = response.data;
         for (let key in groups) {
@@ -75,6 +56,14 @@ export default {
         router.replace('/404');
       }
     }
+  },
+  clearDataset (context) {
+    context.commit('filters', {});
+    context.commit('selectedPathways', []);
+    context.commit('selectedFeatures', null);
+    context.commit('columnIndicesFile', null);
+    context.commit('columnNamesFile', null);
+    context.commit('sampleFile', null);
   },
   logout (context) {
     localStorage.removeItem('jwt');

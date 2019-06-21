@@ -83,7 +83,7 @@
           </div>
 
           <div class="col-12">
-            <router-link class="btn btn-secondary" style="margin-top: 10px;" :to="`/dataset/${dataset.id}/filter`">Back</router-link>
+            <router-link class="btn btn-secondary" style="margin-top: 10px;" :to="`/dataset/${dataset.id}/filter/columns`">Back</router-link>
           </div>
         </div>
       </div>

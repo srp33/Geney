@@ -34,11 +34,11 @@
         </div>
         <div class="col-lg-6 offset-sm-3 column-selection pathways" id="gene-sets" v-if="pathways">
           <b-row align-h="between">
-            <b-col cols="1">
+            <b-col cols="auto">
               <h5>Pathways:</h5>
             </b-col>
 
-            <b-col cols="auto">
+            <b-col>
               <selectize class="top-cushion"
                 :options="pathways"
                 :value="selectedPathways"
@@ -50,8 +50,6 @@
             </b-col>
           </b-row>
           *Information about pathways can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
-                  <h5>Total Number of Features Selected: 5</h5>
-
         </div>
       </div>
 
@@ -155,7 +153,7 @@ export default {
           if (this.selected[group].value === 'all') {
             return {name: group, _rowVariant: 'success'};
           } else if (this.selected[group].value === 'none') {
-            return {name: group, _rowVariant: 'warning'};
+            return {name: group, _rowVariant: 'secondary'};
           } else {
             return {name: group, _showDetails: true, _rowVariant: 'success'};
           }
