@@ -183,6 +183,9 @@ export default {
       return this.$store.state.dataset;
     },
   },
+  created () {
+    this.$store.commit('numSamples', null);
+  },
   methods: {
     variableSettings (group) {
       const baseSettings = { maxItems: 1, clearValue: false, valueField: 'value' };

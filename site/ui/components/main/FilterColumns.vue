@@ -344,6 +344,8 @@ export default {
           // return;
         }
         router.push(`/dataset/${this.$route.params.dataset}/filter/download`);
+      } else if (!this.numDataPoints) {
+        console.log('hold up');
       } else {
         this.$store.commit('addAlert', {
           variant: 'danger',

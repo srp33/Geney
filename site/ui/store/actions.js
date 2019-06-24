@@ -64,6 +64,7 @@ export default {
     context.commit('columnIndicesFile', null);
     context.commit('columnNamesFile', null);
     context.commit('sampleFile', null);
+    context.commit('numSamples', null);
   },
   logout (context) {
     localStorage.removeItem('jwt');
