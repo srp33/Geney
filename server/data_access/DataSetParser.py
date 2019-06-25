@@ -342,7 +342,7 @@ class DataSetParser:
 
         for row_index in row_indices:
             value = next(parse_data_values(row_index, ll, query_col_coords, data_handle)).rstrip()
-            if value == b"": # Is missing
+            if value == b"" or value == b"NA": # Is missing
                 continue
 
             # See https://stackoverflow.com/questions/18591778/how-to-pass-an-operator-to-a-python-function

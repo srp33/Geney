@@ -11,6 +11,9 @@
           </span>
           <h3 v-else id="num-samples-error">Unable to retreive number of samples.</h3>
         </div>
+        <div v-else>
+          <h3>Filtering Samples...</h3>
+        </div>
         <h2>Select Features:</h2>
         <div class="col-lg-6 offset-sm-3 column-selection">
           <b-table bordered :fields="fields" :items="items" v-if="items && items !== {}">
@@ -33,12 +36,12 @@
           </b-table>
         </div>
         <div class="col-lg-6 offset-sm-3 column-selection pathways" id="gene-sets" v-if="pathways">
-          <b-row align-h="between">
+          <b-row align-h="between" align-v="center">
             <b-col cols="auto">
               <h5>Pathways:</h5>
             </b-col>
 
-            <b-col>
+            <b-col style="margin-top: 5px;">
               <selectize class="top-cushion"
                 :options="pathways"
                 :value="selectedPathways"
@@ -49,21 +52,25 @@
                 id="pathways-select"></selectize>
             </b-col>
           </b-row>
-          *Information about pathways can be found on the Pathway Commons <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
+          *Information about pathways can be found on the Pathway Commons 
+          <a href="http://www.pathwaycommons.org/" target="_blank">website</a>.
         </div>
       </div>
 
       <div class="col-sm-4">
         <div class="col-12">
           <h2>Continue with these filters?</h2>
-          <button @click="filterColumns" class="btn btn-primary btn-lg confirm-btn">
+          <button :disabled="!finishedFilteringSamples" @click="filterColumns" 
+          class="btn btn-primary btn-lg confirm-btn">
             Confirm
             <span v-if="formErrors" v-b-tooltip="downloadTooltipSettings"></span>
           </button>
         </div>
 
         <div class="col-12">
-          <router-link class="btn btn-secondary" style="margin-top: 10px;" :to="`/dataset/${dataset.id}/filter`">Back</router-link>
+          <router-link class="btn btn-secondary" style="margin-top: 10px;" :to="`/dataset/${dataset.id}/filter`">
+          Back
+          </router-link>
         </div>
       </div>
     </div>
@@ -144,6 +151,9 @@ export default {
     },
     selectedPathways () {
       return this.$store.state.selectedPathways;
+    },
+    finishedFilteringSamples () {
+      return this.numSamples !== null;
     },
     items () {
       if (!this.selected) {
@@ -344,8 +354,6 @@ export default {
           // return;
         }
         router.push(`/dataset/${this.$route.params.dataset}/filter/download`);
-      } else if (!this.numDataPoints) {
-        console.log('hold up');
       } else {
         this.$store.commit('addAlert', {
           variant: 'danger',
@@ -382,9 +390,6 @@ export default {
 <style lang="scss">
 h1, h2, h3, h4 {
   font-weight: normal;
-}
-h5 {
-  margin-top: 10px;
 }
 .form-group {
   label {
