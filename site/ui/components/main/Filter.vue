@@ -1,5 +1,4 @@
 <template>
-
   <div class="filter top row justify-content-center" v-if="groups">
     <div class="col-sm-6">
       <h1>Filter Samples</h1>
@@ -16,9 +15,9 @@
             <div class="spacer"></div>
             <div class="line"></div>
             <div class="spacer"></div>
-            <div v-for="variable in currentVariablesByGroup[key]" :key="variable">
+            <div v-for="(variable, index) in currentVariablesByGroup[key]" :key="index">
               <div class="spacer"></div>
-              <div v-if="options[variable].options !== 'continuous'">
+              <div v-if="options[variable.index].options !== 'continuous'">
                 <b-row style="margin-left: 10px;">
                   <b-col col lg="1">
                     <button
@@ -28,11 +27,11 @@
                     </button>
                   </b-col>
                   <b-col cols="1" md="auto">
-                    <h5>{{variable.split(sep)[1]}}:</h5>
+                    <h5>{{variable.name}}:</h5>
                   </b-col>
                   <b-col cols="8">
                     <selectize
-                    :options="options[variable].options"
+                    :options="options[variable.index].options"
                     :value="getValues(variable)"
                     @updated="x => updateSelectedFilters(variable, x)"
                     placeholder="Select value(s) to include - begin typing to see more results"
@@ -48,10 +47,9 @@
                     @click="removeFilter(variable)">
                   <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
-                  {{variable.split(sep)[1]}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
+                  {{variable.name}}<h6><br>(min: {{variableMin(variable).toFixed(2)}} - max: {{variableMax(variable).toFixed(2)}})</h6>
               </h4>
-                <!-- {{selectVariable[variable]}} -->
-                <div class="logic-set row" v-for="(logicSet, index) in selectedFilters[variable]" :key="logicSet.randomKey">
+                <div class="logic-set row" v-for="(logicSet, index) in filters[variable.index].value" :key="logicSet.randomKey">
 
                   <div class="form-group col" :class="{'has-danger': errors.has(variable + '_' + index + '_operator')}">
                   <selectize
@@ -90,7 +88,7 @@
         </div>
       </div>
       <div id="description" class="col-12 spacer">
-        <div v-if="Object.keys(query).length > 0">
+        <div v-if="Object.keys(filters).length > 0">
           <h2>Continue with these filters?</h2>
           <button @click="commit" class="btn btn-primary btn-lg confirm-btn">Confirm</button>
         </div>
@@ -116,16 +114,9 @@ export default {
   },
   data () {
     return {
-      selectedMetaTypes: [],
       selectedVariables: [],
-      selectedMeta: {},
-      selectedFilters: {},
-      currentMeta: null,
       option: '',
       settings: {
-        oneItem: {
-          maxItems: 1,
-        },
         logicOperators: {
           maxItems: 1,
           labelField: 'label',
@@ -141,20 +132,23 @@ export default {
         '==': 'Equal To',
         '!=': 'Not Equal To',
       },
-      query: {},
+      // query: {},
     };
   },
   computed: {
     ...mapGetters({
       options: 'getOptions',
     }),
+    filters () {
+      return this.$store.state.filters;
+    },
     currentVariables () {
       const list = [];
-      for (var variable in this.query) {
-        list.push(variable);
+      for (var variable in this.filters) {
+        list.push(this.filters[variable].variable);
       }
       for (var i in this.selectedVariables) {
-        if (list.indexOf(this.selectedVariables[i]) === -1) {
+        if (!this.containsVariable(this.selectedVariables[i], list)) {
           list.push(this.selectedVariables[i]);
         }
       }
@@ -166,13 +160,10 @@ export default {
         vars[Object.keys(this.groups)[i]] = [];
       }
       for (var j in this.currentVariables) {
-        var group = this.currentVariables[j].split(this.sep)[0];
+        var group = this.currentVariables[j].group;
         vars[group] = vars[group].concat(this.currentVariables[j]);
       }
       return vars;
-    },
-    metaData () {
-      return this.$store.state.metaData;
     },
     groups () {
       return this.$store.state.groups;
@@ -191,23 +182,23 @@ export default {
     dataset () {
       return this.$store.state.dataset;
     },
-    cachedMeta () {
-      return this.$store.state.cachedMeta[this.dataset.id];
-    },
-    sep () {
-      return this.$store.state.sep;
-    },
+  },
+  created () {
+    this.$store.commit('numSamples', null);
   },
   methods: {
     variableSettings (group) {
-      const baseSettings = { maxItems: 1, clearValue: false };
+      const baseSettings = { maxItems: 1, clearValue: false, valueField: 'value' };
       if (this.groups && this.groups[group] === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
             `/api/datasets/${this.$route.params.dataset}/groups/${group}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
-              return {name: item.replace(group + this.sep, '')};
+              return {
+                name: item[1],
+                value: item,
+              };
             });
             callback(items);
           }, failedResponse => {
@@ -221,29 +212,28 @@ export default {
       }
     },
     variableMin (variable) {
-      if (this.options[variable].options === 'continuous') {
-        return this.options[variable].min;
+      if (this.options[variable.index].options === 'continuous') {
+        return this.options[variable.index].min;
       }
       return 0;
     },
     variableMax (variable) {
-      if (this.options[variable].options === 'continuous') {
-        return this.options[variable].max;
+      if (this.options[variable.index].options === 'continuous') {
+        return this.options[variable.index].max;
       }
       return 0;
     },
     getValues (variable) {
-      return this.query[variable];
+      return this.filters[variable.index].value;
     },
     removeFilter (variable) {
-      delete this.selectedFilters[variable];
-      delete this.query[variable];
+      this.$store.commit('removeFilter', variable);
       var index = this.selectedVariables.indexOf(variable);
       this.selectedVariables = this.selectedVariables.splice(0, index).concat(this.selectedVariables.splice(index + 1));
       this.$forceUpdate();
     },
     getOptions (variable) {
-      return Vue.http.get(`/api/datasets/${this.$route.params.dataset}/options/${variable}`).then(response => {
+      return Vue.http.get(`/api/datasets/${this.$route.params.dataset}/options/${variable.index}`).then(response => {
         const data = response.body;
         if (Array.isArray(data.options)) {
           data.options = data.options.map(val => ({ name: val }));
@@ -253,98 +243,61 @@ export default {
         console.error(err);
       });
     },
-    selectMetaType (metaType) {
-      console.log('selected ' + metaType);
-      if (metaType && metaType !== undefined && this.selectedMetaTypes.indexOf(metaType) === -1) {
-        this.selectedMetaTypes.push(metaType);
-      }
-      this.option = null;
-      if (metaType) {
-        if (this.metaData && this.metaData.meta === null) {
-          if (!this.cachedMeta[metaType]) { // not in cache so request it from the server
-            this.getVariableMetadata(metaType).then(metaData => {
-              this.$store.commit('cachedMeta', {
-                dataset: this.dataset.id,
-                metaType: metaType,
-                value: metaData,
-              });
-              this.initializeContinuousType(metaType);
-            });
-          }
-        } else {
-          this.initializeContinuousType(metaType);
-        }
-      }
-    },
     selectVariable (variable, group = null) {
-      if (variable && variable !== undefined && variable !== '' && this.selectedVariables.indexOf(variable) === -1) {
-        if (group) {
-          variable = group + this.sep + variable;
+      if (variable && variable !== undefined && variable !== '') {
+        variable = variable.split(',');
+        variable = {group: group, index: variable[0], name: variable[1]};
+        if (this.selectedVariables.indexOf(variable) === -1) {
+          this.getOptions(variable).then(options => {
+            if (options) {
+              this.$store.commit('options', {'variable': variable.index, 'options': options});
+              this.selectedVariables.push(variable);
+              this.initializeContinuousType(variable);
+            }
+          });
+          this.option = null;
         }
-        this.getOptions(variable).then(options => {
-          if (options) {
-            this.$store.commit('options', {'variable': variable, 'options': options});
-            this.selectedVariables.push(variable);
-            this.initializeContinuousType(variable);
-          }
-        });
-        this.option = null;
-      }
-    },
-    updateSelectedMeta (metaType, value, index, key = false) {
-      if (value && value !== undefined && metaType !== undefined) {
-        this.$store.commit('lastMetaType', metaType);
-        if (key === false) {
-          this.$set(this.selectedMeta, metaType, value);
-        } else {
-          this.$set(this.selectedMeta[metaType][index], key, value);
-        }
-        this.updateQuery();
       }
     },
     updateSelectedFilters (variable, value, index, key = false) {
       if (value && value !== undefined && variable !== undefined) {
-        // this.$store.commit('lastMetaType', variable);
-        if (key === false) {
-          this.$set(this.selectedFilters, variable, value);
-        } else {
-          this.$set(this.selectedFilters[variable][index], key, value);
-        }
-        this.updateQuery();
+        this.$store.commit('addFilter', {
+          variable: variable,
+          value: value,
+          index: index,
+          key: key,
+        });
       }
     },
-    updateQuery () {
-      // basically just removes any null elements from the selectedMeta object
+    cleanFilters () {
+      // basically just removes any null elements from the selectedVariables object
       // they become null when you remove all filters from a meta type
-      const filters = JSON.parse(JSON.stringify(this.selectedFilters));
+      const filters = JSON.parse(JSON.stringify(this.filters));
       for (let variable in filters) {
-        if (!filters[variable]) {
+        if (!filters[variable].value || filters[variable].value.length < 1) {
           delete filters[variable];
         } else if (this.options[variable].options === 'continuous') {
           const list = [];
-          for (let item of filters[variable]) {
+          for (let item of filters[variable].value) {
             if (this.validLogicSet(variable, item)) {
-              list.push({
-                operator: item.operator,
-                value: item.value,
-              });
+              list.push(item);
             }
           }
           if (list.length === 0) {
             delete filters[variable];
           } else {
-            filters[variable] = list;
+            filters[variable].value = list;
           }
         }
       }
-      this.$set(this, 'query', filters);
+      this.$store.commit('filters', filters);
     },
     commit () {
-      this.$store.commit('filters', this.query);
-      router.push('/dataset/' + this.$route.params.dataset + '/filter/download');
+      this.cleanFilters();
+      router.push('/dataset/' + this.$route.params.dataset + '/filter/columns');
     },
     addLogicSet (variable) {
-      const list = this.selectedFilters[variable].slice();
+      const list = this.filters[variable.index].value.slice();
       list.push({
         operator: null,
         value: null,
@@ -354,27 +307,15 @@ export default {
       this.$forceUpdate();
     },
     removeLogicSet (variable, index) {
-      const list = this.selectedFilters[variable].slice();
+      const list = this.filters[variable.index].value.slice();
       list.splice(index, 1);
       this.updateSelectedFilters(variable, list);
       this.$forceUpdate();
       Vue.nextTick(() => {
         this.$validator.validateAll();
       });
-    },
-    optionsType (metaType) {
-      if (this.metaData && this.metaData.meta !== undefined) {
-        const meta = this.getMeta(metaType);
-        if (!meta) {
-          return;
-        }
-        if (Array.isArray(meta.options) || meta.options === null) {
-          return 'array';
-        } else if (meta.options === 'continuous') {
-          return 'continuous';
-        } else {
-          throw new Error(`Unknown options type. Given ${meta.options}`);
-        }
+      if (this.filters[variable.index].value.length === 0) {
+        this.removeFilter(variable);
       }
     },
     validLogicSet (variable, logicSet) {
@@ -394,10 +335,10 @@ export default {
     },
     getSelectizeSettings (variable) {
       const settings = {};
-      if (this.options[variable].options === null) {
+      if (this.options[variable.index].options === null) {
         const loadfn = function (query, callback) {
           this.$http.get(
-            `/api/datasets/${this.$route.params.dataset}/options/${variable}/search/${query}`
+            `/api/datasets/${this.$route.params.dataset}/options/${variable.index}/search/${query}`
           ).then(response => {
             const items = response.data.map(item => {
               return {name: item};
@@ -411,42 +352,37 @@ export default {
       }
       return settings;
     },
-    getVariableMetadata (metaType) {
-      return Vue.http.get(`/api/datasets/${this.dataset.id}/meta/${metaType}`).then(response => {
-        const data = response.body;
-        if (Array.isArray(data.options)) {
-          data.options = data.options.map(val => ({ name: val }));
-        }
-        return data;
-      }).catch(err => {
-        console.error(err);
-      });
-    },
-    getMeta (metaType) {
-      return this.metaData.meta ? this.metaData.meta[metaType] : this.cachedMeta[metaType];
-    },
     initializeContinuousType (variable) {
-      const options = this.options[variable];
+      const options = this.options[variable.index];
       if (options && options.options === 'continuous') {
-        if (!this.selectedFilters[variable] || this.selectedFilters[variable].length === 0) {
-          this.selectedFilters[variable] = [];
-          this.addLogicSet(variable);
+        if (!this.filters[variable.index] || this.filters[variable.index].length === 0) {
+          this.$store.commit('addFilter', {
+            variable: variable,
+            value: [{
+              operator: null,
+              value: null,
+              randomKey: Math.random(),
+            }],
+          });
+        }
+      } else {
+        if (!this.filters[variable.index] || this.filters[variable.index].length === 0) {
+          this.$store.commit('addFilter', {
+            variable: variable,
+            value: [],
+          });
         }
       }
     },
-  },
-  created () {
-    if (this.$store.state.filters) {
-      const filters = JSON.parse(JSON.stringify(this.$store.state.filters));
-      this.$set(this, 'selectedFilters', filters);
-      // this.$set(this, 'selectedFeatures', filters.features);
-      if (this.$store.state.lastMetaType) {
-        this.selectVariable(this.$store.state.lastMetaType);
-      } else {
-        this.selectVariable(Object.keys(filters)[0]);
+    containsVariable (obj, list) {
+      var i;
+      for (i = 0; i < list.length; i++) {
+        if (list[i].index === obj.index) {
+          return true;
+        }
       }
-      this.updateQuery();
-    }
+      return false;
+    },
   },
 };
 </script>

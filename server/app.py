@@ -10,6 +10,8 @@ from psutil import Process as ProcessManager
 from psutil import NoSuchProcess
 from flask import Flask, make_response, Response, jsonify, request, send_file, send_from_directory
 from data_access.Dataset import GeneyDataset
+from data_access.filters import DiscreteFilter, NumericFilter
+from data_access.DataSetParser import DataSetParser
 from multiprocessing import Process
 from data_access import GeneyJob
 import smtplib
@@ -34,7 +36,6 @@ else:
 	DOWNLOAD_HISTORY = os.path.join(DOWNLOAD_LOCATION, 'download_history.pkl')
 	with open(DOWNLOAD_HISTORY, 'wb') as fp:
 		pickle.dump({}, fp)
-
 
 MIME_TYPES = {
 	'csv': 'text/csv',
@@ -75,17 +76,17 @@ def load_datasets() -> None:
 	for directory in os.listdir(DATA_PATH):
 		if os.path.isdir(os.path.join(DATA_PATH, directory)):
 			try:
-				dataset = GeneyDataset(os.path.join(DATA_PATH, directory))
-				DATASETS[dataset.dataset_id] = dataset
-				DESCRIPTIONS[dataset.dataset_id] = dataset.description
-				# redis_con.set('dataset_' + directory, pickle.dumps(dataset))
+				dataset = DataSetParser(os.path.join(DATA_PATH, directory, 'data.fwf'))
+				DATASETS[dataset.id] = dataset
+				DESCRIPTIONS[dataset.id] = dataset.info
+			# redis_con.set('dataset_' + directory, pickle.dumps(dataset))
 			except Exception as e:
 				sys.stderr.write(str(e))
 				sys.stderr.write('UNABLE TO LOAD DATASET "{}"'.format(directory))
 	DATASETS_LOADED = True
 
 
-def get_dataset(dataset_id: str) -> GeneyDataset:
+def get_dataset(dataset_id: str) -> DataSetParser:
 	try:
 		if not DATASETS_LOADED:
 			load_datasets()
@@ -141,39 +142,85 @@ def search_group(dataset_id, group_name, search_str=None):
 
 
 @app.route('/api/datasets/<string:dataset_id>/options', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>', strict_slashes=False)
-def get_options(dataset_id, variable_name=None):
+@app.route('/api/datasets/<string:dataset_id>/options/<int:column_index>', strict_slashes=False)
+def get_options(dataset_id, column_index=None):
 	dataset = get_dataset(dataset_id)
 	if dataset is None:
 		return not_found()
-	if variable_name:
-		results = dataset.get_variable(variable_name)
+	if column_index:
+		results = dataset.get_variable_meta(column_index)
 		return jsonify(results)
 	else:
-		return send_file(dataset.options_path)
+		# return send_file(dataset.options_path)
+		return not_found()
 
 
-@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>/search', strict_slashes=False)
-@app.route('/api/datasets/<string:dataset_id>/options/<string:variable_name>/search/<string:search_str>',
+@app.route('/api/datasets/<string:dataset_id>/options/<int:column_index>/search', strict_slashes=False)
+@app.route('/api/datasets/<string:dataset_id>/options/<int:column_index>/search/<string:search_str>',
 		   strict_slashes=False)
-def search_options(dataset_id, variable_name, search_str=None):
+def search_options(dataset_id, column_index, search_str=None):
 	dataset = get_dataset(dataset_id)
 	if dataset is None:
 		return not_found()
 	else:
-		return jsonify(dataset.search_options(variable_name, search_str))
+		return jsonify(dataset.search_variable_options(column_index, search_str))
 
 
 @app.route('/api/datasets/<string:dataset_id>/samples', strict_slashes=False, methods=['POST'])
-def count_samples(dataset_id):
+def get_samples(dataset_id):
 	dataset = get_dataset(dataset_id)
 	if dataset is None:
 		return not_found()
-	count = dataset.get_num_samples_matching_filters(request.data)
-	if count is None:
-		return bad_request()
+	filters = json.loads(request.data)
+	numeric_filters = []
+	discrete_filters = []
+	for column_index in filters.keys():
+		column_values = filters[column_index]['value']
+		if type(column_values[0]) == dict:
+			for column_value in column_values:
+				numeric_filters.append(NumericFilter(int(column_index), column_value['operator'], column_value['value']))
+		else:
+			discrete_filters.append(DiscreteFilter(int(column_index), column_values))
+	count, file = dataset.save_sample_indices_matching_filters(discrete_filters, numeric_filters)
+	return jsonify({'numSamples': count, 'sampleFile': file})
 
-	return jsonify(count)
+
+@app.route('/api/datasets/<string:dataset_id>/columns', strict_slashes=False, methods=['POST'])
+def get_columns(dataset_id):
+	dataset = get_dataset(dataset_id)
+	if dataset is None:
+		return not_found()
+	query = json.loads(request.data)
+	groups = query['groups']
+	features = [int(x) for x in query['features']]
+	pathways = query['pathways']
+	num_columns, col_indices_file, col_names_file = dataset.save_column_indices_to_select(features, groups, pathways)
+	return jsonify(
+		{'numColumns': num_columns, 'columnIndicesFile': col_indices_file, 'columnNamesFile': col_names_file})
+
+
+@app.route('/api/datasets/<string:dataset_id>/download', strict_slashes=False, methods=['POST'])
+def create_download(dataset_id):
+	dataset = get_dataset(dataset_id)
+	if dataset is None:
+		return not_found()
+	query = json.loads(request.data)
+	row_indices_file = query['sampleFile']
+	col_indices_file = query['columnIndicesFile']
+	col_names_file = query['columnNamesFile']
+	file_name = '{}-{}.tsv'.format(dataset_id, uuid.uuid4().hex[:8])
+	file_path = os.path.join(DOWNLOAD_LOCATION, file_name)
+	dataset.build_output_file(row_indices_file, col_indices_file, col_names_file, file_path, 'tsv')
+	return jsonify({'downloadPath': file_name})
+
+
+@app.route('/api/datasets/<string:dataset_id>/pathways', strict_slashes=False, methods=['GET'])
+def get_pathways(dataset_id):
+	dataset = get_dataset(dataset_id)
+	if dataset is None:
+		return not_found()
+	pathways = dataset.get_pathways()
+	return jsonify(pathways)
 
 
 @app.route('/api/datasets/<string:dataset_id>/num_points', strict_slashes=False, methods=['POST'])
@@ -329,7 +376,7 @@ def query(dataset_id):
 
 
 def not_found(error='not found'):
-	return make_response(jsonify({'error': error}), 404)
+	return make_response(jsonify({'error': str(error)}), 404)
 
 
 def bad_request(error='bad request'):

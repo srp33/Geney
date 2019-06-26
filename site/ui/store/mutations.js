@@ -11,22 +11,24 @@ export default {
   options (state, value) {
     state.options[value.variable] = value.options;
   },
-  metaData (state, value) {
-    state.metaData = value;
-  },
   filters (state, value) {
     state.filters = value;
-    if (state.filters) {
-      state.selectedVariables = Object.keys(state.filters);
+  },
+  addFilter (state, payload) {
+    if (!payload.key || payload.key === false) {
+      state.filters[payload.variable.index] = {value: payload.value, variable: payload.variable};
+    } else {
+      state.filters[payload.variable.index].value[payload.index][payload.key] = payload.value;
     }
+  },
+  removeFilter (state, variable) {
+    delete state.filters[variable.index];
   },
   datasets (state, value) {
     state.datasets = value;
   },
   dataset (state, value) {
     state.dataset = value;
-    state.selectedFeatures = {};
-    state.selectedVariables = [];
     state.downloadRadios = {};
   },
   user (state, value) {
@@ -38,26 +40,50 @@ export default {
   users (state, users) {
     state.users = users;
   },
-  cachedMeta (state, payload) {
-    if (!state.cachedMeta[payload.dataset]) {
-      state.cachedMeta[payload.dataset] = {};
-    }
-
-    state.cachedMeta[payload.dataset][payload.metaType] = payload.value;
-  },
-  initializeMetaCache (state) {
-    if (state.dataset && state.dataset.id && !state.cachedMeta[state.dataset.id]) {
-      state.cachedMeta[state.dataset.id] = {};
-    }
-  },
   selectedFeatures (state, payload) {
-    state.selectedFeatures[payload.group] = payload.value;
+    if (!payload) {
+      state.selectedFeatures = null;
+    } else {
+      if (!state.selectedFeatures) {
+        state.selectedFeatures = {};
+      }
+      if (!state.selectedFeatures[payload.group]) {
+        state.selectedFeatures[payload.group] = {value: null, selected: null};
+      }
+      if (payload.value) {
+        state.selectedFeatures[payload.group].value = payload.value;
+      }
+      if (payload.selected) {
+        state.selectedFeatures[payload.group].selected = payload.selected;
+      }
+    }
   },
-  selectedSets (state, payload) {
-    state.selectedSets = payload;
+  columnData (state, payload) {
+    state.columnNamesFile = payload.columnNamesFile;
+    state.columnIndicesFile = payload.columnIndicesFile;
+    state.numColumns = payload.numColumns;
   },
-  selectedVariables (state, payload) {
-    state.selectedVariables = payload;
+  sampleData (state, payload) {
+    state.sampleFile = payload.sampleFile;
+    state.numSamples = payload.numSamples;
+  },
+  columnIndicesFile (state, value) {
+    state.columnIndicesFile = value;
+  },
+  columnNamesFile (state, value) {
+    state.columnNamesFile = value;
+  },
+  sampleFile (state, value) {
+    state.sampleFile = value;
+  },
+  numSamples (state, value) {
+    state.numSamples = value;
+  },
+  numColumns (state, value) {
+    state.numColumns = value;
+  },
+  selectedPathways (state, payload) {
+    state.selectedPathways = payload;
   },
   lastMetaType (state, payload) {
     state.lastMetaType = payload;

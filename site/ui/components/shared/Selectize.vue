@@ -62,6 +62,7 @@ export default {
     }
 
     this.update(this.value);
+    this.selectize.refreshItems();
   },
   methods: {
     // this function is called whenever the user changes the value of the selectize

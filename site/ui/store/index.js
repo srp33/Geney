@@ -12,6 +12,9 @@ export default new Vuex.Store({
     getOptions: () => {
       return state.options;
     },
+    getSelectedFeatures: () => {
+      return state.selectedFeatures;
+    },
     getDownloadRadios: () => {
       return state.downloadRadios;
     },

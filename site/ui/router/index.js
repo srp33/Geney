@@ -37,6 +37,11 @@ export default new Router({
       component: Components.Filter,
     },
     {
+      path: '/dataset/:dataset/filter/columns',
+      name: 'FilterColumns',
+      component: Components.FilterColumns,
+    },
+    {
       path: '/dataset/:dataset/filter/download',
       name: 'Download',
       component: Components.Download,
