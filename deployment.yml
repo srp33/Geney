@@ -7,6 +7,7 @@ services:
       dockerfile: docker/prod.dockerfile
     ports:
       - 8888:8888
+    restart: always
     volumes:
       - "${GENEY_DATA_PATH}:/app/data"
       - "./server/downloads:/app/downloads"
@@ -17,3 +18,4 @@ services:
       dockerfile: docker/prod.dockerfile
     ports:
       - 80:80
+    restart: always
