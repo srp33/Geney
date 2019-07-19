@@ -8,7 +8,7 @@ Geney is a Web-based tool for querying large genomic datasets. You can filter da
 
 If you would like to contribute to the development of Geney, please follow these instructions.
 
-1. You need to have both python3 and node. If you're on a Mac, you can install homebrew and then type into your terminal `brew install python3 node`. If you're on Linux, consult your distibutions's package manager on how to install these.
+1. You need to have both python3 and node. If you're on a Mac, you can install homebrew and then type into your terminal `brew install python3 node`. If you're on Linux, consult your distribution's package manager on how to install these.
 
 2. Go into the "site" folder and run an `npm install` in your terminal. This will install all of the javascript dependencies for the Geney website into a new folder called "node_modules".
 
