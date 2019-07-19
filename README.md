@@ -22,4 +22,13 @@ If you would like to contribute to the development of Geney, please follow these
 
 7. Add your awesome changes and make a pull request!
 
+## Deploying Geney
 
+To deploy Geney using docker-compose, run the following, making sure to change the paths to the correct path on your machine:
+
+```bash
+export GENEY_DATA_PATH=/Applications/GeneyWishBuilder/WishBuilder-CLI/GeneyDatasets/
+export DOWNLOAD_LOCATION=/Applications/Geney/server/downloads/
+cd /Applications/Geney
+docker-compose -f deployment.yml up -d
+```
