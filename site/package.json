@@ -79,7 +79,7 @@
     "less-loader": "^4.0.5",
     "lolex": "^2.1.1",
     "mocha": "^3.2.0",
-    "node-sass": "^4.5.0",
+    "node-sass": "^7.0.0",
     "nodemon": "^1.11.0",
     "opn": "^5.1.0",
     "optimize-css-assets-webpack-plugin": "^2.0.0",
