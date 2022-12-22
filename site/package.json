@@ -20,7 +20,7 @@
     "express": "^4.14.1",
     "express-jwt": "^5.1.0",
     "express-jwt-permissions": "^1.0.0",
-    "jsonwebtoken": "^7.3.0",
+    "jsonwebtoken": "^9.0.0",
     "morgan": "^1.8.2",
     "sqlite3": "^3.1.8"
   },
