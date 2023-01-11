@@ -22,7 +22,7 @@
     "express-jwt-permissions": "^1.0.0",
     "jsonwebtoken": "^7.3.0",
     "morgan": "^1.8.2",
-    "sqlite3": "^3.1.8"
+    "sqlite3": "^3.1.13"
   },
   "devDependencies": {
     "animate.css": "^3.5.2",
@@ -78,7 +78,7 @@
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
     "lolex": "^2.1.1",
-    "mocha": "^3.2.0",
+    "mocha": "^3.5.3",
     "node-sass": "^7.0.0",
     "nodemon": "^1.11.0",
     "opn": "^5.1.0",
